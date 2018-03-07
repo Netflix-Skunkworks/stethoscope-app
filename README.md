@@ -7,7 +7,7 @@
 
 ## Setup & Development
 
-Run the app + graphql server (currently requires port 3000)
+Run the app + graphql server (currently requires port 12000)
 
 ```
 yarn install
