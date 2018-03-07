@@ -1,0 +1,102 @@
+{
+  "name": "Stethoscope",
+  "version": "0.2.5",
+  "private": true,
+  "homepage": "./",
+  "author": "Netflix",
+  "description": "Local Stethoscope app",
+  "main": "src/start.js",
+  "build": {
+    "publish": [{
+      "provider": "generic",
+      "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/"
+    }],
+    "appId": "com.netflix.stethoscope-local",
+    "extends": null,
+    "productName": "Stethoscope",
+    "files": [
+      "bin/*",
+      "practices/*",
+      "build/**",
+      "public/**",
+      "resolvers/*",
+      "sources/*",
+      "src/lib/*.js",
+      "src/*.json",
+      "src/*.js",
+      "server.js",
+      "schema.graphql"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "perMachine": true
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "System"
+    },
+    "protocols": [
+      {
+        "name": "stethoscope",
+        "role": "Viewer",
+        "schemes": [
+          "stethoscope"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "start": "nf start -p 3000",
+    "platform-build": "rm -r dist/ ; react-scripts build && electron-builder",
+    "build": "npm run platform-build -- -mwl",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "electron-start": "node src/start-react",
+    "react-start": "react-scripts start",
+    "pack": "build --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "applescript": "^1.0.0",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "electron-log": "^2.2.11",
+    "electron-updater": "^2.20.1",
+    "es6-promisify": "^5.0.0",
+    "express": "^4.16.2",
+    "foreman": "^2.0.0",
+    "graphql": "^0.11.7",
+    "graphql-server-express": "^1.2.0",
+    "graphql-tools": "^2.12.0",
+    "helmet": "^3.9.0",
+    "js-yaml": "^3.10.0",
+    "marked": "^0.3.7",
+    "moment": "^2.19.3",
+    "node-powershell": "^3.3.1",
+    "qr-image": "^3.2.0",
+    "qrcode": "^1.0.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-scripts": "1.0.17",
+    "semver": "^5.4.1",
+    "shell-escape": "^0.2.0",
+    "socket.io": "^2.0.4"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "electron": "^1.7.11",
+    "electron-builder": "^19.48.2",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1"
+  }
+}

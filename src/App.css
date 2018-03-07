@@ -1,0 +1,101 @@
+#root {
+  height: 100%;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+table {
+  border: 1px solid #eee;
+  border-collapse: collapse;
+  color: #aaa;
+  width: 100%;
+}
+
+tbody td {
+  padding: 10px;
+}
+
+tr.UNKNOWN, td.UNKNOWN {
+  background-color: #dfe8db;
+  color: #737b73;
+}
+
+tr.PASS, td.ON {
+  background-color: #dfe8db;
+  color: #737b73;
+}
+
+td.ON {
+  content: "✓";
+}
+
+tr.FAIL, td.OFF {
+  color: #a94442;
+  background-color: #f2dede
+}
+
+.center {
+  text-align: center;
+}
+/*
+.buttonRow button {
+  margin-left: 15px;
+  margin-bottom: 15px;
+  padding: 5px;
+  font-size: 12px;
+  background-color: #eee;
+  color: #aaa;
+}*/
+
+.buttonRow button:hover {
+  color: #333;
+}
+
+footer {
+  position: fixed;
+  bottom: 0px;
+  background-color: #f3f2f2;
+  border-top: 1px solid #e8e8e8;
+  width: 100%;
+}
+
+footer button span {
+  margin-right: 5px;
+}
+
+footer button {
+  font-size: 80%;
+  padding: 0.3em 1em;
+}
+
+.icon-white {
+  color: #fff !important;
+}
+.toolbar-actions {
+  margin-top: 1px !important;
+}
+
+.buttonRow {
+  display: flex;
+  padding-right: 5px;
+  align-content: center;
+  justify-content: space-between;
+}

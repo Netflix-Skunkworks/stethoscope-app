@@ -1,0 +1,114 @@
+organization: Netflix
+practices:
+  firewall:
+    title: Firewall
+    description: >
+      Firewalls control network traffic into and out of a system. Enabling the
+      firewall on your device can prevent network-based attacks on your system,
+      and is especially important if you make use of insecure wireless networks
+      (such as at coffee shops and airports).
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
+        1. Click the [Firewall](x-apple.systempreferences:com.apple.preference.security?Firewall) tab.
+        1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
+        1. Click "Turn On Firewall" or "Start" to enable the firewall.
+        1. Click Advanced to customize the firewall configuration.
+      win32: |
+        1. Open [Windows Firewall](prefs://Firewall)
+        1. Select Turn Windows Firewall on or off
+        1. Ensure Turn Windows Firewall On is selected
+        1. Click OK
+
+  stethoscopeVersion:
+    title: Stethoscope up-to-date
+    description: >
+      Keeping the Stethoscope app up-to-date gives you access to the latest features, security patches, and performance improvements.
+    directions:
+      darwin: |
+        <a href='action://update' class="btn">Update Stethoscope</a>
+      win32: |
+        <a href='link://https://drive.google.com/open?id=1b65mt-a4cPmYmINIzyc8CSMXKCvdoxaf' class="btn">Update Stethoscope</a>
+
+  remoteLogin:
+    title: Remote Login Disabled
+    description: >
+      The 'Remote Login' setting on your Mac controls whether users can login remotely
+      to the system using SSH. (If you don't know what this is or why you would want it,
+      you should disable 'Remote Login'.)
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [Sharing](x-apple.systempreferences:com.apple.preferences.sharing?Services_RemoteLogin).
+        1. Uncheck "Remote Login" on the left.
+      win32: |
+        1. Open [Advanced System Preferences](ps://SystemPropertiesRemote)
+        1. Under "Remote Desktop" heading, select "Don't allow remote connections to this computer"
+        1. Click Apply
+        1. Click OK
+
+  diskEncryption:
+    title: Disk Encryption
+    description: >
+      With disk encryption turned on, your data is only accessible when you're
+      logged in. (If someone steals your device, they'll still need your password
+      or passcode to see your data.)
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
+        1. Click the [FileVault](x-apple.systempreferences:com.apple.preference.security?FDE) tab.
+        1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
+        1. Click "Turn On FileVault" to start the process.
+      win32: |
+        1. Open [System Settings](ms-settings:)
+        1. Click ["Encryption"](prefs://BitLocker)
+        1. Verify that disk encryption is enabled
+
+  automaticUpdates:
+    title: Automatic Updates
+    description: >
+      It's easier to keep your software up to date if you turn on automatic updates.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [App Store](prefs://com.apple.preferences.appstore).
+        1. Click "Automatically check for updates"
+        1. Make sure "Install macOS updates" and "Install system data files and security updates" are checked.
+      win32: |
+        1. Open [Services](ps://services.msc) (Start > Run > services.msc)
+        1. Scroll down to find "Windows Update" and double-click the name
+        1. Change "Startup Type" from "DISABLED" to "MANUAL" or "AUTOMATIC"
+        1. Click "Apply"
+        1. Click "OK"
+
+  screenLock:
+    title: Screen Lock
+    description: >
+      Having your computer automatically log out when you aren't using it can prevent bad actors from accessing
+      your machine when you step away.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu
+        1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
+        1. Select the [General](x-apple.systempreferences:com.apple.preference.security?General) tab
+        1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
+        1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins
+      win32: |
+        1. Open [User Account Settings](ps://netplwiz)
+        1. Check Users must enter a user name and password to use this computer
+        1. Click "Apply"
+        1. Click "OK"
+
+  osVersion:
+    title: Up to date system
+    description: Keeping your system up to date is super important.
+    directions:
+      darwin: |
+        1. Open the [App Store](app://App%20Store) app.
+        1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
+        1. Install any outstanding updates.
+      win32: |
+        1. Open [Windows Update](ms-settings:windowsupdate) in the Settings.
+        1. Click "Restart now"

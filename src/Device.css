@@ -1,0 +1,188 @@
+.panel {
+  font-size: 16px;
+}
+.device-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  display: inline-block;
+}
+.panel.device {
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 15px;
+  width: 100%;
+}
+.device-name {
+  font-weight: bold;
+}
+.last-updated {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 15px;
+}
+ul.mac-addresses {
+  padding: 0;
+  margin: 0;
+}
+.device-info {
+  font-size: 12px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+.device-info dt, dd {
+  margin-bottom: 0;
+}
+.device-info dd {
+  margin-left: calc(20% + 10px);
+}
+.device-info dt {
+  width: 20%;
+  font-weight: bold;
+  text-align: right;
+  box-sizing: border-box;
+  margin-right: 10px;
+  float: left;
+  clear: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.device-info-toggle {
+  float: right;
+  position: relative;
+  top: -2em;
+  color: rgba(40,40,40, 0.3);
+  opacity: 0.3;
+}
+.device-info-toggle.closed, .show-description.closed {
+  -ms-transform: rotate(-90deg); /* IE 9 */
+  -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+.toggleLink, .device-info-toggle:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+.possible-match {
+  color: #b99a4b;
+  border-bottom: 1px dotted #ddd;
+  padding: 10px 0;
+}
+
+/* device actions */
+
+div.action-list > ul > li {
+  border-bottom: 1px solid #eee;
+  padding: 5px 0;
+}
+
+li.done, a.show-description {
+  color: #aaa;
+  transform: rotate(0deg);
+  transition: transform 0.1s ease;
+}
+
+a.show-description {
+  float: right;
+  text-decoration: none;
+}
+
+.title {
+  cursor: pointer;
+  font-size: 15px;
+}
+
+a {
+  color: #337ab7;
+}
+
+.device-wrapper h4 {
+  color: #656464;
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+
+div.description,
+div.instructions {
+  margin: 10px 0;
+}
+
+div.instructions li {
+  padding: 5px 0;
+}
+
+.action-description {
+  border-left: 1px solid #eee;
+  padding-left: 15px;
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+}
+
+.action-description ol {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.action-icon {
+  display: inline-block;
+  margin-right: 7px;
+  position: relative;
+  top: 3px;
+}
+
+pre.description {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+a.btn {
+  cursor: pointer;
+  display: inline-block;
+  min-height: 1em;
+  outline: 0;
+  border: none;
+  vertical-align: baseline;
+  background: #e0e1e2 none;
+  color: rgba(0,0,0,.6);
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+  margin: 0 .25em 0 0;
+  padding: .78571429em 1.5em .78571429em;
+  text-transform: none;
+  text-shadow: none;
+  font-weight: 700;
+  line-height: 1em;
+  font-style: normal;
+  text-align: center;
+  text-decoration: none;
+  border-radius: .28571429rem;
+  -webkit-box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,.15) inset;
+  box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,.15) inset;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-transition: opacity .1s ease,background-color .1s ease,color .1s ease,background .1s ease,-webkit-box-shadow .1s ease;
+  transition: opacity .1s ease,background-color .1s ease,color .1s ease,background .1s ease,-webkit-box-shadow .1s ease;
+  transition: opacity .1s ease,background-color .1s ease,color .1s ease,box-shadow .1s ease,background .1s ease;
+  transition: opacity .1s ease,background-color .1s ease,color .1s ease,box-shadow .1s ease,background .1s ease,-webkit-box-shadow .1s ease;
+  will-change: '';
+  -webkit-tap-highlight-color: transparent;
+}
+
+a.btn:hover {
+  background-color: #cacbcd;
+  background-image: none;
+  -webkit-box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,.15) inset;
+  box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,.15) inset;
+  color: rgba(0,0,0,.8);
+}

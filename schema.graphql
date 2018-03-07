@@ -1,0 +1,208 @@
+type Query {
+  status: String
+  device: Device
+  policy: Policy
+}
+
+# Semver string e.g. "<=5.0.0"
+scalar Semver
+
+# Available information about user device
+type Device {
+  # machine information
+  deviceId: String
+  # name of device
+  deviceName: String # system_info
+  # standard, less-friendly name of platform
+  platform: String
+  # friendly name of platform
+  platformName: String
+  # operating system version
+  osVersion: String
+  # device firmware version
+  firmwareVersion: String
+  # device model
+  hardwareModel: String
+  # friendly name of model
+  friendlyName: String
+  # device serial number
+  hardwareSerial: String
+  # installed applications
+  applications: [Application]
+  # current IP addresses
+  ipAddresses: [IpAddress]
+  # interface_details
+  macAddresses: [NetworkInterface]
+  # version of the stethoscope application
+  stethoscopeVersion: String
+  # osquery version (platform specific)
+  osqueryVersion: String
+  # available hard disks
+  disks: [Disk]
+  security: SecurityInfo
+  user: User
+  policyResult: FeatureState
+}
+
+type SecurityInfo {
+  osVersion: FeatureState
+  # current firewall state
+  firewall: FeatureState
+  # whether automatic updates are enabled
+  automaticUpdates: FeatureState
+  # if OS specific disk encryption is enabled
+  diskEncryption: FeatureState
+  # if screen lock is enabled
+  screenLock: FeatureState
+  # remote login setting
+  remoteLogin: FeatureState
+}
+
+type Application {
+  name: String!
+  version: String!
+  last_opened_time: String
+  install_date: String
+}
+
+# A DevicePolicy is a description of the desired state of a set of pre-selected device features
+input DevicePolicy {
+  # current operation system version, use [semver](https://www.nodesource.com/blog/semver-a-primer/) strings to define requirement
+  osVersion: PlatformStringRequirement
+  # whether or not software firewall is required
+  firewall: RequirementOption
+  # whether or not disk encryption is required (this is not a comprehensive check as users are free to employ encyption that isn't baked into the OS)
+  diskEncryption: RequirementOption
+  # whether or not automatic updates need to be enabled
+  automaticUpdates: RequirementOption
+  # whether or not screen lock is required ("IF_SUPPORTED" is recommended)
+  screenLock: RequirementOption
+  # remote login status
+  remoteLogin: RequirementOption
+  # require applications to be installed
+  requiredApplications: [AppRequirement]
+  # ban applications from being installed on user's machine
+  bannedApplications: [AppRequirement]
+  # add extensions
+  stethoscopeVersion: Semver
+}
+
+# Defines a requirement for an installed application
+input AppRequirement {
+  # required application name
+  name: String!
+  # optional application version requirement
+  version: Semver
+  # optional platform if only required for specific OS
+  platform: PlatformStringRequirement
+  # controls whether regex or equality check is performed against application name
+  exactMatch: Boolean
+  # controls whether bin packages are checked (homebrew, chocolatey, etc)
+  includePackages: Boolean
+}
+
+type PolicyResult {
+  status: FeatureState
+  osVersion: FeatureState
+  # current firewall state
+  firewall: FeatureState
+  # whether automatic updates are enabled
+  automaticUpdates: FeatureState
+  # if OS specific disk encryption is enabled
+  diskEncryption: FeatureState
+  # if screen lock is enabled
+  screenLock: FeatureState
+  # remote login setting
+  remoteLogin: FeatureState
+  # whether or not all requiredApplications are installed
+  requiredApplications: [ApplicationFeatureState]
+  # whether or not any bannedApplications are installed
+  bannedApplications: [ApplicationFeatureState]
+  # stethoscope is up-to-date
+  stethoscopeVersion: FeatureState
+}
+
+type Security {
+  # operating system version requirement
+  osVersion(requirement: PlatformStringRequirement!): Boolean!
+  firewall(requirement: RequirementOption!): Boolean!
+  automaticUpdates(requirment: RequirementOption!): Boolean!
+  diskEncryption(requirement: RequirementOption!): Boolean!
+  screenLock(requirement: RequirementOption!): Boolean!
+  remoteLogin(requirement: RequirementOption!): Boolean!
+  requiredApplications(requirement: RequirementOption!): [Boolean!]!
+  bannedApplications(requirement: RequirementOption!): [Boolean!]!
+  stethoscopeVersion(requirement: Semver!): Boolean!
+}
+
+type Policy {
+  validate(policy:DevicePolicy): FeatureState!
+  validateWithDetails(policy:DevicePolicy): PolicyResult!
+}
+
+type IpAddress {
+  interface: String
+  address: String
+  mask: String
+  broadcast: String
+}
+
+# describes a network interface on a device
+type NetworkInterface {
+  interface: String
+  type: String
+  mac: String
+  # the last time network interface was updated
+  lastChange: String
+}
+
+# describes a hard disk on a device
+type Disk {
+  name: String
+  uuid: String
+  encrypted: Boolean
+}
+
+type User {
+  name: String
+  email: String
+}
+
+type ApplicationFeatureState {
+  name: String
+  status: FeatureState
+}
+
+# a platform string requirement defines a target string value for specific platforms
+input PlatformStringRequirement {
+  darwin: Semver
+  win32: Semver
+  linux: Semver
+  all: Semver
+}
+
+# a platform boolean requirement defines a target boolean value for specific platforms
+input PlatformBoolRequirement {
+  darwin: Boolean
+  win32: Boolean
+  linux: Boolean
+  all: Boolean
+}
+
+# possible states that a device 'feature' can be in
+enum FeatureState {
+  PASS
+  FAIL
+  ON
+  OFF
+  UNSUPPORTED
+  UNKNOWN
+}
+
+# valid values for a given policy requirement
+enum RequirementOption {
+  ALWAYS
+  SUGGESTED
+  IF_SUPPORTED
+  NEVER
+}

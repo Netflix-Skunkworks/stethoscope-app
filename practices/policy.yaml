@@ -1,0 +1,10 @@
+# netflix default policy
+os version:
+  darwin: ">=10.3.2"
+  win32: ">=10.0.1"
+  linux: ">=4.3.3"
+firewall: ALWAYS
+disk encryption: ALWAYS
+automatic updates: ALWAYS
+screen lock: IF_SUPPORTED
+remote login: NEVER
