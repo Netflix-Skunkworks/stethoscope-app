@@ -4,9 +4,10 @@ const applescript = require('./applescript')
 const powershell = require('./powershell')
 const { shell } = require('electron')
 const env = process.env.NODE_ENV || 'production'
-const { checkForUpdates } = require('../updater')(env)
 
-module.exports = function initProtocols() {
+module.exports = function initProtocols(mainWindow) {
+  const { checkForUpdates } = require('../updater')(env, mainWindow)
+
   protocol.registerHttpProtocol('app', (request, cb) => {
     applescript.openApp(decodeURIComponent(request.url.replace('app://','')))
   })

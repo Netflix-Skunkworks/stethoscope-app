@@ -1,16 +1,18 @@
 {
   "name": "Stethoscope",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "main": "src/start.js",
   "build": {
-    "publish": [{
-      "provider": "generic",
-      "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/"
-    }],
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/"
+      }
+    ],
     "appId": "com.netflix.stethoscope-local",
     "extends": null,
     "productName": "Stethoscope",
@@ -54,16 +56,19 @@
     ]
   },
   "scripts": {
-    "start": "nf start -p 3000",
-    "platform-build": "rm -r dist/ ; react-scripts build && electron-builder",
-    "build": "npm run platform-build -- -mwl",
+    "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron .",
     "electron-start": "node src/start-react",
     "react-start": "react-scripts start",
-    "pack": "build --dir",
-    "postinstall": "electron-builder install-app-deps"
+    "build": "rm -r dist/ ; react-scripts build && electron-builder -mw",
+    "postinstall": "electron-builder install-app-deps",
+    "build:mac": "rm -r dist/ ; react-scripts build && electron-builder -m",
+    "build:windows": "react-scripts build && electron-builder -w",
+    "codesign:mac": "echo TODO",
+    "codesign:windows": "/usr/local/bin/signcode -$ commercial -a sha1 -t http://timestamp.digicert.com -i https://stethoscope.prod.netflix.net -spc code-cert.spc -v code-cert.pvk -n \"Stethoscope Installer\" \"dist/Stethoscope Setup $npm_package_version.exe\"",
+    "build:linux": "rm -r dist/ ; react-scripts build && electron-builder -l"
   },
   "dependencies": {
     "applescript": "^1.0.0",
@@ -89,6 +94,7 @@
     "react-scripts": "1.0.17",
     "semver": "^5.4.1",
     "shell-escape": "^0.2.0",
+    "showdown": "^1.8.6",
     "socket.io": "^2.0.4"
   },
   "devDependencies": {

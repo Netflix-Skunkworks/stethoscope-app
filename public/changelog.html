@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Stethoscope Changelog</title>
+  <style>
+    body { font-family: Helvetica, 'Source Sans Pro'; margin: 0px; color: #444; }
+    code { font-size: 1.2rem; }
+    hr { margin: 0 20px; }
+    hr:nth-child(1n+1) {
+      border-color: #ccc;
+      background-color: #eee;
+      height: 1px;
+      border: 0;
+    }
+    h1 {
+      background-color: cornflowerblue;
+      color: white;
+      padding: 25px 15px;
+      margin: 0;
+    }
+    h2, h3, h4, h5, p, ul {
+      margin: 15px;
+    }
+    h2 a {
+      text-decoration: none;
+      color: cornflowerblue;
+    }
+    ul {
+      margin-bottom: 20px;
+      margin-left: 5px;
+    }
+    p:last-child {
+      text-align: center;
+      margin-top: 50px;
+      color: #aaa;
+    }
+    p:last-child a {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="changelog"></div>
+  <script>
+    var showdown  = require('showdown');
+    var converter = new showdown.Converter();
+    var fs = require('fs')
+    fs.readFile('./CHANGELOG.md', function(err, res) {
+      if (err) { throw new Error(err) }
+      document.querySelector('#changelog').innerHTML = converter.makeHtml(''+res)
+    })
+  </script>
+</body>
+</html>

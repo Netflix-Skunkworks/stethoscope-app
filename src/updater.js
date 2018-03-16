@@ -8,7 +8,7 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function(env) {
+module.exports = function(env, mainWindow) {
   autoUpdater.autoDownload = false
   const isDev = env === 'development'
 
@@ -58,12 +58,17 @@ module.exports = function(env) {
     'update-downloaded': () => {
       dialog.showMessageBox({
         title: 'Install Updates',
-        message: 'Updates downloaded, application will be quit for update...'
+        message: 'Updates downloaded, Stethoscope will be quit for update...'
       }, () => {
         if (!isDev) {
           setImmediate(() => autoUpdater.quitAndInstall())
         }
       })
+    },
+    'download-progress': (progressObj) => {
+      mainWindow.webContents.send('download:progress', progressObj)
+      // NOTE: uncomment to have download update progress displayed over app icon
+      // mainWindow.setProgressBar(progressObj.percent / 100)
     }
   }
 

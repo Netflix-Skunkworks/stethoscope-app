@@ -1,0 +1,70 @@
+.error {
+  color: #a94442;
+  background-color: #f2dede;
+  width: 100vw;
+  height: 100vh;
+  padding: 25px;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+.error h1 {
+  margin-bottom: 0px;
+}
+
+.error pre {
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  padding: 15px;
+  width: 89%;
+  color: #000;
+  white-space: pre-wrap;
+  overflow-y: scroll;
+  font-size: 15px;
+  max-height: 20vh;
+}
+
+.error pre:hover {
+  background-color: white;
+}
+
+.error #giraffe {
+  position: fixed;
+  bottom: -5px;
+  right: 0px;
+  z-index: 1;
+  box-shadow: 11px 10px 27px -15px rgba(68,68,68,1);
+}
+
+.error #helpBubble {
+  z-index: 1;
+  background-color: white;
+  color: #333;
+  border: 1px solid #eee;
+  border-radius: 40px;
+  padding: 30px;
+  width: 120px;
+  position: fixed;
+  bottom: 150px;
+  right: 20px;
+}
+.error #helpBubble:hover {
+  box-shadow: 11px 10px 27px -15px rgba(68,68,68,1);
+}
+.error #helpBubble:after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: 0;
+	height: 0;
+	border: 20px solid transparent;
+	border-top-color: white;
+	border-bottom: 0;
+	border-right: 0;
+	margin-left: -10px;
+	margin-bottom: -20px;
+}
+.error #helpBubble .helpLink {
+  display: block;
+}

@@ -1,9 +1,13 @@
-const { app, Menu, shell } = require('electron')
+const { app, Menu, shell, BrowserWindow } = require('electron')
+const path = require('path')
+const url = require('url')
 const config = require('./config.json')
 const env = process.env.NODE_ENV || 'production'
-const { checkForUpdates } = require('./updater')(env)
+
+let changelog
 
 module.exports = function(mainWindow) {
+  const { checkForUpdates } = require('./updater')(env, mainWindow)
   const template = [
     {
       label: 'Edit',
@@ -33,6 +37,12 @@ module.exports = function(mainWindow) {
             checkForUpdates(this, mainWindow, event)
           }
         },
+        {
+          label: 'CHANGE LOG',
+          click(event) {
+            showChangelog()
+          }
+        },
         {role: 'services', submenu: []},
         {type: 'separator'},
         {role: 'hide'},
@@ -47,6 +57,11 @@ module.exports = function(mainWindow) {
       label: 'Check for Update',
       click(event) {
         checkForUpdates(this, mainWindow, event)
+      }
+    }, {
+      label: 'CHANGE LOG',
+      click(event) {
+        showChangelog()
       }
     })
   }
@@ -68,4 +83,18 @@ module.exports = function(mainWindow) {
 
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
+}
+
+const showChangelog = () => {
+  if (!changelog) {
+    changelog = new BrowserWindow()
+    changelog.loadURL(url.format({
+      pathname: path.join(__dirname, '/../public/changelog.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+    changelog.on('closed', () => {
+      changelog = null
+    })
+  }
 }

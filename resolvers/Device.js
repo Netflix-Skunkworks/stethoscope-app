@@ -1,5 +1,6 @@
 const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
+const NetworkInterface = require('../src/lib/NetworkInterface')
 const macFriendlyName = require('../sources/macmodels')
 const { ON, OFF, UNSUPPORTED } = require('../src/constants')
 
@@ -81,8 +82,15 @@ const Device = {
   },
 
   // can/should these be filtered down?
-  macAddresses (root, args, context) {
-    return OSQuery.all('interface_details')
+  async macAddresses (root, args, context) {
+    const addresses = await OSQuery.all('interface_details')
+    return addresses.filter(({ mac }) => {
+      return (
+        !NetworkInterface.isLocal(mac)
+     && !NetworkInterface.isMulticast(mac)
+     && !NetworkInterface.isPlaceholder(mac)
+      )
+    })
   },
 
   async osqueryVersion (root, args, context) {

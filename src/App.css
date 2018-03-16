@@ -49,7 +49,7 @@ td.ON {
 
 tr.FAIL, td.OFF {
   color: #a94442;
-  background-color: #f2dede
+  background-color: #f2dede;
 }
 
 .center {
@@ -98,4 +98,27 @@ footer button {
   padding-right: 5px;
   align-content: center;
   justify-content: space-between;
+}
+
+#downloadProgress {
+  width: 95vw;
+  margin: 0 auto;
+  text-align: center;
+  color: #aaa;
+}
+
+progress {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 30px;
+}
+
+progress[value]::-webkit-progress-bar {
+  background-color: #eee;
+  border-radius: 2px;
+}
+
+progress[value]::-webkit-progress-value {
+  background-color: #478cc8;
+  transition: width .75s ease;
 }

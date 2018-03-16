@@ -1,4 +1,4 @@
-const { protocol, app, remote, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
+const { protocol, app, ipcMain, remote, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
 const fs = require('fs')
@@ -9,7 +9,6 @@ const applescript = require('./lib/applescript')
 const powershell = require('./lib/powershell')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
-const updater = require('./updater')(env)
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
 
@@ -29,6 +28,8 @@ const statusImages = {
   FAIL: ugly,
 }
 
+const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
+
 function createWindow() {
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {
@@ -45,10 +46,27 @@ function createWindow() {
     return
   }
 
-  const webPreferences = { webSecurity: false, sandbox: false }
-  mainWindow = new BrowserWindow({ width: 480, height: 670, webPreferences })
-  tray = new Tray(statusImages.ok)
+  const windowPrefs = {
+    width: 480,
+    height: 670,
+    // uncomment the line before to keep window controls but hide title bar
+    // titleBarStyle: 'hidden',
+    webPreferences: {
+      webSecurity: false,
+      sandbox: false
+    }
+  }
 
+  // only allow resize if debugging production build
+  if (env === 'production' && !enableDebugger) {
+    windowPrefs.resizable = false
+  }
+
+  mainWindow = new BrowserWindow(windowPrefs)
+
+  if (tray) tray.destroy()
+
+  tray = new Tray(statusImages.ok)
   tray.on('click', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) {
@@ -56,7 +74,7 @@ function createWindow() {
       }
       mainWindow.focus()
     } else {
-      mainWindow = new BrowserWindow({ width: 480, height: 670, webPreferences })
+      mainWindow = new BrowserWindow(windowPrefs)
       initMenu(mainWindow)
       mainWindow.loadURL(
         process.env.ELECTRON_START_URL ||
@@ -69,6 +87,10 @@ function createWindow() {
     }
   })
 
+  if (enableDebugger) {
+    mainWindow.webContents.openDevTools()
+  }
+
   initMenu(mainWindow)
 
   mainWindow.loadURL(
@@ -80,6 +102,29 @@ function createWindow() {
     }),
   )
 
+  // adjust window height when download begins and ends
+  ipcMain.on('download:start', (event, arg) => {
+    mainWindow.setSize(windowPrefs.width, 110, true)
+  })
+
+  ipcMain.on('scan:init', (event) => {
+    app.setBadgeCount(0)
+    mainWindow.setOverlayIcon(null, 'No policy violations')
+  })
+
+  ipcMain.on('scan:violation', (event, badgeURI, violationCount) => {
+    if (process.platform === 'darwin') {
+      app.setBadgeCount(violationCount)
+    } else {
+      const img = nativeImage.createFromDataURL(badgeURI)
+      mainWindow.setOverlayIcon(img, `${violationCount} policy violations`)
+    }
+  })
+
+  ipcMain.on('download:complete', (event, arg) => {
+    mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
@@ -87,8 +132,9 @@ function createWindow() {
 
 app.on('ready', () => {
   createWindow()
+  initProtocols(mainWindow)
 
-  initProtocols()
+  const updater = require('./updater')(env, mainWindow)
 
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
@@ -122,12 +168,12 @@ app.on('ready', () => {
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
-})
-
-app.on('window-all-closed', () => {
   if (server && server.listening) {
     server.close()
   }
+})
+
+app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }

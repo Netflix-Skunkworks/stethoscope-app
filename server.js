@@ -18,7 +18,7 @@ const defaultPolicyServer = HOST
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const app = express()
 const http = require('http').Server(app)
-const io = require('socket.io')(http)
+const io = require('socket.io')(http, { wsEngine: 'ws' })
 
 // used to ensure that user is not shown multiple notifications for a login scan
 // sessionId is used as a key
@@ -161,6 +161,8 @@ module.exports = function startServer(env, log, appActions) {
           policy: variables,
           showNotification
         })
+      } else {
+        io.sockets.emit('scan:complete', { noResults: true })
       }
 
       if (!result.extensions) result.extensions = {}

@@ -2,7 +2,7 @@ const net = require('net')
 const { spawn } = require('child_process')
 const os = require('os')
 
-const port = process.env.PORT ? process.env.PORT : 12000
+const port = process.env.PORT ? process.env.PORT - 100 : 12000
 
 process.env.ELECTRON_START_URL = `http://localhost:${port}`
 
