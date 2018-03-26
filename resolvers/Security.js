@@ -2,7 +2,7 @@ const semver = require('semver')
 const Device = require('./Device')
 const OSQuery = require('../sources/osquery')
 const pkg = require('../package.json')
-const { UNSUPPORTED } = require('../src/constants')
+const { NUDGE, UNSUPPORTED } = require('../src/constants')
 
 const Security = {
   async automaticUpdates (root, args, context) {
@@ -234,7 +234,6 @@ const Security = {
     /*
       select version from os_version
     */
-
     switch (context.platform) {
       case 'darwin':
         if (version.split('.').length === 2) {
@@ -248,6 +247,19 @@ const Security = {
     }
 
     return semver.satisfies(semver.coerce(version), reqVersion)
+  },
+
+  async osVersionV2 (root, args, context) {
+    const { ok, nudge } = args.osVersion[context.platform]
+    let { version } = await context.osVersion
+
+    if (semver.satisfies(semver.coerce(version), ok)) {
+      return true
+    } else if (semver.satisfies(semver.coerce(version), nudge)) {
+      return NUDGE
+    } else {
+      return false
+    }
   },
 
   async firewall (root, args, context) {

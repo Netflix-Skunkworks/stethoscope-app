@@ -17,10 +17,9 @@ export default class ErrorMessage extends Component {
     return (
       <div className="error">
         <h1>Oh no!</h1>
-        <p>Something went wrong. Here's what we know:<br />
-          <pre>{this.props.message}</pre>
-          <button onClick={this.copyToClipboard}>Copy Error to Clipboard</button>
-        </p>
+        <p>Something went wrong. Here's what we know:</p>
+        <pre>{this.props.message}</pre>
+        <button onClick={this.copyToClipboard}>Copy Error to Clipboard</button>
         <div id="helpBubble">
           <strong>Need some help?</strong>
           {config.menu.help.map(({ label, link }) => (
@@ -31,4 +30,8 @@ export default class ErrorMessage extends Component {
       </div>
     )
   }
+}
+
+ErrorMessage.defaultProps = {
+  message: 'Unknown error :('
 }

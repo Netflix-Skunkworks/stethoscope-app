@@ -1,6 +1,7 @@
 // policy result
 const PASS = 'PASS'
 const FAIL = 'FAIL'
+const NUDGE = 'NUDGE'
 const WARN = 'WARN'
 const UNKNOWN = 'UNKNOWN'
 // policy requirements
@@ -18,7 +19,7 @@ const HOST = `http://localhost:${PORT}`
 
 module.exports = {
   PORT, HOST,
-  PASS, FAIL, WARN, UNKNOWN,
+  PASS, FAIL, NUDGE, WARN, UNKNOWN,
   ALWAYS, SUGGESTED, NEVER, IF_SUPPORTED,
   ON, OFF, UNSUPPORTED
 }

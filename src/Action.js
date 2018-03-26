@@ -3,7 +3,6 @@ import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
 import marked from 'marked'
 
-
 class Action extends Component {
   constructor (props) {
     super(props)
@@ -41,6 +40,9 @@ class Action extends Component {
   }
 
   toggleDescription () {
+    if (!this.state.showDescription && this.props.status === 'FAIL') {
+      this.props.onExpandPolicyViolation()
+    }
     this.setState({
       showDescription: !this.state.showDescription
     }, () => {
@@ -49,7 +51,7 @@ class Action extends Component {
   }
 
   render () {
-    const { action, type } = this.props
+    const { action, type, status } = this.props
     let description = null
 
     if (this.state.showDescription) {
@@ -85,10 +87,10 @@ class Action extends Component {
             name={this.iconName(type)}
             color={this.iconColor(type)}
             title={this.hoverText(type)}
-            width='18px' 
+            width='18px'
             height='18px'
           />
-          {action.title}
+          {action.title[status]}
         </span>
         <Accessible label='Toggle action description' expanded={this.state.showDescription}>
           <a className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>

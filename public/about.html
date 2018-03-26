@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>About Stethoscope</title>
+  <style>
+    .center {
+      margin-top: 20px;
+      text-align: center;
+    }
+    body {
+      font-family: Helvetica, Arial;
+      background-color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    p {
+      color: #666;
+      font-size: 0.9rem;
+      padding: 0px;
+      margin: 10px;
+
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <img src="./icon.ico" width="100" alt="Stethoscope icon">
+    <h3>Stethoscope</h3>
+    <p id="version"></p>
+    <p id="copyright"></p>
+  </div>
+  <script>
+    var pkg = require('../package.json')
+    document.querySelector('#version').innerHTML = `Version: ${pkg.version} (${pkg.version})`
+    document.querySelector('#copyright').innerHTML = `Copyright &copy; ${new Date().getFullYear()} ${pkg.author}`
+  </script>
+</body>
+</html>

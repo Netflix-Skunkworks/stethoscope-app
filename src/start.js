@@ -21,10 +21,8 @@ const good = nativeImage.createFromPath(findIcon('scope-icon.png'))
 const bad =  nativeImage.createFromPath(findIcon('scope-icon-nudge.png'))
 const ugly = nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 const statusImages = {
-  ok: good,
   PASS: good,
-  nudge: bad,
-  warn: ugly,
+  NUDGE: bad,
   FAIL: ugly,
 }
 
@@ -49,6 +47,8 @@ function createWindow() {
   const windowPrefs = {
     width: 480,
     height: 670,
+    fullscreenable: false,
+    maximizable: false,
     // uncomment the line before to keep window controls but hide title bar
     // titleBarStyle: 'hidden',
     webPreferences: {
@@ -66,7 +66,7 @@ function createWindow() {
 
   if (tray) tray.destroy()
 
-  tray = new Tray(statusImages.ok)
+  tray = new Tray(statusImages.PASS)
   tray.on('click', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) {
@@ -147,7 +147,7 @@ app.on('ready', () => {
   })
 
   server = runLocalServer(env, log, {
-    setScanStatus(status = 'ok') {
+    setScanStatus(status = 'PASS') {
       tray.setImage(statusImages[status])
     },
     requestUpdate() {

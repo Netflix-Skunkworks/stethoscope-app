@@ -5,6 +5,7 @@ import Loader from './Loader'
 import openSocket from 'socket.io-client'
 import moment from 'moment'
 import prettyBytes from './lib/prettyBytes'
+import classNames from 'classnames'
 import getBadge from './lib/getBadge'
 import { HOST } from './constants'
 import ErrorMessage from './ErrorMessage'
@@ -32,11 +33,17 @@ class App extends Component {
     result: {},
     instructions: {},
     loading: false,
+    // determines loading screen language
     remoteScan: false,
+    // surface which app performed the most recent scan
     scannedBy: 'Stethoscope',
     lastScanTime: Date.now(),
+    // whether app currently has focus
     focused: true,
+    // progress object from updater process { percent, total, transferred }
     downloadProgress: null,
+    // whether rescan button should be highlighted
+    highlightRescan: false,
   }
 
   componentWillMount() {
@@ -99,7 +106,7 @@ class App extends Component {
       const { data: { policy }} = Object(result)
 
       let newState = {
-        result: policy.validateWithDetails,
+        result: policy.validateWithDetails || policy.validateV2,
         loading: false,
         remoteScan: remote,
         scannedBy: remote ? 'Meechum' : 'Stethoscope'
@@ -107,7 +114,7 @@ class App extends Component {
 
       // handle old-style requests, policy.validate should not be used anymore
       // TODO remove this logic
-      if (!policy.validateWithDetails) {
+      if (!newState.result) {
         const lastScanTime = Date.now()
         newState = {
           result: {
@@ -141,8 +148,9 @@ class App extends Component {
     })
   }
 
-  handleResponseError = (err) => {
-    this.setState({ error: err })
+  handleResponseError = (err = { message: 'Error requesting policy information' }) => {
+    console.log('handling response error', new Error(err))
+    this.setState({ error: new Error(err) })
   }
 
   loadPractices = () => {
@@ -181,11 +189,13 @@ class App extends Component {
     }).catch(this.handleResponseError)
   }
 
+  highlightRescanButton = event => this.setState({ highlightRescan: true })
+
   render() {
     const {
       device, policy, result, downloadProgress,
       scannedBy, lastScanTime, error,
-      instructions, loading
+      instructions, loading, highlightRescan
     } = this.state
 
     let content = null
@@ -221,15 +231,20 @@ class App extends Component {
             policy={policy}
             lastScanTime={lastScanFriendly}
             scannedBy={scannedBy}
+            onExpandPolicyViolation={this.highlightRescanButton}
           />
           <footer className="toolbar toolbar-footer">
             <div className="buttonRow">
-              <button className="btn btn-default" onClick={this.scan}>
+              <button
+                className={classNames("btn btn-default", {
+                  'btn-primary': highlightRescan && result.status !== 'PASS'
+                })}
+                onClick={this.scan}>
                 <span className="icon icon-arrows-ccw"></span>rescan
               </button>
 
               <button
-                className="btn btn-primary pull-right"
+                className="btn pull-right"
                 href='https://stethoscope.prod.netflix.net/'
                 onClick={this.openExternal}
               >
@@ -240,8 +255,6 @@ class App extends Component {
         </div>
       )
     }
-
-
 
     return (
       <div className={`App ${loading ? 'loading' : ''}`}>

@@ -104,9 +104,9 @@ export default class Stethoscope {
   // privately retry request until a response is given
   static __repeatRequest(policy, resolve, reject) {
     // TODO create and use fragments here
-    const query = `query ValidateDevice($policy: DevicePolicy!) {
+    const query = `query ValidateDevice($policy: DevicePolicyV2!) {
       policy {
-        validateWithDetails(policy: $policy) {
+        validateV2(policy: $policy) {
           status
           osVersion
           firewall
@@ -176,7 +176,7 @@ export default class Stethoscope {
         }
       })
       .then(({ data }) => {
-        const result = data.policy.validateWithDetails
+        const result = data.policy.validateV2
         const { device } = data
         resolve({ result, device })
       })

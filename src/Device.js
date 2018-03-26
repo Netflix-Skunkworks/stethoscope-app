@@ -14,15 +14,33 @@ class Device extends Component {
   }
 
   actions (actions, type) {
+    const status = type === 'done' ? 'PASS' : 'FAIL'
+
     return actions.map((a) => {
       if (a.results) {
         return (
-          <Action key={a.title} type={type} action={a}>
-            <ul className="result-list">{a.results.map(i => <li key={i.name}>{i.name}</li>)}</ul>
+          <Action
+            key={a.title[status]}
+            type={type}
+            status={status}
+            action={a}
+            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
+          >
+            <ul className="result-list">{a.results.map(({ name })=> (
+              <li key={name}>{name}</li>
+            ))}</ul>
           </Action>
         )
       } else {
-        return <Action key={a.title} type={type} action={a} />
+        return (
+          <Action
+            key={a.title[status]}
+            status={status}
+            type={type}
+            action={a}
+            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
+          />
+        )
       }
     })
   }
@@ -71,15 +89,21 @@ class Device extends Component {
             </dd>
             <dt>Serial</dt><dd>{device.hardwareSerial}&nbsp;</dd>
             <dt>UDID</dt><dd>{device.deviceId}&nbsp;</dd>
-            <dt>Status</dt><dd>{device.status}&nbsp;</dd>
+            <dt>Status</dt><dd>{scanResult.status}&nbsp;</dd>
           </dl>
         </div>
       )
     }
 
+    let deviceClass = 'ok'
+
+    if (scanResult.status !== 'PASS') {
+      deviceClass = scanResult.status === 'NUDGE' ? 'warning' : 'critical'
+    }
+
     return (
       <div className='device-wrapper'>
-        <div className={`panel device ${scanResult.status === 'PASS' ? 'ok' : 'critical'}`}>
+        <div className={`panel device ${deviceClass}`}>
           <header>
             <div className='device-name'>{device.friendlyName}</div>
             <div className='device-identifier'>{device.identifier}&nbsp;</div>

@@ -1,8 +1,18 @@
 # netflix default policy
 os version:
-  darwin: ">=10.3.2"
-  win32: ">=10.0.1"
-  linux: ">=4.3.3"
+  darwin:
+    # High Sierra
+    ok: ">=10.13.3"
+    # Sierra
+    nudge: ">=10.12.6"
+  win32:
+    # Version 1803 - Redstone 3 Fall Creators Update
+    ok: ">=10.0.16299"
+    # Version 1703 - Redstone 2 Creators Update
+    nudge: ">=10.0.15063"
+  linux:
+    ok: ">=4.3.3"
+    nudge: ">=4.2.0"
 firewall: ALWAYS
 disk encryption: ALWAYS
 automatic updates: ALWAYS

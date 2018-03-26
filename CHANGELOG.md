@@ -6,6 +6,40 @@ All notable changes to this project will be documented in this file.
 
 ----
 
+## [0.3.2](#) - 2018-03-22
+
+----
+
+### Added
+- `policyFormat` version an `version` to `instructions.yaml`
+- PASS/FAIL titles instead of single title to individual instructions
+- Support for NUDGE state, instead of just PASS/FAIL
+- `validateV2` GraphQL endpoint that allows osVersion policy to be bracketed
+- schemas to support updated osVersion policy format
+- "active" state to scan button when non-passing item instructions are expanded
+
+### Changed
+- Aligned definitions and instructions with web Stethoscope
+
+### Fixed
+- osVerson now properly reports non-passing state
+
+## [0.3.1](#) - 2018-03-16
+
+----
+
+### Added
+- About screen for Windows
+
+### Changed
+- Removed ability to maximize and fullscreen application windows
+- Signing instructions (previous were incorrect)
+- Made "View all devices" link gray to not draw action
+
+### Fixed
+- Added missing PASS/FAIL status in device information
+- Bad path for changelog file in production
+
 ## [0.3.0](#) - 2018-03-16
 
 -----

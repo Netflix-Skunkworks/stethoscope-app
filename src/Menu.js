@@ -4,7 +4,7 @@ const url = require('url')
 const config = require('./config.json')
 const env = process.env.NODE_ENV || 'production'
 
-let changelog
+let changelog, about
 
 module.exports = function(mainWindow) {
   const { checkForUpdates } = require('./updater')(env, mainWindow)
@@ -63,6 +63,12 @@ module.exports = function(mainWindow) {
       click(event) {
         showChangelog()
       }
+    },
+    {
+      label: 'About',
+      click(event) {
+        showAbout()
+      }
     })
   }
 
@@ -87,14 +93,30 @@ module.exports = function(mainWindow) {
 
 const showChangelog = () => {
   if (!changelog) {
-    changelog = new BrowserWindow()
+    changelog = new BrowserWindow({ resizable: false, maximizable: false, fullscreenable: false })
+    const dir = env === 'production' ? 'build' : 'public'
     changelog.loadURL(url.format({
-      pathname: path.join(__dirname, '/../public/changelog.html'),
+      pathname: path.join(__dirname, `/../${dir}/changelog.html`),
       protocol: 'file:',
       slashes: true
     }))
     changelog.on('closed', () => {
       changelog = null
+    })
+  }
+}
+
+const showAbout = () => {
+  if (!about) {
+    about = new BrowserWindow({ width: 375, height: 285, resizable: false, titleBarStyle: 'hidden', maximizable: false, fullscreenable: false })
+    const dir = env === 'production' ? 'build' : 'public'
+    about.loadURL(url.format({
+      pathname: path.join(__dirname, `/../${dir}/about.html`),
+      protocol: 'file:',
+      slashes: true
+    }))
+    about.on('closed', () => {
+      about = null
     })
   }
 }

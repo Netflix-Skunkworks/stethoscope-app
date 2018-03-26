@@ -87,6 +87,28 @@ input DevicePolicy {
   stethoscopeVersion: Semver
 }
 
+# A DevicePolicy is a description of the desired state of a set of pre-selected device features
+input DevicePolicyV2 {
+  # current operation system version, use [semver](https://www.nodesource.com/blog/semver-a-primer/) strings to define requirement
+  osVersion: PlatformBracketRequirement
+  # whether or not software firewall is required
+  firewall: RequirementOption
+  # whether or not disk encryption is required (this is not a comprehensive check as users are free to employ encyption that isn't baked into the OS)
+  diskEncryption: RequirementOption
+  # whether or not automatic updates need to be enabled
+  automaticUpdates: RequirementOption
+  # whether or not screen lock is required ("IF_SUPPORTED" is recommended)
+  screenLock: RequirementOption
+  # remote login status
+  remoteLogin: RequirementOption
+  # require applications to be installed
+  requiredApplications: [AppRequirement]
+  # ban applications from being installed on user's machine
+  bannedApplications: [AppRequirement]
+  # add extensions
+  stethoscopeVersion: Semver
+}
+
 # Defines a requirement for an installed application
 input AppRequirement {
   # required application name
@@ -125,6 +147,7 @@ type PolicyResult {
 type Security {
   # operating system version requirement
   osVersion(requirement: PlatformStringRequirement!): Boolean!
+  osVersionV2(requirement: PlatformBracketRequirement!): Boolean!
   firewall(requirement: RequirementOption!): Boolean!
   automaticUpdates(requirment: RequirementOption!): Boolean!
   diskEncryption(requirement: RequirementOption!): Boolean!
@@ -138,6 +161,7 @@ type Security {
 type Policy {
   validate(policy:DevicePolicy): FeatureState!
   validateWithDetails(policy:DevicePolicy): PolicyResult!
+  validateV2(policy: DevicePolicyV2): PolicyResult!
 }
 
 type IpAddress {
@@ -181,6 +205,13 @@ input PlatformStringRequirement {
   all: Semver
 }
 
+input PlatformBracketRequirement {
+  darwin: VersionBracket
+  win32: VersionBracket
+  linux: VersionBracket
+  all: VersionBracket
+}
+
 # a platform boolean requirement defines a target boolean value for specific platforms
 input PlatformBoolRequirement {
   darwin: Boolean
@@ -189,10 +220,16 @@ input PlatformBoolRequirement {
   all: Boolean
 }
 
+input VersionBracket {
+  ok: Semver
+  nudge: Semver
+}
+
 # possible states that a device 'feature' can be in
 enum FeatureState {
   PASS
   FAIL
+  NUDGE
   ON
   OFF
   UNSUPPORTED
