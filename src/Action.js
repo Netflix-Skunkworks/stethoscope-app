@@ -90,7 +90,7 @@ class Action extends Component {
             width='18px'
             height='18px'
           />
-          {action.title[status]}
+          {action.title[status] || action.title}
         </span>
         <Accessible label='Toggle action description' expanded={this.state.showDescription}>
           <a className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>
