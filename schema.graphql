@@ -176,6 +176,8 @@ type NetworkInterface {
   interface: String
   type: String
   mac: String
+  physical_adapter: Boolean
+  interface: String
   # the last time network interface was updated
   lastChange: String
 }
