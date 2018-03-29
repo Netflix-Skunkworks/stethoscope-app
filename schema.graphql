@@ -19,6 +19,10 @@ type Device {
   platformName: String
   # operating system version
   osVersion: String
+  # os build
+  osBuild: String
+  # os name
+  osName: String
   # device firmware version
   firmwareVersion: String
   # device model
