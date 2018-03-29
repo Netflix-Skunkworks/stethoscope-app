@@ -30,6 +30,16 @@ const Device = {
     return version
   },
 
+  async osBuild (root, args, context) {
+    const { build } = await context.osVersion
+    return build
+  },
+
+  async osName (root, args, context) {
+    const { name } = await context.osVersion
+    return name
+  },
+
   async firmwareVersion (root, args, context) {
     const { revision } = await context.platformInfo
     return revision
