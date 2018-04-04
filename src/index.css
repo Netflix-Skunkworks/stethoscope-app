@@ -101,6 +101,10 @@ nav a.brand {
 .panel.warning header {
   color: #90783b;
   background-color: #fbf3df;
+  border-color: #f1e2bd;
+}
+.panel.critical header {
+  border-color: #e4c9c8;
 }
 .panel.unknown, .panel.unknown header {
   color: #666;
