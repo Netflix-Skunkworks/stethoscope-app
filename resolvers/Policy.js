@@ -12,70 +12,69 @@ const Policy = {
 
   async validate (root, args, context) {
     const { policy } = args
-    let results = Object.assign({ status: PASS }, policy)
+
+    let response = Object.assign({ status: PASS }, policy)
 
     for (let verification in policy) {
-
-      let compliance = policy[verification]
-
+      // get policy requirement for current property
+      let requirement = policy[verification]
+      // determine device state
       const passing = await Security[verification](root, policy, context)
 
+      // this handles multiplicable items like applications, etc.
       if (Array.isArray(passing)) {
-        results[verification] = []
+        response[verification] = []
 
         for (let i = 0; i < passing.length; i++) {
-          results[verification][i] = {
+          response[verification][i] = {
             name: passing[i].name,
             status: passing[i].passing ? PASS : FAIL
           }
 
           if (!passing[i].passing) {
-            results.status = FAIL
+            response.status = FAIL
           }
         }
       } else {
-        results[verification] = PASS
+        // default item to PASS
+        response[verification] = PASS
 
-        let failed = false
+        if (passing === false) {
+          // test failure against policy requirement
+          switch (requirement) {
+            // passing is not required
+            case SUGGESTED:
+              response[verification] = NUDGE
+              // we only want the global status to be switched to NUDGE if it
+              // is currently PASS, it should not override a global status FAIL
+              if (response.status === PASS) {
+                response.status = NUDGE
+              }
+              break
 
-        switch (passing) {
-          case false:
-            if (compliance === ALWAYS || (compliance !== IF_SUPPORTED && compliance !== NEVER)) {
-              failed = true
-            }
-            break
+            // passing is only required if platform supports
+            case IF_SUPPORTED:
+            // failure is required
+            case NEVER:
+              break
 
-          case UNSUPPORTED:
-            if (compliance !== IF_SUPPORTED) {
-              failed = true
-            }
-            break
-
-          case NUDGE:
-            results[verification] = NUDGE
-            if (results.status === PASS) {
-              results.status = NUDGE
-            }
-            break
-
-          case true:
-            if (compliance === NEVER) {
-              failed = true
-            }
-            break
-
-          default:
-            break
+            // handles ALWAYS and semver requirement failures
+            default:
+              response[verification] = FAIL
+              response.status = FAIL
+              break
+          }
         }
 
-        if (failed) {
-          results[verification] = FAIL
-          results.status = FAIL
+        // passing tests are only a FAIL if the policy forbids it (e.g. remote login enabled)
+        if (passing === true && requirement === NEVER) {
+          response[verification] = FAIL
+          response.status = FAIL
         }
       }
     }
 
-    return results
+    return response
   }
 }
 
