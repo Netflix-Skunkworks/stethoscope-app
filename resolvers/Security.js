@@ -17,7 +17,7 @@ const Security = {
           where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'`
         })
 
-        return automatic_updates !== '0'
+        return automatic_updates !== '0' || NUDGE
 
       case 'win32':
         /*
@@ -29,11 +29,11 @@ const Security = {
           where: 'display_name = "Windows Update" and start_type != "DISABLED"'
         })
 
-        return services && services.automatic_updates === '1'
+        return services && services.automatic_updates === '1' || NUDGE
 
       case 'linux':
       default:
-        return false
+        return NUDGE
     }
   },
 
@@ -228,28 +228,6 @@ const Security = {
   },
 
   async osVersion (root, args, context) {
-    const reqVersion = args.osVersion[context.platform]
-    let { version } = await context.osVersion
-
-    /*
-      select version from os_version
-    */
-    switch (context.platform) {
-      case 'darwin':
-        if (version.split('.').length === 2) {
-          // sometimes we only get major/minor version
-          version = `${version}.0`
-        }
-        break
-
-      default:
-        break
-    }
-
-    return semver.satisfies(semver.coerce(version), reqVersion)
-  },
-
-  async osVersionV2 (root, args, context) {
     const { ok, nudge } = args.osVersion[context.platform]
     let { version } = await context.osVersion
 
