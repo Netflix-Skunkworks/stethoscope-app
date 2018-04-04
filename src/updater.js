@@ -28,8 +28,8 @@ module.exports = function(env, mainWindow) {
       dialog.showMessageBox({
         type: 'info',
         title: 'Found Updates',
-        message: 'Found updates, do you want update now?',
-        buttons: ['Sure', 'No']
+        message: 'New version available, do you want update now?',
+        buttons: ['Yes', 'No']
       }, (buttonIndex) => {
         if (buttonIndex === 0) {
           if (!isDev) {
@@ -49,7 +49,7 @@ module.exports = function(env, mainWindow) {
     'update-not-available': () => {
       dialog.showMessageBox({
         title: 'No Updates',
-        message: 'Current version is up-to-date.'
+        message: 'You already have the latest version.'
       })
       attemptingUpdate = false
       if (updater) updater.enabled = true
@@ -58,7 +58,7 @@ module.exports = function(env, mainWindow) {
     'update-downloaded': () => {
       dialog.showMessageBox({
         title: 'Install Updates',
-        message: 'Updates downloaded, Stethoscope will be quit for update...'
+        message: 'Updates downloaded, Stethoscope will quit and relaunch.'
       }, () => {
         if (!isDev) {
           setImmediate(() => autoUpdater.quitAndInstall())
