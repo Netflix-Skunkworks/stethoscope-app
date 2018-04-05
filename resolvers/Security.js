@@ -2,7 +2,7 @@ const semver = require('semver')
 const Device = require('./Device')
 const OSQuery = require('../sources/osquery')
 const pkg = require('../package.json')
-const { NUDGE, UNSUPPORTED } = require('../src/constants')
+const { NUDGE, IF_SUPPORTED } = require('../src/constants')
 
 const Security = {
   async automaticUpdates (root, args, context) {
@@ -105,6 +105,83 @@ const Security = {
     }
   },
 
+  async stethoscopeVersion(root, args, context) {
+    return semver.satisfies(pkg.version, args.stethoscopeVersion)
+  },
+
+  async screenLock (root, args, context) {
+    let { version } = await context.osVersion
+
+    switch (context.platform) {
+      case 'darwin':
+        if (semver.satisfies(version, '<10.13')) {
+          /*
+            select value as screen_lock from preferences
+            where domain = 'com.apple.screensaver' and key = 'askForPassword'
+          */
+          const { screen_lock } = await OSQuery.first('preferences', {
+            fields: ['value as screen_lock'],
+            where: `domain = 'com.apple.screensaver' and key = 'askForPassword'`
+          })
+
+          return screen_lock === '1'
+        } else {
+          // macOS High Sierra removed support screen lock querying
+          return args.screenLock === IF_SUPPORTED ? true : false
+        }
+
+      case 'win32':
+        /*
+          select name, data from registry
+          where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
+         */
+        const response = await OSQuery.first('registry', {
+          fields: ['name', 'data'],
+          where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
+        })
+        return response.data !== '1'
+
+      default:
+        return false
+    }
+  },
+
+  async osVersion (root, args, context) {
+    const { ok, nudge } = args.osVersion[context.platform]
+    let { version } = await context.osVersion
+
+    if (semver.satisfies(semver.coerce(version), ok)) {
+      return true
+    } else if (semver.satisfies(semver.coerce(version), nudge)) {
+      return NUDGE
+    } else {
+      return false
+    }
+  },
+
+  async firewall (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        /*
+          select global_state as firewall_enabled from alf
+         */
+        const { firewall_enabled = 0 } = await OSQuery.first('alf', { fields: ['global_state as firewall_enabled'] })
+        return parseInt(firewall_enabled, 10) > 0
+
+      case 'win32':
+        /*
+          select name, data from registry
+          where key like 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile' and name = 'EnableFirewall'
+         */
+        const result = await OSQuery.first('registry', { fields: ['name', 'data'], where: `key like 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile' and name = 'EnableFirewall'` })
+        return result && result.data === '1'
+
+      case 'linux':
+        // TODO
+        return true
+    }
+  },
+
   async requiredApplications (root, args, context) {
     const applications = await Device.applications(root, args, context)
     const { version: osVersion } = await context.osVersion
@@ -187,103 +264,6 @@ const Security = {
       return { name, passing: true }
     })
   },
-
-  async stethoscopeVersion(root, args, context) {
-    return semver.satisfies(pkg.version, args.stethoscopeVersion)
-  },
-
-  async screenLock (root, args, context) {
-    let { version } = await context.osVersion
-
-    switch (context.platform) {
-      case 'darwin':
-        if (semver.satisfies(version, '<10.13')) {
-          /*
-            select value as screen_lock from preferences
-            where domain = 'com.apple.screensaver' and key = 'askForPassword'
-          */
-          const { screen_lock } = await OSQuery.first('preferences', {
-            fields: ['value as screen_lock'],
-            where: `domain = 'com.apple.screensaver' and key = 'askForPassword'`
-          })
-
-          return screen_lock === '1'
-        } else {
-          // macOS High Sierra removed support screen lock querying
-          return UNSUPPORTED
-        }
-      case 'win32':
-        /*
-          select name, data from registry
-          where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
-         */
-        const response = await OSQuery.first('registry', {
-          fields: ['name', 'data'],
-          where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
-        })
-        return response.data !== '1'
-      default:
-        return false
-    }
-  },
-
-  async osVersion (root, args, context) {
-    const reqVersion = args.osVersion[context.platform]
-    let { version } = await context.osVersion
-
-    /*
-      select version from os_version
-    */
-    switch (context.platform) {
-      case 'darwin':
-        if (version.split('.').length === 2) {
-          // sometimes we only get major/minor version
-          version = `${version}.0`
-        }
-        break
-
-      default:
-        break
-    }
-
-    return semver.satisfies(semver.coerce(version), reqVersion)
-  },
-
-  async osVersionV2 (root, args, context) {
-    const { ok, nudge } = args.osVersion[context.platform]
-    let { version } = await context.osVersion
-
-    if (semver.satisfies(semver.coerce(version), ok)) {
-      return true
-    } else if (semver.satisfies(semver.coerce(version), nudge)) {
-      return NUDGE
-    } else {
-      return false
-    }
-  },
-
-  async firewall (root, args, context) {
-    switch (context.platform) {
-      case 'darwin':
-        /*
-          select global_state as firewall_enabled from alf
-         */
-        const { firewall_enabled = 0 } = await OSQuery.first('alf', { fields: ['global_state as firewall_enabled'] })
-        return parseInt(firewall_enabled, 10) > 0
-
-      case 'win32':
-        /*
-          select name, data from registry
-          where key like 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile' and name = 'EnableFirewall'
-         */
-        const result = await OSQuery.first('registry', { fields: ['name', 'data'], where: `key like 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile' and name = 'EnableFirewall'` })
-        return result && result.data === '1'
-
-      case 'linux':
-        // TODO
-        return true
-    }
-  }
 }
 
 module.exports = Security

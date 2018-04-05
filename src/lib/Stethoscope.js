@@ -1,52 +1,6 @@
-const { ON, OFF, NEVER, ALWAYS, UNSUPPORTED, IF_SUPPORTED, HOST } = require('../constants')
+const { HOST } = require('../constants')
 
-const handleValidate = (policy, result, partitions, device, practices, platform) => {
-  const { security = {} } = Object(device)
-
-  return Object.keys(policy).reduce((acc, key) => {
-    const item = {
-      title: key,
-      name: key,
-      status: security[key],
-      actions: '',
-      link: '',
-      ...practices[key],
-      directions: practices[key].directions[platform]
-    }
-
-    if (security[key] === ON) {
-      switch (policy[key]) {
-        case NEVER:
-          acc.critical.push(item)
-          break
-        default:
-          acc.done.push(item)
-      }
-    } else if (security[key] === UNSUPPORTED) {
-      switch (policy[key]) {
-        case IF_SUPPORTED:
-          acc.done.push(item)
-          break
-        default:
-          acc.critical.push(item)
-      }
-    } else if (security[key] === OFF) {
-      switch (policy[key]) {
-        case ALWAYS:
-          acc.critical.push(item)
-          break
-        case NEVER:
-          acc.done.push(item)
-          break
-        default:
-          acc.suggested.push(item)
-      }
-    }
-    return acc
-  }, partitions)
-}
-
-const handleValidateWithDetails = (result, partitions, device, practices, platform) => {
+const handleValidate = (result, partitions, device, practices, platform) => {
   const { status, ...rest } = result
   const nonNullValues = Object.keys(rest).filter(key => result[key])
 
@@ -94,19 +48,15 @@ export default class Stethoscope {
       done: [],
     }
 
-    if (Object.keys(result).length === 1 && result.status) {
-      return handleValidate(policy, result, partitions, device, practices, platform)
-    } else {
-      return handleValidateWithDetails(result, partitions, device, practices, platform)
-    }
+    return handleValidate(result, partitions, device, practices, platform)
   }
 
   // privately retry request until a response is given
   static __repeatRequest(policy, resolve, reject) {
     // TODO create and use fragments here
-    const query = `query ValidateDevice($policy: DevicePolicyV2!) {
+    const query = `query ValidateDevice($policy: DevicePolicy!) {
       policy {
-        validateV2(policy: $policy) {
+        validate(policy: $policy) {
           status
           osVersion
           firewall
@@ -176,7 +126,7 @@ export default class Stethoscope {
         }
       })
       .then(({ data }) => {
-        const result = data.policy.validateV2
+        const result = data.policy.validate
         const { device } = data
         resolve({ result, device })
       })

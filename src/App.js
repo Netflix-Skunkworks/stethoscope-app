@@ -106,24 +106,10 @@ class App extends Component {
       const { data: { policy }} = Object(result)
 
       let newState = {
-        result: policy.validateWithDetails || policy.validateV2,
+        result: policy.validate,
         loading: false,
         remoteScan: remote,
         scannedBy: remote ? 'Meechum' : 'Stethoscope'
-      }
-
-      // handle old-style requests, policy.validate should not be used anymore
-      // TODO remove this logic
-      if (!newState.result) {
-        const lastScanTime = Date.now()
-        newState = {
-          result: {
-            status: policy.validate
-          },
-          loading: false,
-          lastScanTime,
-          policy: appPolicy.policy
-        }
       }
 
       if (newState.result.status !== 'PASS') {
@@ -218,6 +204,12 @@ class App extends Component {
       )
     }
 
+    if (loading) {
+      content = (
+        <Loader remoteScan={this.state.remoteScan} />
+      )
+    }
+
     if (!content) {
       const secInfo = Stethoscope.partitionSecurityInfo(policy, result, device, instructions.practices, platform)
       const decoratedDevice = Object.assign({}, device, secInfo, { lastScanTime })
@@ -258,10 +250,7 @@ class App extends Component {
 
     return (
       <div className={`App ${loading ? 'loading' : ''}`}>
-        {loading
-          ? <Loader remoteScan={this.state.remoteScan} />
-          : content
-        }
+        {content}
       </div>
     )
   }

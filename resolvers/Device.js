@@ -119,11 +119,6 @@ const Device = {
   disks (root, args, context) {
     return OSQuery.all('block_devices')
   },
-
-  // TODO expose this for osqueryd server?
-  user (root, args, context) {
-    return {}
-  }
 }
 
 module.exports = Device

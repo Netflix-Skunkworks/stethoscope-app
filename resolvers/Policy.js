@@ -1,203 +1,90 @@
 const semver = require('semver')
 const Security = require('./Security')
 const {
-  PASS, FAIL, NUDGE, UNKNOWN, UNSUPPORTED,
+  PASS, FAIL, NUDGE,
   ALWAYS, SUGGESTED, IF_SUPPORTED, NEVER
 } = require('../src/constants')
-
-const isObject = o => Object(o) === o
-const isBool = b => typeof b === 'boolean'
 
 const Policy = {
 
   async validate (root, args, context) {
-    const { policy } = args
-    let result = PASS
+    const { policy } = Object.assign({}, args)
+    const response = {}
 
-    for (let verification in policy) {
-      let compliance = policy[verification]
-
+    for (const verification in policy) {
+      // get policy requirement for current property
+      const requirement = policy[verification]
+      // determine device state
       const passing = await Security[verification](root, policy, context)
 
+      // this handles multiplicable items like applications, etc.
       if (Array.isArray(passing)) {
-        for (let i = 0; i < passing.length; i++) {
-          let itemCompliance = compliance[i]
-          let itemPassing = passing[i]
+        // convert verification result to PASS|FAIL
+        response[verification] = passing.map(({ name, passing }) => {
+          return {
+            name,
+            status: passing ? PASS : FAIL
+          }
+        })
+      } else {
+        // default item to PASS
+        response[verification] = PASS
 
-          switch (itemPassing) {
-            case false:
-              if (itemCompliance === ALWAYS) {
-                return FAIL
-              }
+        if (passing === false) {
+          // test failure against policy requirement
+          switch (requirement) {
+            // passing is suggested, NUDGE user
+            case SUGGESTED:
+              response[verification] = NUDGE
               break
 
-            case UNSUPPORTED:
-              if (itemCompliance !== IF_SUPPORTED) {
-                return FAIL
-              }
+            // passing is only required if platform supports
+            case IF_SUPPORTED:
+            // failure is required
+            case NEVER:
+              break
 
-            default: // true, no early return
+            // handles ALWAYS and some semver requirement failures
+            default:
+              response[verification] = FAIL
               break
           }
         }
-      } else {
-        switch (passing) {
-          case false:
-            if (compliance === ALWAYS || (compliance !== IF_SUPPORTED && compliance !== NEVER)) {
-              return FAIL
-            }
-            break
 
-          case UNSUPPORTED:
-            if (compliance !== IF_SUPPORTED) {
-              return FAIL
-            }
 
-          case true:
-            if (compliance === NEVER) {
-              return FAIL
-            }
-
-          default: // true, no early return
-            break
+        // passing tests are only a FAIL if the policy forbids it (e.g. remote login enabled)
+        if (passing && requirement === NEVER) {
+          response[verification] = FAIL
         }
+
+        if (passing === NUDGE) {
+          response[verification] = NUDGE
+        }
+      }
+
+      // set the global validation status based on the individual policy evaluation results
+      const values = Object.values(response)
+      const deviceResults = new Set(values)
+
+      // need to also add any multiplicable statuses (e.g. applications)
+      values.forEach(val => {
+        if (Array.isArray(val)) {
+          val.forEach(({ status }) => {
+            deviceResults.add(status)
+          })
+        }
+      })
+
+      if (deviceResults.has(FAIL)) {
+        response.status = FAIL
+      } else if (deviceResults.has(NUDGE)) {
+        response.status = NUDGE
+      } else {
+        response.status = PASS
       }
     }
 
-    return PASS
-  },
-
-  async validateWithDetails (root, args, context) {
-    const { policy } = args
-    let results = Object.assign({ status: PASS }, policy)
-
-    for (let verification in policy) {
-      let compliance = policy[verification]
-
-      const passing = await Security[verification](root, policy, context)
-
-      if (Array.isArray(passing)) {
-        results[verification] = []
-
-        for (let i = 0; i < passing.length; i++) {
-          results[verification][i] = {
-            name: passing[i].name,
-            status: passing[i].passing ? PASS : FAIL
-          }
-
-          if (!passing[i].passing) {
-            results.status = FAIL
-          }
-        }
-      } else {
-        results[verification] = PASS
-
-        let failed = false
-
-        switch (passing) {
-          case false:
-            if (compliance === ALWAYS || (compliance !== IF_SUPPORTED && compliance !== NEVER)) {
-              failed = true
-            }
-            break
-
-          case UNSUPPORTED:
-            if (compliance !== IF_SUPPORTED) {
-              failed = true
-            }
-            break
-
-          case true:
-            if (compliance === NEVER) {
-              failed = true
-            }
-            break
-
-          default:
-            break
-        }
-
-        if (failed) {
-          results[verification] = FAIL
-          results.status = FAIL
-        }
-      }
-    }
-
-    return results
-  },
-
-  async validateV2 (root, args, context) {
-    const { policy } = args
-    let results = Object.assign({ status: PASS }, policy)
-
-    for (let verification in policy) {
-      if (verification === 'osVersion') {
-        verification += 'V2'
-      }
-
-      let compliance = policy[verification]
-
-      const passing = await Security[verification](root, policy, context)
-
-      if (verification === 'osVersionV2') {
-        verification = 'osVersion'
-      }
-
-      if (Array.isArray(passing)) {
-        results[verification] = []
-
-        for (let i = 0; i < passing.length; i++) {
-          results[verification][i] = {
-            name: passing[i].name,
-            status: passing[i].passing ? PASS : FAIL
-          }
-
-          if (!passing[i].passing) {
-            results.status = FAIL
-          }
-        }
-      } else {
-        results[verification] = PASS
-
-        let failed = false
-
-        switch (passing) {
-          case false:
-            if (compliance === ALWAYS || (compliance !== IF_SUPPORTED && compliance !== NEVER)) {
-              failed = true
-            }
-            break
-
-          case UNSUPPORTED:
-            if (compliance !== IF_SUPPORTED) {
-              failed = true
-            }
-            break
-
-          case NUDGE:
-            results[verification] = NUDGE
-            results.status = NUDGE
-            break
-
-          case true:
-            if (compliance === NEVER) {
-              failed = true
-            }
-            break
-
-          default:
-            break
-        }
-
-        if (failed) {
-          results[verification] = FAIL
-          results.status = FAIL
-        }
-      }
-    }
-
-    return results
+    return response
   }
 }
 

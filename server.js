@@ -134,22 +134,11 @@ module.exports = function startServer(env, log, appActions) {
 
     graphql(schema, query, null, context, variables).then((result) => {
       const { data = {} } = result
-      // TODO ick remove this and simplify GraphQL model
-      const scanResult = data.policy && (
-        data.policy.validate ||
-        data.policy.validateWithDetails ||
-        data.policy.validateV2
-      )
+      const scanResult = data.policy && data.policy.validate
 
       if (scanResult) {
-        // clean up check
-        let status = data.policy.validate
-        let upToDate = true
-
-        if (!status) {
-          status = scanResult.status
-          upToDate = scanResult.stethoscopeVersion !== 'FAIL'
-        }
+        let status = data.policy.validate.status
+        let upToDate = scanResult.stethoscopeVersion !== 'FAIL'
 
         appActions.setScanStatus(status)
 
