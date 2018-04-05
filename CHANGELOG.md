@@ -6,7 +6,27 @@ All notable changes to this project will be documented in this file.
 
 ----
 
-## [0.3.2](#) - 2018-03-22
+## [1.0.0](https://github.com/Netflix/stethoscope-app/tree/1.0.0) - 2018-04-05
+
+----
+
+### Added
+- Top level messaging on device status
+- Added `SUGGESTED` to requirement options
+- Support for NUDGE status
+- Bracketing on OS version requirements in Policy
+- Added `osName` and `osBuild` attributes to `Device` schema
+
+### Changed
+- *Breaking Change* Removed original `validate` and `validateWithDetails` queries and moved newer `validateV2` to `validate`
+- Minimum required Mac version in default policy (10.13.3 -> 10.13.4)
+- Update flow copy
+- Removed unused code/resolvers and branching that was required by supporting multiple validation queries and results
+
+### Fixed
+- Commented logic in policy evaluation, simplified policy processing
+
+## [0.3.2](https://github.com/Netflix/stethoscope-app/tree/0.3.2) - 2018-03-22
 
 ----
 
