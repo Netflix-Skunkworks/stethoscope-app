@@ -37,12 +37,12 @@ module.exports = function(mainWindow) {
             checkForUpdates(this, mainWindow, event)
           }
         },
-        {
+        /*{
           label: 'CHANGE LOG',
           click(event) {
             showChangelog()
           }
-        },
+        },*/
         {role: 'services', submenu: []},
         {type: 'separator'},
         {role: 'hide'},
@@ -58,12 +58,12 @@ module.exports = function(mainWindow) {
       click(event) {
         checkForUpdates(this, mainWindow, event)
       }
-    }, {
+    }, /*{
       label: 'CHANGE LOG',
       click(event) {
         showChangelog()
       }
-    },
+    },*/
     {
       label: 'About',
       click(event) {
