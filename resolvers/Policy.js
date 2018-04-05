@@ -45,11 +45,6 @@ const Policy = {
             // passing is not required
             case SUGGESTED:
               response[verification] = NUDGE
-              // we only want the global status to be switched to NUDGE if it
-              // is currently PASS, it should not override a global status FAIL
-              if (response.status === PASS) {
-                response.status = NUDGE
-              }
               break
 
             // passing is only required if platform supports
@@ -58,10 +53,9 @@ const Policy = {
             case NEVER:
               break
 
-            // handles ALWAYS and semver requirement failures
+            // handles ALWAYS and some semver requirement failures
             default:
               response[verification] = FAIL
-              response.status = FAIL
               break
           }
         }
@@ -69,8 +63,21 @@ const Policy = {
         // passing tests are only a FAIL if the policy forbids it (e.g. remote login enabled)
         if (passing === true && requirement === NEVER) {
           response[verification] = FAIL
-          response.status = FAIL
         }
+
+        if (passing === NUDGE) {
+          response[verification] = NUDGE
+        }
+      }
+
+      // set the global validation status
+      const uniqueResults = new Set(Object.values(response))
+      if (uniqueResults.has(FAIL)) {
+        response.status = FAIL
+      } else if (uniqueResults.has(NUDGE)) {
+        response.status = NUDGE
+      } else {
+        response.status = PASS
       }
     }
 
