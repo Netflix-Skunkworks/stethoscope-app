@@ -1,40 +1,31 @@
 const semver = require('semver')
 const Security = require('./Security')
 const {
-  PASS, FAIL, NUDGE, UNKNOWN, UNSUPPORTED,
+  PASS, FAIL, NUDGE,
   ALWAYS, SUGGESTED, IF_SUPPORTED, NEVER
 } = require('../src/constants')
-
-const isObject = o => Object(o) === o
-const isBool = b => typeof b === 'boolean'
 
 const Policy = {
 
   async validate (root, args, context) {
-    const { policy } = args
+    const { policy } = Object.assign({}, args)
+    const response = {}
 
-    let response = Object.assign({ status: PASS }, policy)
-
-    for (let verification in policy) {
+    for (const verification in policy) {
       // get policy requirement for current property
-      let requirement = policy[verification]
+      const requirement = policy[verification]
       // determine device state
       const passing = await Security[verification](root, policy, context)
 
       // this handles multiplicable items like applications, etc.
       if (Array.isArray(passing)) {
-        response[verification] = []
-
-        for (let i = 0; i < passing.length; i++) {
-          response[verification][i] = {
-            name: passing[i].name,
-            status: passing[i].passing ? PASS : FAIL
+        // convert verification result to PASS|FAIL
+        response[verification] = passing.map(({ name, passing }) => {
+          return {
+            name,
+            status: passing ? PASS : FAIL
           }
-
-          if (!passing[i].passing) {
-            response.status = FAIL
-          }
-        }
+        })
       } else {
         // default item to PASS
         response[verification] = PASS
@@ -42,7 +33,7 @@ const Policy = {
         if (passing === false) {
           // test failure against policy requirement
           switch (requirement) {
-            // passing is not required
+            // passing is suggested, NUDGE user
             case SUGGESTED:
               response[verification] = NUDGE
               break
@@ -60,8 +51,9 @@ const Policy = {
           }
         }
 
+
         // passing tests are only a FAIL if the policy forbids it (e.g. remote login enabled)
-        if (passing === true && requirement === NEVER) {
+        if (passing && requirement === NEVER) {
           response[verification] = FAIL
         }
 
@@ -70,11 +62,22 @@ const Policy = {
         }
       }
 
-      // set the global validation status
-      const uniqueResults = new Set(Object.values(response))
-      if (uniqueResults.has(FAIL)) {
+      // set the global validation status based on the individual policy evaluation results
+      const values = Object.values(response)
+      const deviceResults = new Set(values)
+
+      // need to also add any multiplicable statuses (e.g. applications)
+      values.forEach(val => {
+        if (Array.isArray(val)) {
+          val.forEach(({ status }) => {
+            deviceResults.add(status)
+          })
+        }
+      })
+
+      if (deviceResults.has(FAIL)) {
         response.status = FAIL
-      } else if (uniqueResults.has(NUDGE)) {
+      } else if (deviceResults.has(NUDGE)) {
         response.status = NUDGE
       } else {
         response.status = PASS
