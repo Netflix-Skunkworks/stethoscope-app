@@ -186,3 +186,35 @@ a.btn:hover {
   box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,.15) inset;
   color: rgba(0,0,0,.8);
 }
+
+.panel.device-summary {
+  border: 1px solid #ddd;
+  background: #fbfafa;
+}
+.panel.device-summary.ok {
+  font-size: 1.05em;
+  border-color: #e4eae1;
+}
+.panel.device-summary.warning {
+  border-color: #f1e3c1;
+}
+.panel.device-summary.critical {
+  border-color: #ecdede;
+}
+
+.panel.device-summary svg {
+  position: relative;
+  top: -3px;
+  padding-right: 10px;
+}
+
+.panel.device-summary span {
+  color: #333;
+  vertical-align: middle;
+}
+.panel.device-summary.critical span {
+  color: #9a211d;
+}
+.panel.device-summary.warning span {
+  color: #5d4a19;
+}
