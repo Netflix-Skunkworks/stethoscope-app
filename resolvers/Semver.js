@@ -4,19 +4,19 @@ const semver = require('semver')
 const Semver = new GraphQLScalarType({
   name: 'Semver',
   description: 'Semver formatted string',
-  serialize(value) {
+  serialize (value) {
     if (semver.valid(semver.coerce(value))) {
       return value
     }
     throw new Error(`${value} is not a valid Semver string`)
   },
-  parseValue(value) {
+  parseValue (value) {
     if (semver.valid(semver.coerce(value))) {
       return value
     }
     throw new Error(`${value} is not a valid Semver string`)
   },
-  parseLiteral(ast) {
+  parseLiteral (ast) {
     if (semver.valid(semver.coerce(ast.value))) {
       return ast.value
     }

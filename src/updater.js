@@ -8,7 +8,7 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function(env, mainWindow) {
+module.exports = function (env, mainWindow) {
   autoUpdater.autoDownload = false
   const isDev = env === 'development'
 

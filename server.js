@@ -9,7 +9,7 @@ const yaml = require('js-yaml')
 const { graphql } = require('graphql')
 const bodyParser = require('body-parser')
 const { makeExecutableSchema } = require('graphql-tools')
-const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
+const { graphiqlExpress } = require('graphql-server-express')
 const Resolvers = require('./resolvers/')
 const OSQuery = require('./sources/osquery')
 const { HOST, PORT } = require('./src/constants')
@@ -24,7 +24,7 @@ const io = require('socket.io')(http, { wsEngine: 'ws' })
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = function startServer(env, log, appActions) {
+module.exports = function startServer (env, log, appActions) {
   const find = filePath => env === 'development' ? filePath : path.join(__dirname, filePath)
 
   const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
@@ -41,13 +41,13 @@ module.exports = function startServer(env, log, appActions) {
 
   const {
     allowHosts = [],
-    allowRegex = [],
+    allowRegex = []
   } = defaultConfig
 
   let { policyServer = defaultPolicyServer } = defaultConfig
 
   const corsOptions = {
-    origin(origin, callback) {
+    origin (origin, callback) {
       if (env === 'development') {
         return callback(null, true)
       }
@@ -64,12 +64,12 @@ module.exports = function startServer(env, log, appActions) {
         callback(new Error(`Unauthorized request from ${origin}`), false)
       }
     },
-    methods: 'GET,OPTIONS,HEAD,POST',
+    methods: 'GET,OPTIONS,HEAD,POST'
   }
 
   // policy, instructions and config data should only be served to app
   const policyRequestOptions = {
-    origin(origin, callback) {
+    origin (origin, callback) {
       const allowed = ['http://localhost', 'stethoscope://', 'http://127.0.0.1']
       if (origin && allowed.some(hostname => origin.startsWith(hostname))) {
         callback(null, true)
@@ -109,7 +109,7 @@ module.exports = function startServer(env, log, appActions) {
       platform: os.platform(),
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
-      osVersion: OSQuery.first('os_version'),
+      osVersion: OSQuery.first('os_version')
     }
 
     const key = req.method === 'POST' ? 'body' : 'query'
@@ -197,7 +197,7 @@ module.exports = function startServer(env, log, appActions) {
     }
   })
 
-  //const defaultConfig = yaml.safeLoad(fs.readFileSync(path.resolve('./practices/config.yaml'), 'utf8'))
+  // const defaultConfig = yaml.safeLoad(fs.readFileSync(path.resolve('./practices/config.yaml'), 'utf8'))
 
   app.get('/config', cors(policyRequestOptions), (req, res) => {
     if (!policyServer) {

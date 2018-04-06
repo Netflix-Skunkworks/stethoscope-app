@@ -18,8 +18,18 @@ const PORT = 37370
 const HOST = `http://localhost:${PORT}`
 
 module.exports = {
-  PORT, HOST,
-  PASS, FAIL, NUDGE, WARN, UNKNOWN,
-  ALWAYS, SUGGESTED, NEVER, IF_SUPPORTED,
-  ON, OFF, UNSUPPORTED
+  PORT,
+  HOST,
+  PASS,
+  FAIL,
+  NUDGE,
+  WARN,
+  UNKNOWN,
+  ALWAYS,
+  SUGGESTED,
+  NEVER,
+  IF_SUPPORTED,
+  ON,
+  OFF,
+  UNSUPPORTED
 }

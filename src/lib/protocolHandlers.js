@@ -5,11 +5,11 @@ const powershell = require('./powershell')
 const { shell } = require('electron')
 const env = process.env.NODE_ENV || 'production'
 
-module.exports = function initProtocols(mainWindow) {
+module.exports = function initProtocols (mainWindow) {
   const { checkForUpdates } = require('../updater')(env, mainWindow)
 
   protocol.registerHttpProtocol('app', (request, cb) => {
-    applescript.openApp(decodeURIComponent(request.url.replace('app://','')))
+    applescript.openApp(decodeURIComponent(request.url.replace('app://', '')))
   })
 
   protocol.registerHttpProtocol('prefs', (request, cb) => {
@@ -30,10 +30,9 @@ module.exports = function initProtocols(mainWindow) {
     if (request.url.includes('update')) {
       try {
         checkForUpdates()
-      } catch(e) {
+      } catch (e) {
         console.log(e)
       }
-
     }
   })
 
