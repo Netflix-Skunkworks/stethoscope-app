@@ -1,5 +1,5 @@
 const applescript = require('applescript')
-const promisify = require("es6-promisify")
+const {promisify} = require("es6-promisify")
 const execString = promisify(applescript.execString)
 
 const openPreferences = async function(preferencePaneId) {
