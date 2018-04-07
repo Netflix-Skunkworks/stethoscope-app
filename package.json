@@ -16,35 +16,61 @@
     "appId": "com.netflix.stethoscope-local",
     "extends": null,
     "productName": "Stethoscope",
-    "files": [
-      "bin/*",
-      "practices/*",
-      "build/**",
-      "public/**",
-      "resolvers/*",
-      "sources/*",
-      "src/lib/*.js",
-      "src/*.json",
-      "src/*.js",
-      "server.js",
-      "schema.graphql"
-    ],
     "directories": {
       "buildResources": "public"
     },
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "files": [
+        "bin/osqueryi_darwin",
+        "practices/*",
+        "build/**",
+        "public/**",
+        "resolvers/*",
+        "sources/*",
+        "src/lib/*.js",
+        "src/*.json",
+        "src/*.js",
+        "server.js",
+        "schema.graphql"
+      ]
     },
     "win": {
       "target": "nsis",
-      "certificateSubjectName": "Netflix, Inc."
+      "certificateSubjectName": "Netflix, Inc.",
+      "files": [
+        "bin/osqueryi.exe",
+        "practices/*",
+        "build/**",
+        "public/**",
+        "resolvers/*",
+        "sources/*",
+        "src/lib/*.js",
+        "src/*.json",
+        "src/*.js",
+        "server.js",
+        "schema.graphql"
+      ]
     },
     "nsis": {
       "perMachine": true
     },
     "linux": {
       "target": "AppImage",
-      "category": "System"
+      "category": "System",
+      "files": [
+        "bin/osqueryi_linux",
+        "practices/*",
+        "build/**",
+        "public/**",
+        "resolvers/*",
+        "sources/*",
+        "src/lib/*.js",
+        "src/*.json",
+        "src/*.js",
+        "server.js",
+        "schema.graphql"
+      ]
     },
     "protocols": [
       {
@@ -63,7 +89,7 @@
     "electron": "electron .",
     "electron-start": "node src/start-react",
     "react-start": "react-scripts start",
-    "build": "rm -r dist/ ; react-scripts build && electron-builder -mw",
+    "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",
     "postinstall": "electron-builder install-app-deps",
     "build:mac": "rm -r dist/ ; react-scripts build && electron-builder -m",
     "build:windows": "react-scripts build && electron-builder -w",
