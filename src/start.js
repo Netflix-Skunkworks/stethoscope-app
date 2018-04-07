@@ -1,12 +1,8 @@
-const { protocol, app, ipcMain, remote, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
+const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
-const fs = require('fs')
-const yaml = require('js-yaml')
 const log = require('electron-log')
 const initMenu = require('./Menu')
-const applescript = require('./lib/applescript')
-const powershell = require('./lib/powershell')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
@@ -18,26 +14,26 @@ let appStartTime = Date.now()
 let server
 
 const good = nativeImage.createFromPath(findIcon('scope-icon.png'))
-const bad =  nativeImage.createFromPath(findIcon('scope-icon-nudge.png'))
+const bad = nativeImage.createFromPath(findIcon('scope-icon-nudge.png'))
 const ugly = nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 const statusImages = {
   PASS: good,
   NUDGE: bad,
-  FAIL: ugly,
+  FAIL: ugly
 }
 
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
-function createWindow() {
+function createWindow () {
   // determine if app is already running
-  const shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {
+  const shouldQuit = app.makeSingleInstance(function (commandLine, workingDirectory) {
     // Someone tried to run a second instance, we should focus our window.
     if (mainWindow) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore()
       }
     }
-  });
+  })
 
   if (shouldQuit) {
     app.quit()
@@ -81,8 +77,8 @@ function createWindow() {
         url.format({
           pathname: path.join(__dirname, '/../build/index.html'),
           protocol: 'file:',
-          slashes: true,
-        }),
+          slashes: true
+        })
       )
     }
   })
@@ -98,8 +94,8 @@ function createWindow() {
     url.format({
       pathname: path.join(__dirname, '/../build/index.html'),
       protocol: 'file:',
-      slashes: true,
-    }),
+      slashes: true
+    })
   )
 
   // adjust window height when download begins and ends
@@ -141,16 +137,17 @@ app.on('ready', () => {
     const base = 'stethoscope://main'
     Object.assign(requestHeaders, {
       Origin: base,
-      Referrer: base,
+      Referrer: base
     })
-    callback({ cancel: false, requestHeaders });
+    const args = { cancel: false, requestHeaders }
+    callback(args)
   })
 
   server = runLocalServer(env, log, {
-    setScanStatus(status = 'PASS') {
+    setScanStatus (status = 'PASS') {
       tray.setImage(statusImages[status])
     },
-    requestUpdate() {
+    requestUpdate () {
       updater.checkForUpdates()
     }
   })
@@ -158,7 +155,7 @@ app.on('ready', () => {
   server.on('error', (err) => {
     if (err.message.includes('EADDRINUSE')) {
       dialog.showMessageBox({
-        message: 'Stethoscope is already running',
+        message: 'Stethoscope is already running'
       })
       app.quit()
     }
@@ -181,8 +178,6 @@ app.on('window-all-closed', () => {
 
 app.on('open-url', function (event, url) {
   event.preventDefault()
-  const policyUrl = url.replace(/^stethoscope/,'https')
-  const params = `policies=${encodeURIComponent(policyUrl)}`
   if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()

@@ -17,11 +17,11 @@ const tryConnection = () => {
       startedElectron = true
       const cmd = os.platform() === 'win32' ? 'npm.cmd' : 'npm'
       const appServer = spawn(cmd, ['run', 'electron'], {
-        cwd: __dirname,
+        cwd: __dirname
       })
       appServer.stdout.on('data', data => console.log(data.toString()))
       appServer.stderr.on('data', data => console.error(data.toString()))
-      appServer.on('error', (err) => console.log("FAILED TO SPAWN", err))
+      appServer.on('error', (err) => console.log('FAILED TO SPAWN', err))
     }
   })
 }

@@ -1,8 +1,6 @@
-const semver = require('semver')
 const Security = require('./Security')
 const {
-  PASS, FAIL, NUDGE,
-  ALWAYS, SUGGESTED, IF_SUPPORTED, NEVER
+  PASS, FAIL, NUDGE, SUGGESTED, IF_SUPPORTED, NEVER
 } = require('../src/constants')
 
 const Policy = {
@@ -40,6 +38,7 @@ const Policy = {
 
             // passing is only required if platform supports
             case IF_SUPPORTED:
+              break
             // failure is required
             case NEVER:
               break
@@ -50,7 +49,6 @@ const Policy = {
               break
           }
         }
-
 
         // passing tests are only a FAIL if the policy forbids it (e.g. remote login enabled)
         if (passing && requirement === NEVER) {

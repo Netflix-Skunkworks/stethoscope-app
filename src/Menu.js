@@ -6,21 +6,21 @@ const env = process.env.NODE_ENV || 'production'
 
 let changelog, about
 
-module.exports = function(mainWindow) {
+module.exports = function (mainWindow) {
   const { checkForUpdates } = require('./updater')(env, mainWindow)
   const template = [
     {
       label: 'Edit',
       submenu: [
-        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' }
       ]
     },
     {
       label: 'Help',
       submenu: config.menu.help.map(({label, link}) => ({
         label,
-        click() { shell.openExternal(link) }
+        click () { shell.openExternal(link) }
       }))
     }
   ]
@@ -33,13 +33,13 @@ module.exports = function(mainWindow) {
         {type: 'separator'},
         {
           label: 'Check for Update',
-          click(event) {
+          click (event) {
             checkForUpdates(this, mainWindow, event)
           }
         },
         /*{
           label: 'CHANGE LOG',
-          click(event) {
+          click (event) {
             showChangelog()
           }
         },*/
@@ -55,18 +55,18 @@ module.exports = function(mainWindow) {
   } else if (process.platform === 'win32') {
     template.find(item => item.label === 'Help').submenu.push({type: 'separator'}, {
       label: 'Check for Update',
-      click(event) {
+      click (event) {
         checkForUpdates(this, mainWindow, event)
       }
     }, /*{
       label: 'CHANGE LOG',
-      click(event) {
+      click (event) {
         showChangelog()
       }
     },*/
     {
       label: 'About',
-      click(event) {
+      click (event) {
         showAbout()
       }
     })
@@ -78,11 +78,11 @@ module.exports = function(mainWindow) {
       submenu: [{
         label: 'Toggle Developer Tools',
         accelerator: 'Alt+Command+I',
-        click() { mainWindow.toggleDevTools(); }
+        click () { mainWindow.toggleDevTools() }
       }, {
         label: 'Reload',
         accelerator: 'Command+R',
-        click() { mainWindow.reload(); }
+        click () { mainWindow.reload() }
       }]
     })
   }

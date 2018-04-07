@@ -24,7 +24,6 @@ const deviceMessages = {
 }
 
 class Device extends Component {
-
   constructor (props) {
     super(props)
     this.state = {
@@ -46,7 +45,7 @@ class Device extends Component {
             action={a}
             onExpandPolicyViolation={this.props.onExpandPolicyViolation}
           >
-            <ul className="result-list">{a.results.map(({ name })=> (
+            <ul className='result-list'>{a.results.map(({ name }) => (
               <li key={name}>{name}</li>
             ))}</ul>
           </Action>
@@ -89,7 +88,7 @@ class Device extends Component {
 
     if (this.state.showInfo) {
       const macAddresses = device.macAddresses.filter(({mac}) => mac !== '00:00:00:00:00:00').map(({mac}, i) => (
-          <li key={i}>{mac}</li>
+        <li key={i}>{mac}</li>
       ))
 
       deviceInfo = (
@@ -162,7 +161,7 @@ Device.defaultProps = {
   ipAddresses: [],
   critical: [],
   suggested: [],
-  done: [],
+  done: []
 }
 
 export default Device
