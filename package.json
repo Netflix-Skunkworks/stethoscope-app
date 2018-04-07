@@ -107,6 +107,7 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "foreman": "^2.0.0",
+    "nsp": "^3.2.1",
     "react-scripts": "^1.1.4",
     "standard": "^11.0.1"
   }
