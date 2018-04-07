@@ -1,5 +1,4 @@
 const { execFile } = require('child_process')
-const escape = require('shell-escape')
 const os = require('os')
 const path = require('path')
 const platform = os.platform()
@@ -7,7 +6,7 @@ const platform = os.platform()
 const osqueryPlatforms = {
   darwin: '../bin/osqueryi_darwin',
   win32: '../bin/osqueryi.exe',
-  linux: '../bin/osqueryi_linux',
+  linux: '../bin/osqueryi_linux'
 }
 
 const defaultOptions = {
@@ -19,7 +18,7 @@ const cache = new Map()
 const timers = new Map()
 
 module.exports = class OSQuery {
-  static getTimingInfo() {
+  static getTimingInfo () {
     let timerValues = [...timers.values()]
     let queries = [...timers.entries()]
 
@@ -27,15 +26,15 @@ module.exports = class OSQuery {
 
     return {
       total: timerValues.reduce((p, v) => p + v, 0),
-      queries,
+      queries
     }
   }
 
-  static flushCache() {
+  static flushCache () {
     cache.clear()
   }
 
-  static clearTimers() {
+  static clearTimers () {
     timers.clear()
   }
   /**
@@ -44,7 +43,7 @@ module.exports = class OSQuery {
    * @param  {Object} [options=defaultOptions] query options { fields: [field1, field2], where: 'my where clause' }
    * @return {Promise}                         resolves with JSON query result, rejects with stderr
    */
-  static first(schema, options = defaultOptions) {
+  static first (schema, options = defaultOptions) {
     return this.all(schema, options)
       .then((data) => {
         return Object(Array.isArray(data) ? data[0] : data)
@@ -57,7 +56,7 @@ module.exports = class OSQuery {
    * @param  {Object} [options=defaultOptions] query options { fields: [field1, field2], where: 'my where clause' }
    * @return {Promise}                         resolves with JSON query result, rejects with stderr
    */
-  static all(schema, options = defaultOptions) {
+  static all (schema, options = defaultOptions) {
     return this.exec(`select ${options.fields.join(', ')} from ${schema} where ${options.where || '1==1'};`)
   }
 
@@ -66,7 +65,7 @@ module.exports = class OSQuery {
    * @param  {String|Array} queries  Query(ies) to run
    * @return {Promise}
    */
-  static exec(queries) {
+  static exec (queries) {
     return new Promise((resolve, reject) => {
       const commands = Array.isArray(queries) ? queries : [queries]
       const key = commands.join('')
@@ -94,7 +93,7 @@ module.exports = class OSQuery {
         resolve(result)
       })
     }).catch((err) => {
-      console.error("OSQUERY ERROR", err)
+      console.error('OSQUERY ERROR', err)
     })
   }
 }

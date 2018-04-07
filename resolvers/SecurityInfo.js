@@ -33,5 +33,5 @@ module.exports = {
   async remoteLogin (root, args, context) {
     const status = await Security.remoteLogin(root, args, context)
     return securityToDeviceStatus(status)
-  },
+  }
 }

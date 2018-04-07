@@ -2,7 +2,6 @@ const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const macFriendlyName = require('../sources/macmodels')
-const { ON, OFF, UNSUPPORTED } = require('../src/constants')
 
 const Device = {
   async deviceId (root, args, context) {
@@ -11,8 +10,8 @@ const Device = {
   },
 
   async deviceName (root, args, context) {
-    const { computer_name } = await context.systemInfo
-    return computer_name
+    const { computer_name: computerName } = await context.systemInfo
+    return computerName
   },
 
   async platform (root, args, context) {
@@ -46,23 +45,23 @@ const Device = {
   },
 
   async friendlyName (root, args, context) {
-    const { hardware_model } = await context.systemInfo
+    const { hardware_model: hardwareModel } = await context.systemInfo
 
     switch (context.platform) {
       case 'darwin':
-        return macFriendlyName(hardware_model)
+        return macFriendlyName(hardwareModel)
     }
-    return hardware_model
+    return hardwareModel
   },
 
   async hardwareModel (root, args, context) {
-    const { hardware_model } = await context.systemInfo
-    return hardware_model
+    const { hardware_model: hardwareModel } = await context.systemInfo
+    return hardwareModel
   },
 
   async hardwareSerial (root, args, context) {
-    const { hardware_serial } = await context.systemInfo
-    return hardware_serial
+    const { hardware_serial: hardwareSerial } = await context.systemInfo
+    return hardwareSerial
   },
 
   async applications (root, args, context) {
@@ -96,9 +95,9 @@ const Device = {
     const addresses = await OSQuery.all('interface_details')
     return addresses.filter(({ mac }) => {
       return (
-        !NetworkInterface.isLocal(mac)
-     && !NetworkInterface.isMulticast(mac)
-     && !NetworkInterface.isPlaceholder(mac)
+        !NetworkInterface.isLocal(mac) &&
+     !NetworkInterface.isMulticast(mac) &&
+     !NetworkInterface.isPlaceholder(mac)
       )
     })
   },
@@ -118,7 +117,7 @@ const Device = {
 
   disks (root, args, context) {
     return OSQuery.all('block_devices')
-  },
+  }
 }
 
 module.exports = Device

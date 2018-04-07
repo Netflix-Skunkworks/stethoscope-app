@@ -12,12 +12,12 @@ const Security = {
           select value as automatic_updates from plist
           where path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'
          */
-        const { automatic_updates = false } = await OSQuery.first('plist', {
-          fields: ['value as automatic_updates'],
+        const { automaticUpdates = false } = await OSQuery.first('plist', {
+          fields: ['value as automaticUpdates'],
           where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'`
         })
 
-        return automatic_updates !== '0'
+        return automaticUpdates !== '0'
 
       case 'win32':
         /*
@@ -25,11 +25,11 @@ const Security = {
           where display_name = "Windows Update" and start_type != "DISABLED"
          */
         const services = await OSQuery.first('services', {
-          fields: ['1 as automatic_updates'],
+          fields: ['1 as automaticUpdates'],
           where: 'display_name = "Windows Update" and start_type != "DISABLED"'
         })
 
-        return services && services.automatic_updates === '1'
+        return services && services.automaticUpdates === '1'
 
       case 'linux':
       default:
@@ -55,7 +55,7 @@ const Security = {
           fields: ['data'],
           where: `path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections'`
         })
-        return winResult.data !== "1"
+        return winResult.data !== '1'
     }
 
     return false
@@ -105,7 +105,7 @@ const Security = {
     }
   },
 
-  async stethoscopeVersion(root, args, context) {
+  async stethoscopeVersion (root, args, context) {
     return semver.satisfies(pkg.version, args.stethoscopeVersion)
   },
 
@@ -119,15 +119,15 @@ const Security = {
             select value as screen_lock from preferences
             where domain = 'com.apple.screensaver' and key = 'askForPassword'
           */
-          const { screen_lock } = await OSQuery.first('preferences', {
-            fields: ['value as screen_lock'],
+          const { screenLock } = await OSQuery.first('preferences', {
+            fields: ['value as screenLock'],
             where: `domain = 'com.apple.screensaver' and key = 'askForPassword'`
           })
 
-          return screen_lock === '1'
+          return screenLock === '1'
         } else {
           // macOS High Sierra removed support screen lock querying
-          return args.screenLock === IF_SUPPORTED ? true : false
+          return args.screenLock === IF_SUPPORTED
         }
 
       case 'win32':
@@ -165,8 +165,8 @@ const Security = {
         /*
           select global_state as firewall_enabled from alf
          */
-        const { firewall_enabled = 0 } = await OSQuery.first('alf', { fields: ['global_state as firewall_enabled'] })
-        return parseInt(firewall_enabled, 10) > 0
+        const { firewallEnabled = 0 } = await OSQuery.first('alf', { fields: ['global_state as firewallEnabled'] })
+        return parseInt(firewallEnabled, 10) > 0
 
       case 'win32':
         /*
@@ -185,7 +185,6 @@ const Security = {
   async requiredApplications (root, args, context) {
     const applications = await Device.applications(root, args, context)
     const { version: osVersion } = await context.osVersion
-    const response = []
     const { requiredApplications = [] } = args
 
     return requiredApplications.filter((app) => {
@@ -205,7 +204,7 @@ const Security = {
       version,
       platform,
       // ignored for now
-      includePackages,
+      includePackages
     }) => {
       let userApp = false
 
@@ -229,7 +228,6 @@ const Security = {
   async bannedApplications (root, args, context) {
     const applications = await Device.applications(root, args, context)
     const { version: osVersion } = await context.osVersion
-    const response = []
     const { bannedApplications = [] } = args
 
     return bannedApplications.filter((app) => {
@@ -249,7 +247,7 @@ const Security = {
       version,
       platform,
       // ignored for now
-      includePackages,
+      includePackages
     }) => {
       let userApp = false
 
@@ -263,7 +261,7 @@ const Security = {
 
       return { name, passing: true }
     })
-  },
+  }
 }
 
 module.exports = Security

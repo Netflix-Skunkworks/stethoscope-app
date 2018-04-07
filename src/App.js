@@ -1,3 +1,4 @@
+/* global fetch, Notification */
 import React, { Component } from 'react'
 import Stethoscope from './lib/Stethoscope'
 import Device from './Device'
@@ -23,7 +24,7 @@ try {
   ipcRenderer = window.require('electron').ipcRenderer
 } catch (e) {
   // browser polyfill
-  ipcRenderer = { on() {}, send() {} }
+  ipcRenderer = { on () {}, send () {} }
 }
 
 class App extends Component {
@@ -43,10 +44,10 @@ class App extends Component {
     // progress object from updater process { percent, total, transferred }
     downloadProgress: null,
     // whether rescan button should be highlighted
-    highlightRescan: false,
+    highlightRescan: false
   }
 
-  componentWillMount() {
+  componentWillMount () {
     // perform the initial policy load & scan
     this.loadPractices()
     // this handler tells the main process (in start.js) to resize the window
@@ -63,7 +64,7 @@ class App extends Component {
 
       if (downloadProgress && downloadProgress.percent >= 99) {
         ipcRenderer.send('download:complete')
-        return this.setState({ downloadProgress: null }, () => downloadStartSent = false)
+        return this.setState({ downloadProgress: null }, () => { downloadStartSent = false })
       } else {
         this.setState({ downloadProgress })
       }
@@ -73,17 +74,17 @@ class App extends Component {
       ipcRenderer.send('download:complete')
       this.setState({
         downloadProgress: null,
-        error,
-      }, () => downloadStartSent = false)
+        error
+      }, () => { downloadStartSent = false })
     })
 
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({
-      focused: true,
+      focused: true
     }), false)
 
     window.addEventListener('blur', () => this.setState({
-      focused: false,
+      focused: false
     }), false)
 
     // the server emits this event when a remote scan begins
@@ -103,7 +104,7 @@ class App extends Component {
         return this.setState({ loading: false, scannedBy: 'Stethoscope' })
       }
 
-      const { data: { policy }} = Object(result)
+      const { data: { policy } } = Object(result)
 
       let newState = {
         result: policy.validate,
@@ -120,9 +121,12 @@ class App extends Component {
 
       this.setState(newState, () => {
         if (this.state.result.status !== 'PASS' && showNotification) {
-          new Notification('Security recommendation', {
+          let notification = new Notification('Security recommendation', {
             body: 'You can improve the security settings on this device. Click for more information.'
           })
+          notification.onerror = () => {
+            console.log('unable to show desktop notification')
+          }
         }
       })
     })
@@ -177,7 +181,7 @@ class App extends Component {
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })
 
-  render() {
+  render () {
     const {
       device, policy, result, downloadProgress,
       scannedBy, lastScanTime, error,
@@ -189,10 +193,10 @@ class App extends Component {
     // don't want to render entire app, partition device info, etc. if downloading an update
     if (downloadProgress !== null) {
       content = (
-        <div className="App">
-          <div id="downloadProgress">
+        <div className='App'>
+          <div id='downloadProgress'>
             <p>Downloading update ({prettyBytes(downloadProgress.transferred)} of {prettyBytes(downloadProgress.total)})</p>
-            <progress max="100" value={downloadProgress.percent}></progress>
+            <progress max='100' value={downloadProgress.percent} />
           </div>
         </div>
       )
@@ -225,22 +229,22 @@ class App extends Component {
             scannedBy={scannedBy}
             onExpandPolicyViolation={this.highlightRescanButton}
           />
-          <footer className="toolbar toolbar-footer">
-            <div className="buttonRow">
+          <footer className='toolbar toolbar-footer'>
+            <div className='buttonRow'>
               <button
-                className={classNames("btn btn-default", {
+                className={classNames('btn btn-default', {
                   'btn-primary': highlightRescan && result.status !== 'PASS'
                 })}
                 onClick={this.scan}>
-                <span className="icon icon-arrows-ccw"></span>rescan
+                <span className='icon icon-arrows-ccw' />rescan
               </button>
 
               <button
-                className="btn pull-right"
+                className='btn pull-right'
                 href='https://stethoscope.prod.netflix.net/'
                 onClick={this.openExternal}
               >
-                <span className="icon icon-monitor white"></span>view all devices
+                <span className='icon icon-monitor white' />view all devices
               </button>
             </div>
           </footer>

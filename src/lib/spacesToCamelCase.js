@@ -1,6 +1,6 @@
 const capitalize = require('./capitalize')
 
-module.exports = function spacesToCamelCase(initialPolicy) {
+module.exports = function spacesToCamelCase (initialPolicy) {
   return Object.keys(initialPolicy).reduce((p, key) => {
     let policyKey = key
     const keyWords = policyKey.toLowerCase().split(' ')

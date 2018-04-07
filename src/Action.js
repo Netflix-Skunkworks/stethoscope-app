@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
-import marked from 'marked'
+import showdown from 'showdown'
+
+const converter = new showdown.Converter()
 
 class Action extends Component {
   constructor (props) {
@@ -56,7 +58,7 @@ class Action extends Component {
 
     if (this.state.showDescription) {
       description = (
-        <div className="action-description">
+        <div className='action-description'>
           <div className='more-info'>
             <div className='description'>
               {action.description}
@@ -71,9 +73,9 @@ class Action extends Component {
           </div>
           { action.directions && (
             <div
-              className="instructions"
-              dangerouslySetInnerHTML={{__html: marked(action.directions)}}
-            ></div>
+              className='instructions'
+              dangerouslySetInnerHTML={{__html: converter.makeHtml(action.directions)}}
+            />
           )}
         </div>
       )

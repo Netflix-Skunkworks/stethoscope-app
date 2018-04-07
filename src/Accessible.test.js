@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* global expect */
+/* global expect, it */
 
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -19,7 +19,7 @@ it('crashes if multiple children are passed', (done) => {
         <div />
         <div />
       </Accessible>
-    , div)
+      , div)
   } catch (e) {
     return done()
   }

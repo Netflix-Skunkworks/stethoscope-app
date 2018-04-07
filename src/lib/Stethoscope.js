@@ -1,3 +1,4 @@
+/* global fetch */
 const { HOST } = require('../constants')
 
 const handleValidate = (result, partitions, device, practices, platform) => {
@@ -45,14 +46,14 @@ export default class Stethoscope {
     const partitions = {
       critical: [],
       suggested: [],
-      done: [],
+      done: []
     }
 
     return handleValidate(result, partitions, device, practices, platform)
   }
 
   // privately retry request until a response is given
-  static __repeatRequest(policy, resolve, reject) {
+  static __repeatRequest (policy, resolve, reject) {
     // TODO create and use fragments here
     const query = `query ValidateDevice($policy: DevicePolicy!) {
       policy {
@@ -64,6 +65,7 @@ export default class Stethoscope {
           screenLock
           automaticUpdates
           remoteLogin
+          stethoscopeVersion
           requiredApplications {
             name
             status
@@ -111,7 +113,7 @@ export default class Stethoscope {
     const options = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables: { policy }}),
+      body: JSON.stringify({ query, variables: { policy } })
     }
 
     fetch(`${HOST}/scan`, options)
@@ -140,7 +142,7 @@ export default class Stethoscope {
   }
 
   // public API
-  static validate(policy) {
+  static validate (policy) {
     return new Promise((resolve, reject) => {
       this.__repeatRequest(policy, resolve, reject)
     })
