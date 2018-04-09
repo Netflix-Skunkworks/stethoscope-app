@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 
 ----
 
+## [1.0.1](#) - 2018-04-09
+
+-----
+### Added
+- `nsp` dependency to check for vulnerabilities
+- standardjs formatting
+
+### Changed
+- updated dependencies
+
+### Fixed
+- Stopped including osqueryi binaries for all platforms in build
+
+
 ## [1.0.0](https://github.com/Netflix/stethoscope-app/tree/1.0.0) - 2018-04-05
 
 ----
