@@ -128,8 +128,8 @@
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
-    "electron": "^1.7.11",
-    "electron-builder": "^19.48.2",
+    "electron": "^1.8.4",
+    "electron-builder": "^20.8.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "foreman": "^2.0.0",
