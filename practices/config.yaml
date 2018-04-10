@@ -1,5 +1,5 @@
 allowHosts:
   - "stethoscope://main"
 allowRegex:
-  - "(meechum|stethoscope)\\.([^.]+\\.)?netflix\\.(com|net)$"
+  - "^https://(meechum|stethoscope)\\.((test|prod)\\.)?netflix\\.(com|net)$"
 policyServer:
