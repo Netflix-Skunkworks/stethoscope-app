@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ----
 
+## [1.0.2](#) - 2018-04-10
+
+-----
+
+### Changed
+- Updated `electron` and `electron-builder` dependencies to mitigate [CVE-2018-1000118](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1000118)
+
 ## [1.0.1](#) - 2018-04-09
 
 -----
