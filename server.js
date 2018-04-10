@@ -49,16 +49,20 @@ module.exports = function startServer (env, log, appActions) {
   const corsOptions = {
     origin (origin, callback) {
       if (env === 'development') {
+        console.log('dev true')
         return callback(null, true)
       }
 
       if (allowHosts.includes(origin)) {
+        console.log('allowed true')
         callback(null, true)
       } else if (allowRegex.length) {
         const isAllowed = allowRegex.some(pattern => {
           const reg = new RegExp(pattern)
+          console.log(pattern, origin, reg.test(origin))
           return reg.test(origin)
         })
+        console.log('regex', isAllowed)
         callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
       } else {
         callback(new Error(`Unauthorized request from ${origin}`), false)
@@ -69,6 +73,7 @@ module.exports = function startServer (env, log, appActions) {
 
   // policy, instructions and config data should only be served to app
   const policyRequestOptions = {
+
     origin (origin, callback) {
       const allowed = ['http://localhost', 'stethoscope://', 'http://127.0.0.1']
       if (origin && allowed.some(hostname => origin.startsWith(hostname))) {
