@@ -6,7 +6,7 @@ import './Device.css'
 
 const deviceMessages = {
   ok: <span>
-    <ActionIcon className="action-icon" width="35px" height="35px" name="checkmark" color="#bbd8ca" />
+    <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
     <span>This device is properly configured.</span>
   </span>,
   warning: <span>

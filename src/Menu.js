@@ -4,7 +4,8 @@ const url = require('url')
 const config = require('./config.json')
 const env = process.env.NODE_ENV || 'production'
 
-let changelog, about
+// let changelog
+let about
 
 module.exports = function (mainWindow) {
   const { checkForUpdates } = require('./updater')(env, mainWindow)
@@ -37,12 +38,12 @@ module.exports = function (mainWindow) {
             checkForUpdates(this, mainWindow, event)
           }
         },
-        /*{
+        /* {
           label: 'CHANGE LOG',
           click (event) {
             showChangelog()
           }
-        },*/
+        }, */
         {role: 'services', submenu: []},
         {type: 'separator'},
         {role: 'hide'},
@@ -58,12 +59,12 @@ module.exports = function (mainWindow) {
       click (event) {
         checkForUpdates(this, mainWindow, event)
       }
-    }, /*{
+    }, /* {
       label: 'CHANGE LOG',
       click (event) {
         showChangelog()
       }
-    },*/
+    }, */
     {
       label: 'About',
       click (event) {
@@ -91,6 +92,7 @@ module.exports = function (mainWindow) {
   Menu.setApplicationMenu(menu)
 }
 
+/*
 const showChangelog = () => {
   if (!changelog) {
     changelog = new BrowserWindow({ resizable: false, maximizable: false, fullscreenable: false })
@@ -105,7 +107,7 @@ const showChangelog = () => {
     })
   }
 }
-
+*/
 const showAbout = () => {
   if (!about) {
     about = new BrowserWindow({ width: 375, height: 285, resizable: false, titleBarStyle: 'hidden', maximizable: false, fullscreenable: false })
