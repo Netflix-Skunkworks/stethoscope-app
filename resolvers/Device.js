@@ -68,12 +68,12 @@ const Device = {
     switch (context.platform) {
       case 'darwin':
         const apps = await OSQuery.all('apps', {
-          fields: ['name', 'display_name', 'bundle_version as version', 'last_opened_time']
+          fields: ['name', 'display_name as displayName', 'bundle_version as version', 'last_opened_time as lastOpenedTime']
         })
         return apps
       case 'win32':
         const programs = await OSQuery.all('programs', {
-          fields: ['name', 'version', 'install_date']
+          fields: ['name', 'version', 'install_date as installDate']
         })
         return programs
       default:
@@ -92,14 +92,13 @@ const Device = {
 
   // can/should these be filtered down?
   async macAddresses (root, args, context) {
-    const addresses = await OSQuery.all('interface_details')
-    return addresses.filter(({ mac }) => {
-      return (
-        !NetworkInterface.isLocal(mac) &&
-     !NetworkInterface.isMulticast(mac) &&
-     !NetworkInterface.isPlaceholder(mac)
-      )
+    const addresses = await OSQuery.all('interface_details', {
+      fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
     })
+
+    const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
+
+    return addresses.filter(({ mac }) => !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac))
   },
 
   async osqueryVersion (root, args, context) {

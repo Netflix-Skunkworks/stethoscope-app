@@ -66,9 +66,10 @@ type SecurityInfo {
 
 type Application {
   name: String!
+  displayName: String
   version: String!
-  last_opened_time: String
-  install_date: String
+  lastOpenedTime: String
+  installDate: String
 }
 
 # A DevicePolicy is a description of the desired state of a set of pre-selected device features
@@ -153,7 +154,7 @@ type NetworkInterface {
   interface: String
   type: String
   mac: String
-  physical_adapter: Boolean
+  physicalAdapter: Boolean
   # the last time network interface was updated
   lastChange: String
 }
