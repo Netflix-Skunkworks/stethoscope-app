@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
 import showdown from 'showdown'
@@ -52,6 +53,49 @@ class Action extends Component {
     })
   }
 
+  parseDirections() {
+    const { action, security } = this.props
+    let { directions } = action
+    const piped = Object.keys(security).join('|')
+    const regex = new RegExp(`\\[-(${piped}):(${piped})\\]`, 'g')
+
+    let matches = directions.match(regex)
+
+    console.log(matches, regex)
+    let targetStatus = 'ON'
+
+    const reducer = (prev, [parentScope, key]) => {
+      let status = 'done'
+
+      if (security[key] !== targetStatus) {
+         status = 'suggested'
+      }
+
+      const iconString = ReactDOMServer.renderToStaticMarkup(
+        <ActionIcon
+          className='action-icon'
+          name={this.iconName(status)}
+          color={this.iconColor(status)}
+          title={this.hoverText(status)}
+          width='18px'
+          height='18px'
+        />
+      )
+
+      return prev.replace(`[-${parentScope}:${key}]`, iconString)
+    }
+
+    let count = 20 // upper limit of replacements
+
+    while (matches && count-- > 0) {
+      matches.map(m => m.substring(1).split(':'))
+      directions = matches.map(m => m.substring(1).split(':')).reduce(reducer, directions)
+      matches = directions.match(regex)
+    }
+
+    return converter.makeHtml(directions)
+  }
+
   render () {
     const { action, type, status } = this.props
     let description = null
@@ -74,7 +118,7 @@ class Action extends Component {
           { action.directions && (
             <div
               className='instructions'
-              dangerouslySetInnerHTML={{__html: converter.makeHtml(action.directions)}}
+              dangerouslySetInnerHTML={{__html: this.parseDirections()}}
             />
           )}
         </div>

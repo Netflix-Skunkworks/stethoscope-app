@@ -5,19 +5,81 @@ const pkg = require('../package.json')
 const { NUDGE, IF_SUPPORTED } = require('../src/constants')
 
 const Security = {
+  async automaticAppUpdates (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        const {automaticAppUpdates} = await OSQuery.first('plist', {
+          fields: ['value as automaticAppUpdates'],
+          where: `path = '/Library/Preferences/com.apple.commerce.plist' AND key = 'AutoUpdate'`
+        })
+
+        return automaticAppUpdates !== '0'
+      default:
+        break
+    }
+
+    return true
+  },
+
+  async automaticSecurityUpdates (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        const {automaticSecurityUpdates} = await OSQuery.first('plist', {
+          fields: ['value as automaticSecurityUpdates'],
+          where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'CriticalUpdateInstall'`
+        })
+
+        return automaticSecurityUpdates !== '0' || NUDGE
+      default:
+        break
+    }
+
+    return true
+  },
+
+  async automaticOsUpdates (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        const {osUpdates} = await OSQuery.first('plist', {
+          fields: ['value as osUpdates'],
+          where: `path = '/Library/Preferences/com.apple.commerce.plist' AND key = 'AutoUpdateRestartRequired'`
+        })
+
+        return osUpdates !== '0' || NUDGE
+      default:
+        break
+    }
+
+    return true
+  },
+
   async automaticUpdates (root, args, context) {
     switch (context.platform) {
       case 'darwin':
         /*
-          select value as automatic_updates from plist
+          select key, value from plist
           where path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'
          */
-        const { automaticUpdates = false } = await OSQuery.first('plist', {
+        const automaticUpdates = await OSQuery.all('plist', {
           fields: ['value as automaticUpdates'],
-          where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'`
+          where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'AutomaticCheckEnabled'`
         })
 
-        return automaticUpdates !== '0'
+        const appUpdates = await Security.automaticAppUpdates(root, args, context)
+        const osUpdates = await Security.automaticOsUpdates(root, args, context)
+        const securityUpdates = await Security.automaticSecurityUpdates(root, args, context)
+
+        if (automaticUpdates === '0') {
+          return false
+        }
+
+        const missingSuggested = [appUpdates, osUpdates, securityUpdates].some(setting => setting === NUDGE)
+
+        if (missingSuggested) {
+          return NUDGE
+        }
+
+        return true
 
       case 'win32':
         /*

@@ -80,7 +80,11 @@ practices:
         1. Choose System Preferences from the Apple menu.
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
-        1. Make sure "Install macOS updates" and "Install system data files and security updates" are checked.
+        1. Make sure the following are checked:
+            - [-automaticUpdates:automaticAppUpdates] "Install app updates"
+            - [-automaticUpdates:automaticOsUpdates] "Install macOS updates"
+            - [-automaticUpdates:automaticSecurityUpdates] "Install system data files and security updates"
+
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
         1. Scroll down to find "Windows Update" and double-click the name
@@ -112,7 +116,7 @@ practices:
       PASS: System is up-to-date
       FAIL: System needs to be updated
     description: >
-      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures.
+      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures. Recommended Version: RECOMMENDED_VERSION
     directions:
       darwin: |
         1. Open the [App Store](app://App%20Store) app.

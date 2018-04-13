@@ -35,28 +35,32 @@ class Device extends Component {
   actions (actions, type) {
     const status = type === 'done' ? 'PASS' : 'FAIL'
 
-    return actions.map((a) => {
-      if (a.results) {
+    return actions.map((action) => {
+      if (action.results) {
         return (
           <Action
-            key={a.title[status]}
+            key={action.title[status]}
             type={type}
             status={status}
-            action={a}
+            security={this.props.security}
+            action={action}
+            policy={this.props.policy[action.name]}
             onExpandPolicyViolation={this.props.onExpandPolicyViolation}
           >
-            <ul className='result-list'>{a.results.map(({ name }) => (
-              <li key={name}>{name}</li>
-            ))}</ul>
+            <ul className='result-list'>
+              {action.results.map(({ name }) => <li key={name}>{name}</li>)}
+            </ul>
           </Action>
         )
       } else {
         return (
           <Action
-            key={a.title[status]}
+            key={action.title[status]}
             status={status}
+            security={this.props.security}
             type={type}
-            action={a}
+            action={action}
+            policy={this.props.policy[action.name]}
             onExpandPolicyViolation={this.props.onExpandPolicyViolation}
           />
         )
@@ -87,9 +91,9 @@ class Device extends Component {
     let deviceInfo = null
 
     if (this.state.showInfo) {
-      const macAddresses = device.macAddresses.filter(({mac}) => mac !== '00:00:00:00:00:00').map(({mac}, i) => (
-        <li key={i}>{mac}</li>
-      ))
+      const macAddresses = device.macAddresses
+        .filter(({mac}) => mac !== '00:00:00:00:00:00')
+        .map(({mac}, i) => <li key={i}>{mac}</li>)
 
       deviceInfo = (
         <div className='deviceInfo'>

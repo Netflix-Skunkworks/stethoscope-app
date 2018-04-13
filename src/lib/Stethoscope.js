@@ -106,6 +106,9 @@ export default class Stethoscope {
           diskEncryption
           screenLock
           remoteLogin
+          automaticAppUpdates
+          automaticSecurityUpdates
+          automaticOsUpdates
         }
       }
     }`
