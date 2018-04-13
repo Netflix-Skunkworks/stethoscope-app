@@ -172,6 +172,7 @@ type NetworkInterface {
 type Disk {
   name: String
   uuid: String
+  label: String
   encrypted: Boolean
 }
 

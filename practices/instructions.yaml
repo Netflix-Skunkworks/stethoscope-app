@@ -64,13 +64,24 @@ practices:
         1. Click the [FileVault](x-apple.systempreferences:com.apple.preference.security?FDE) tab.
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
         1. Click "Turn On FileVault" to start the process.
+
+        {{#each disks}}
+          <li>
+            {{#if this.encrypted}}
+              {{{okIcon this.label}}}
+            {{else}}
+              {{{warnIcon this.label}}}
+            {{/if}}
+          </li>
+        {{/each}}
+
       win32: |
         1. Open [System Settings](ms-settings:)
         1. Click ["Encryption"](prefs://BitLocker)
         1. Verify that disk encryption is enabled
 
   automaticUpdates:
-    title:
+    title: #Automatic Updates {{#if_passing automaticUpdates}} are {{else}} should be {{/if_passing}} enabled
       PASS: Automatic Updates are enabled
       FAIL: Automatic Updates should be enabled
     description: >
@@ -81,9 +92,10 @@ practices:
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
         1. Make sure the following are checked:
-            - [-automaticUpdates:automaticAppUpdates] "Install app updates"
-            - [-automaticUpdates:automaticOsUpdates] "Install macOS updates"
-            - [-automaticUpdates:automaticSecurityUpdates] "Install system data files and security updates"
+
+        - {{{statusIcon 'automaticAppUpdates' 'Install app updates'}}}
+        - {{{statusIcon 'automaticOsUpdates' 'Install macOS updates'}}}
+        - {{{statusIcon 'automaticSecurityUpdates' 'Install system data files and security updates'}}}
 
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
@@ -116,12 +128,16 @@ practices:
       PASS: System is up-to-date
       FAIL: System needs to be updated
     description: >
-      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures. Recommended Version: RECOMMENDED_VERSION
+      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures.
     directions:
       darwin: |
         1. Open the [App Store](app://App%20Store) app.
         1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
         1. Install any outstanding updates.
+
+        {{{requirement 'osVersion' 'darwin'}}}
       win32: |
         1. Open [Windows Update](ms-settings:windowsupdate) in the Settings.
         1. Click "Restart now"
+
+        {{{requirement 'osVersion' 'win32'}}}

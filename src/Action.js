@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
+import semver from 'semver'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
 import showdown from 'showdown'
+import Handlebars from 'handlebars'
 
 const converter = new showdown.Converter()
 
@@ -13,6 +15,7 @@ class Action extends Component {
       showDescription: false
     }
     this.toggleDescription = this.toggleDescription.bind(this)
+    this.registerHelpers(props)
   }
 
   hoverText (type) {
@@ -53,47 +56,50 @@ class Action extends Component {
     })
   }
 
-  parseDirections() {
-    const { action, security } = this.props
-    let { directions } = action
-    const piped = Object.keys(security).join('|')
-    const regex = new RegExp(`\\[-(${piped}):(${piped})\\]`, 'g')
-
-    let matches = directions.match(regex)
-
-    console.log(matches, regex)
-    let targetStatus = 'ON'
-
-    const reducer = (prev, [parentScope, key]) => {
-      let status = 'done'
-
-      if (security[key] !== targetStatus) {
-         status = 'suggested'
-      }
-
-      const iconString = ReactDOMServer.renderToStaticMarkup(
-        <ActionIcon
-          className='action-icon'
-          name={this.iconName(status)}
-          color={this.iconColor(status)}
-          title={this.hoverText(status)}
-          width='18px'
-          height='18px'
-        />
+  registerHelpers = ({ security, policy, device }) => {
+    const getIcon = (status, msg) => {
+      return ReactDOMServer.renderToStaticMarkup(
+        <div className='subtask'>
+          <ActionIcon
+            className='action-icon'
+            name={this.iconName(status)}
+            color={this.iconColor(status)}
+            title={this.hoverText(status)}
+            width='18px'
+            height='18px'
+          />
+          <span style={{ color: this.iconColor(status)}}>{msg}</span>
+        </div>
       )
-
-      return prev.replace(`[-${parentScope}:${key}]`, iconString)
     }
 
-    let count = 20 // upper limit of replacements
+    Handlebars.registerHelper('statusIcon', (key, msg) => {
+      if (security[key] === 'ON') return
+      return getIcon('suggested', msg)
+    })
 
-    while (matches && count-- > 0) {
-      matches.map(m => m.substring(1).split(':'))
-      directions = matches.map(m => m.substring(1).split(':')).reduce(reducer, directions)
-      matches = directions.match(regex)
-    }
+    Handlebars.registerHelper('okIcon', label => {
+      return getIcon('done', label)
+    })
 
-    return converter.makeHtml(directions)
+    Handlebars.registerHelper('warnIcon', label => {
+      return getIcon('critical', label)
+    })
+
+    Handlebars.registerHelper('requirement', (key, platform) => {
+      const version = semver.coerce(policy[key][platform].ok)
+      return `<div>
+        Suggested version: <span class="suggested-value">${version}</span><br />
+        Your version: <span class="suggested-value">${device[key]}</span>
+      </div>`
+    })
+  }
+
+  parseDirections() {
+    const { security, device, action: { directions } } = this.props
+    const html = converter.makeHtml(directions)
+    const template = Handlebars.compile(html)
+    return template({ ...security, ...device })
   }
 
   render () {

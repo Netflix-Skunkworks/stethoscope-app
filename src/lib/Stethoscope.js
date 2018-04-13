@@ -88,6 +88,11 @@ export default class Stethoscope {
         hardwareSerial
         stethoscopeVersion
         osqueryVersion
+        disks {
+          label
+          name
+          encrypted
+        }
         ipAddresses {
           interface
           address
