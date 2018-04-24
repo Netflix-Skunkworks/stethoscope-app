@@ -66,8 +66,12 @@ type SecurityInfo {
   automaticAppUpdates: FeatureState
   # whether automatic security updates are enabled
   automaticSecurityUpdates: FeatureState
-  # whether OS Updates are automatically downloaded
+  # whether OS Updates are automatically downloaded (Mac only)
   automaticOsUpdates: FeatureState
+  # whether software updates are downloaded in background (Mac only)
+  automaticDownloadUpdates: FeatureState
+  # whether system config data is set to auto update
+  automaticConfigDataInstall: FeatureState
 }
 
 type Application {
@@ -96,6 +100,8 @@ input DevicePolicy {
   requiredApplications: [AppRequirement]
   # ban applications from being installed on user's machine
   bannedApplications: [AppRequirement]
+  # placeholder for suggested applications
+  suggestedApplications: [AppRequirement]
   # add extensions
   stethoscopeVersion: Semver
 }
@@ -112,6 +118,10 @@ input AppRequirement {
   exactMatch: Boolean
   # controls whether bin packages are checked (homebrew, chocolatey, etc)
   includePackages: Boolean
+  # install URL
+  url: String
+  # explanation to show user
+  description: String
 }
 
 type PolicyResult {
@@ -149,6 +159,8 @@ type Security {
   automaticOsUpdates(requirement: RequirementOption!): Boolean!
   automaticSecurityUpdates(requirement: RequirementOption!): Boolean!
   automaticAppUpdates(requirement: RequirementOption!): Boolean!
+  automaticDownloadUpdates(requirement: RequirementOption!): Boolean!
+  automaticConfigDataInstall(requirement: RequirementOption!): Boolean!
 }
 
 type IpAddress {

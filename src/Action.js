@@ -57,40 +57,37 @@ class Action extends Component {
     const { action, security } = this.props
     let { directions } = action
     const piped = Object.keys(security).join('|')
-    const regex = new RegExp(`\\[-(${piped}):(${piped})\\]`, 'g')
+    const regex = new RegExp(`\\[(${piped})\\]`, 'g')
 
     let matches = directions.match(regex)
-
-    console.log(matches, regex)
     let targetStatus = 'ON'
 
-    const reducer = (prev, [parentScope, key]) => {
-      let status = 'done'
+    if (matches) {
+      matches.forEach((k) => {
+        let key = k
+        let status = 'done'
+        let cleanKey = key.replace(/[^A-Za-z]+/g, '')
+        let iconString = ''
 
-      if (security[key] !== targetStatus) {
-         status = 'suggested'
-      }
+        if (security[cleanKey] !== targetStatus) {
+           status = 'suggested'
 
-      const iconString = ReactDOMServer.renderToStaticMarkup(
-        <ActionIcon
-          className='action-icon'
-          name={this.iconName(status)}
-          color={this.iconColor(status)}
-          title={this.hoverText(status)}
-          width='18px'
-          height='18px'
-        />
-      )
+           iconString = ReactDOMServer.renderToStaticMarkup(
+             <ActionIcon
+               className='action-icon'
+               name={this.iconName(status)}
+               color={this.iconColor(status)}
+               title={this.hoverText(status)}
+               width='18px'
+               height='18px'
+             />
+           )
+        } else {
+          key = new RegExp(`- \\[${cleanKey}\\] (.*)`, 'g')
+        }
 
-      return prev.replace(`[-${parentScope}:${key}]`, iconString)
-    }
-
-    let count = 20 // upper limit of replacements
-
-    while (matches && count-- > 0) {
-      matches.map(m => m.substring(1).split(':'))
-      directions = matches.map(m => m.substring(1).split(':')).reduce(reducer, directions)
-      matches = directions.match(regex)
+        directions = directions.replace(key, iconString)
+      })
     }
 
     return converter.makeHtml(directions)

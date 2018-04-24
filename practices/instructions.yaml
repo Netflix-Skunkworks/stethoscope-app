@@ -81,10 +81,11 @@ practices:
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
         1. Make sure the following are checked:
-            - [-automaticUpdates:automaticAppUpdates] "Install app updates"
-            - [-automaticUpdates:automaticOsUpdates] "Install macOS updates"
-            - [-automaticUpdates:automaticSecurityUpdates] "Install system data files and security updates"
-
+            - [automaticDownloadUpdates] Download newly available updates in the background
+            - [automaticAppUpdates] Install app updates
+            - [automaticOsUpdates] Install macOS updates
+            - [automaticSecurityUpdates] Install system data files and security updates
+            - [automaticConfigDataInstall] Install system data files and security updates
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
         1. Scroll down to find "Windows Update" and double-click the name

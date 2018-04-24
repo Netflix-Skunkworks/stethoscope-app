@@ -40,6 +40,16 @@ module.exports = {
     return securityToDeviceStatus(status)
   },
 
+  async automaticConfigDataInstall (root, args, context) {
+    const status = await Security.automaticConfigDataInstall(root, args, context)
+    return securityToDeviceStatus(status)
+  },
+
+  async automaticDownloadUpdates (root, args, context) {
+    const status = await Security.automaticDownloadUpdates(root, args, context)
+    return securityToDeviceStatus(status)
+  },
+
   async diskEncryption (root, args, context) {
     const status = await Security.diskEncryption(root, args, context)
     return securityToDeviceStatus(status)

@@ -21,6 +21,38 @@ const Security = {
     return true
   },
 
+  async automaticDownloadUpdates (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        const {automaticDownloadUpdates} = await OSQuery.first('plist', {
+          fields: ['value as automaticDownloadUpdates'],
+          where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'AutomaticDownload'`
+        })
+
+        return automaticDownloadUpdates !== '0'
+      default:
+        break
+    }
+
+    return true
+  },
+
+  async automaticConfigDataInstall (root, args, context) {
+    switch (context.platform) {
+      case 'darwin':
+        const {automaticConfigDataInstall} = await OSQuery.first('plist', {
+          fields: ['value as automaticConfigDataInstall'],
+          where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'ConfigDataInstall'`
+        })
+
+        return automaticConfigDataInstall !== '0'
+      default:
+        break
+    }
+
+    return true
+  },
+
   async automaticSecurityUpdates (root, args, context) {
     switch (context.platform) {
       case 'darwin':
@@ -60,20 +92,28 @@ const Security = {
           select key, value from plist
           where path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' and key = 'AutomaticCheckEnabled'
          */
-        const automaticUpdates = await OSQuery.all('plist', {
+        const {automaticUpdates} = await OSQuery.first('plist', {
           fields: ['value as automaticUpdates'],
           where: `path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'AutomaticCheckEnabled'`
         })
-
-        const appUpdates = await Security.automaticAppUpdates(root, args, context)
-        const osUpdates = await Security.automaticOsUpdates(root, args, context)
-        const securityUpdates = await Security.automaticSecurityUpdates(root, args, context)
 
         if (automaticUpdates === '0') {
           return false
         }
 
-        const missingSuggested = [appUpdates, osUpdates, securityUpdates].some(setting => setting === NUDGE)
+        const appUpdates = await Security.automaticAppUpdates(root, args, context)
+        const osUpdates = await Security.automaticOsUpdates(root, args, context)
+        const securityUpdates = await Security.automaticSecurityUpdates(root, args, context)
+        const automaticDownloadUpdates = await Security.automaticDownloadUpdates(root, args, context)
+        const automaticConfigDataInstall = await Security.automaticConfigDataInstall(root, args, context)
+
+        const missingSuggested = [
+          appUpdates,
+          osUpdates,
+          securityUpdates,
+          automaticDownloadUpdates,
+          automaticConfigDataInstall
+        ].some(setting => setting === NUDGE)
 
         if (missingSuggested) {
           return NUDGE
@@ -242,6 +282,49 @@ const Security = {
         // TODO
         return true
     }
+  },
+
+  async suggestedApplications (root, args, context) {
+    const applications = await Device.applications(root, args, context)
+    const { version: osVersion } = await context.osVersion
+    const { suggestedApplications = [] } = args
+
+    return suggestedApplications.filter((app) => {
+      const { platform = false } = app
+      // if a platform is required
+      if (platform) {
+        if (platform[context.platform]) {
+          return semver.satisfies(osVersion, platform[context.platform])
+        }
+        return platform.all
+      }
+      // no platform specified - default to ALL
+      return true
+    }).map(({
+      exactMatch = false,
+      name,
+      version,
+      platform,
+      // ignored for now
+      includePackages
+    }) => {
+      let userApp = false
+
+      if (!exactMatch) {
+        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
+      } else {
+        userApp = applications.find((app) => app.name === name)
+      }
+
+      // app isn't installed - fail
+      if (!userApp) return { name, passing: NUDGE, reason: 'NOT_INSTALLED' }
+      // app is out of date - fail
+      if (version && !semver.satisfies(userApp.version, version)) {
+        return { name, passing: NUDGE, reason: 'OUT_OF_DATE' }
+      }
+
+      return { name, passing: true }
+    })
   },
 
   async requiredApplications (root, args, context) {

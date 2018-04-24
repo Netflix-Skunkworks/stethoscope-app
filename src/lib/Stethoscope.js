@@ -109,6 +109,8 @@ export default class Stethoscope {
           automaticAppUpdates
           automaticSecurityUpdates
           automaticOsUpdates
+          automaticDownloadUpdates
+          automaticConfigDataInstall
         }
       }
     }`
