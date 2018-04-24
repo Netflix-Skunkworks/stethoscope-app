@@ -3,9 +3,9 @@ version: 1.0
 policyFormat: 1.0
 practices:
   firewall:
-    title:
-      PASS: Your Firewall is enabled
-      FAIL: Your Firewall should be enabled
+    title: Your Firewall {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
+#      PASS: Your Firewall is enabled
+#      FAIL: Your Firewall should be enabled
     description: >
       Firewalls control network traffic into and out of a system. Enabling the firewall on your device can prevent network-based attacks on your system, and is especially important if you make use of insecure wireless networks (such as at coffee shops and airports).
     directions:
@@ -23,21 +23,21 @@ practices:
         1. Click OK
 
   stethoscopeVersion:
-    title:
-      PASS: Stethoscope is up-to-date
-      FAIL: Stethoscope needs to be updated
+    title: Stethoscope {{#ifPassing}} is up-to-date {{else}} needs to be updated {{/ifPassing}}
+#      PASS: Stethoscope is up-to-date
+#      FAIL: Stethoscope needs to be updated
     description: >
       Keeping the Stethoscope app up-to-date gives you access to the latest features, security patches, and performance improvements.
     directions:
       darwin: |
         <a href='action://update' class="btn">Update Stethoscope</a>
       win32: |
-        <a href='link://https://drive.google.com/open?id=1b65mt-a4cPmYmINIzyc8CSMXKCvdoxaf' class="btn">Update Stethoscope</a>
+        <a href='action://update' class="btn">Update Stethoscope</a>
 
   remoteLogin:
-    title:
-      PASS: Remote Login is disabled
-      FAIL: Remote Login should be disabled
+    title: Remote Login {{#ifPassing}} is {{else}} should be {{/ifPassing}} disabled
+#      PASS: Remote Login is disabled
+#      FAIL: Remote Login should be disabled
     description: >
       The 'Remote Login' setting on your device controls whether users can login remotely to the system. If you don't know what this is or why you would want it, you should disable 'Remote Login'.
     directions:
@@ -52,9 +52,9 @@ practices:
         1. Click OK
 
   diskEncryption:
-    title:
-      PASS: Disk Encryption is enabled
-      FAIL: Disk Encryption should be enabled
+    title: Disk Encryption {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
+#    PASS: Disk Encryption is enabled
+#      FAIL: Disk Encryption should be enabled
     description: >
       Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing Netflix internal data should be encrypted. It is every employee's responsibility to keep Netflix internal data safe.
     directions:
@@ -81,9 +81,9 @@ practices:
         1. Verify that disk encryption is enabled
 
   automaticUpdates:
-    title: #Automatic Updates {{#if_passing automaticUpdates}} are {{else}} should be {{/if_passing}} enabled
-      PASS: Automatic Updates are enabled
-      FAIL: Automatic Updates should be enabled
+    title: Automatic Updates {{#ifPassing}} are {{else}} should be {{/ifPassing}} enabled
+#      PASS: Automatic Updates are enabled
+#      FAIL: Automatic Updates should be enabled
     description: >
       One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures. Enabling automatic updating helps ensure your machine is up-to-date without having to manually install updates.
     directions:
@@ -105,9 +105,9 @@ practices:
         1. Click "OK"
 
   screenLock:
-    title:
-      PASS: Screen Lock is enabled
-      FAIL: Screen Lock should be enabled
+    title: Screen Lock {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
+#      PASS: Screen Lock is enabled
+#      FAIL: Screen Lock should be enabled
     description: >
       Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode. Setting the timeout, i.e., the length of idle time before the screen saver takes effect, to 10 minutes or less is also recommended.
     directions:
@@ -124,9 +124,9 @@ practices:
         1. Click "OK"
 
   osVersion:
-    title:
-      PASS: System is up-to-date
-      FAIL: System needs to be updated
+    title: System {{#ifPassing}} is up-to-date {{else}} needs to be updated {{/ifPassing}}
+#      PASS: System is up-to-date
+#      FAIL: System needs to be updated
     description: >
       One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures.
     directions:

@@ -39,7 +39,7 @@ class Device extends Component {
       if (action.results) {
         return (
           <Action
-            key={action.title[status]}
+            key={action.title}
             type={type}
             status={status}
             device={device}
@@ -57,7 +57,7 @@ class Device extends Component {
       } else {
         return (
           <Action
-            key={action.title[status]}
+            key={action.title}
             status={status}
             security={this.props.security}
             device={device}

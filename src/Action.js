@@ -86,12 +86,30 @@ class Action extends Component {
       return getIcon('critical', label)
     })
 
+    Handlebars.registerHelper('ifPassing', options => {
+      const { action: { name, status }} = this.props
+      const trueFn = options.fn
+      const falseFn = options.inverse
+
+      if (status === 'PASS') {
+        return trueFn(options.context)
+      } else {
+        return falseFn(options.context).trim()
+      }
+    })
+
     Handlebars.registerHelper('requirement', (key, platform) => {
-      const version = semver.coerce(policy[key][platform].ok)
-      return `<div>
-        Suggested version: <span class="suggested-value">${version}</span><br />
-        Your version: <span class="suggested-value">${device[key]}</span>
-      </div>`
+      try {
+        const version = semver.coerce(policy[key][platform].ok)
+        return ReactDOMServer.renderToStaticMarkup(
+          <div>
+            Suggested version: <span class="suggested-value">${version}</span><br />
+            Your version: <span class="suggested-value">${device[key]}</span>
+          </div>
+        )
+      } catch (e) {
+        return ''
+      }
     })
   }
 
@@ -102,8 +120,15 @@ class Action extends Component {
     return template({ ...security, ...device })
   }
 
+  parseTitle() {
+    const { action: { status, title }} = this.props
+    const template = Handlebars.compile(title)
+    console.log(template(), { status })
+    return template()
+  }
+
   render () {
-    const { action, type, status } = this.props
+    const { action, type } = this.props
     let description = null
 
     if (this.state.showDescription) {
@@ -132,7 +157,7 @@ class Action extends Component {
     }
 
     return (
-      <li className={type} ref={el => { this.el = el }}>
+      <li className={type} key={action.title} ref={el => { this.el = el }}>
         <span className='title' onClick={this.toggleDescription}>
           <ActionIcon
             className='action-icon'
@@ -142,7 +167,7 @@ class Action extends Component {
             width='18px'
             height='18px'
           />
-          {action.title[status] || action.title}
+          {this.parseTitle()}
         </span>
         <Accessible label='Toggle action description' expanded={this.state.showDescription}>
           <a className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>
