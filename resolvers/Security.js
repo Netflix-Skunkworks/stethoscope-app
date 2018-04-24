@@ -2,7 +2,7 @@ const semver = require('semver')
 const Device = require('./Device')
 const OSQuery = require('../sources/osquery')
 const pkg = require('../package.json')
-const { NUDGE, IF_SUPPORTED } = require('../src/constants')
+const { NUDGE, IF_SUPPORTED, UNKNOWN } = require('../src/constants')
 
 const Security = {
   async automaticAppUpdates (root, args, context) {
@@ -229,7 +229,7 @@ const Security = {
           return screenLock === '1'
         } else {
           // macOS High Sierra removed support screen lock querying
-          return args.screenLock === IF_SUPPORTED
+          return UNKNOWN
         }
 
       case 'win32':

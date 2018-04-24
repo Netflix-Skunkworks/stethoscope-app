@@ -107,6 +107,13 @@ footer button {
   color: #aaa;
 }
 
+.subtask {
+  padding-left: 15px;
+}
+.suggested-value {
+  color: #737b73;
+}
+
 progress {
   -webkit-appearance: none;
   width: 100%;

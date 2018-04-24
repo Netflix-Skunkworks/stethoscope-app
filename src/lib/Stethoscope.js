@@ -66,16 +66,24 @@ export default class Stethoscope {
           automaticUpdates
           remoteLogin
           stethoscopeVersion
+
           requiredApplications {
             name
             status
           }
+
           bannedApplications {
+            name
+            status
+          }
+
+          suggestedApplications {
             name
             status
           }
         }
       }
+
       device {
         deviceId
         deviceName
@@ -88,18 +96,27 @@ export default class Stethoscope {
         hardwareSerial
         stethoscopeVersion
         osqueryVersion
+
+        disks {
+          label
+          name
+          encrypted
+        }
+
         ipAddresses {
           interface
           address
           mask
           broadcast
         }
+
         macAddresses {
           interface
           type
           mac
           lastChange
         }
+
         security {
           firewall
           automaticUpdates

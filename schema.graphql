@@ -46,7 +46,7 @@ type Device {
   osqueryVersion: String
   # available hard disks
   disks: [Disk]
-  security: SecurityInfo
+  security(policy:DevicePolicy): SecurityInfo
   policyResult: FeatureState
 }
 
@@ -141,6 +141,8 @@ type PolicyResult {
   requiredApplications: [ApplicationFeatureState]
   # whether or not any bannedApplications are installed
   bannedApplications: [ApplicationFeatureState]
+  # placeholder for suggested applications
+  suggestedApplications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
 }
@@ -154,6 +156,7 @@ type Security {
   remoteLogin(requirement: RequirementOption!): Boolean!
   requiredApplications(requirement: RequirementOption!): [Boolean!]!
   bannedApplications(requirement: RequirementOption!): [Boolean!]!
+  suggestedApplications(requirement: RequirementOption!): [Boolean!]!
   stethoscopeVersion(requirement: Semver!): Boolean!
   automaticUpdates(requirment: RequirementOption!): Boolean!
   automaticOsUpdates(requirement: RequirementOption!): Boolean!
@@ -184,6 +187,7 @@ type NetworkInterface {
 type Disk {
   name: String
   uuid: String
+  label: String
   encrypted: Boolean
 }
 
@@ -227,7 +231,6 @@ enum FeatureState {
   NUDGE
   ON
   OFF
-  UNSUPPORTED
   UNKNOWN
 }
 
