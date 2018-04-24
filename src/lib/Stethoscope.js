@@ -76,6 +76,7 @@ export default class Stethoscope {
           }
         }
       }
+
       device {
         deviceId
         deviceName
@@ -88,23 +89,27 @@ export default class Stethoscope {
         hardwareSerial
         stethoscopeVersion
         osqueryVersion
+
         disks {
           label
           name
           encrypted
         }
+
         ipAddresses {
           interface
           address
           mask
           broadcast
         }
+
         macAddresses {
           interface
           type
           mac
           lastChange
         }
+
         security {
           firewall
           automaticUpdates

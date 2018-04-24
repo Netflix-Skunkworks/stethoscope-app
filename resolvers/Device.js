@@ -2,6 +2,21 @@ const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const macFriendlyName = require('../sources/macmodels')
+const Security = require('./Security')
+const { ON, OFF, UNKNOWN, NUDGE } = require('../src/constants')
+
+const securityToDeviceStatus = status => {
+  if (typeof status === 'boolean') {
+    return status ? ON : OFF
+  }
+
+  if (status === NUDGE) {
+    return OFF
+  }
+
+  return UNKNOWN
+}
+
 
 const Device = {
   async deviceId (root, args, context) {
@@ -111,7 +126,48 @@ const Device = {
   },
 
   async security (root, args, context) {
-    return true
+
+    return {
+      async firewall () {
+        const status = await Security.firewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticUpdates () {
+        const status = await Security.automaticUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticSecurityUpdates () {
+        const status = await Security.automaticSecurityUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticOsUpdates () {
+        const status = await Security.automaticOsUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticAppUpdates () {
+        const status = await Security.automaticAppUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async diskEncryption () {
+        const status = await Security.diskEncryption(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async screenLock () {
+        const status = await Security.screenLock(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async remoteLogin (root, args, context) {
+        const status = await Security.remoteLogin(root, args, context)
+        return securityToDeviceStatus(status)
+      }
+    }
   },
 
   async disks (root, args, context) {

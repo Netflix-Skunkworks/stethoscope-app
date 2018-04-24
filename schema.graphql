@@ -46,7 +46,7 @@ type Device {
   osqueryVersion: String
   # available hard disks
   disks: [Disk]
-  security: SecurityInfo
+  security(policy:DevicePolicy): SecurityInfo
   policyResult: FeatureState
 }
 
@@ -216,7 +216,6 @@ enum FeatureState {
   NUDGE
   ON
   OFF
-  UNSUPPORTED
   UNKNOWN
 }
 

@@ -8,25 +8,23 @@ const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
 
-let mainWindow
-let tray
-let appStartTime = Date.now()
-let server
+let mainWindow,
+    tray,
+    appStartTime = Date.now(),
+    server,
+    updater
 
-const good = nativeImage.createFromPath(findIcon('scope-icon.png'))
-const bad = nativeImage.createFromPath(findIcon('scope-icon-nudge.png'))
-const ugly = nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 const statusImages = {
-  PASS: good,
-  NUDGE: bad,
-  FAIL: ugly
+  PASS: nativeImage.createFromPath(findIcon('scope-icon.png')),
+  NUDGE: nativeImage.createFromPath(findIcon('scope-icon-nudge.png')),
+  FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 }
 
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
 function createWindow () {
   // determine if app is already running
-  const shouldQuit = app.makeSingleInstance(function (commandLine, workingDirectory) {
+  const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
     if (mainWindow) {
       if (mainWindow.isMinimized()) {
@@ -130,7 +128,7 @@ app.on('ready', () => {
   createWindow()
   initProtocols(mainWindow)
 
-  const updater = require('./updater')(env, mainWindow)
+  updater = require('./updater')(env, mainWindow)
 
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
@@ -178,6 +176,9 @@ app.on('window-all-closed', () => {
 
 app.on('open-url', function (event, url) {
   event.preventDefault()
+  if (url.includes('update')) {
+    updater.checkForUpdates(env, mainWindow)
+  }
   if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
