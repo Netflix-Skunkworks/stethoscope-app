@@ -15,16 +15,19 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = 'darwin'
-let shell, ipcRenderer
+let shell, ipcRenderer, log, remote
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
   shell = window.require('electron').shell
+  remote = window.require('electron').remote
+  log = remote.getGlobal('log')
   platform = os.platform()
   ipcRenderer = window.require('electron').ipcRenderer
 } catch (e) {
   // browser polyfill
   ipcRenderer = { on () {}, send () {} }
+  log = console
 }
 
 class App extends Component {
@@ -72,6 +75,7 @@ class App extends Component {
 
     ipcRenderer.on('download:error', (event, error) => {
       ipcRenderer.send('download:complete')
+      log.error('Error downloading app update: ' + error)
       this.setState({
         downloadProgress: null,
         error
@@ -99,12 +103,23 @@ class App extends Component {
     })
 
     // setup a socket io listener to refresh the app when a scan is performed
-    socket.on('scan:complete', ({ noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
+    socket.on('scan:complete', ({ errors = [], noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
+      // device only scan with no policy completed
       if (noResults) {
         return this.setState({ loading: false, scannedBy: 'Stethoscope' })
       }
 
-      const { data: { policy } } = Object(result)
+      if (errors && errors.length) {
+        log.log({
+          level: 'error',
+          message: 'Error scanning',
+          policy: appPolicy,
+          variables,
+        })
+        return this.setState({ loading: false, errors: errors.map(({ message }) => message) })
+      }
+
+      const { data: { policy = {} }} = Object(result)
 
       let newState = {
         result: policy.validate,
@@ -139,8 +154,8 @@ class App extends Component {
   }
 
   handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    console.log('handling response error', new Error(err))
-    this.setState({ error: new Error(err) })
+    log.error(err)
+    this.setState({ error: err })
   }
 
   loadPractices = () => {
@@ -176,7 +191,9 @@ class App extends Component {
         scannedBy: 'Stethoscope',
         loading: false
       })
-    }).catch(this.handleResponseError)
+    }).catch(err => {
+      this.handleResponseError({ message: JSON.stringify(err.errors) })
+    })
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })
@@ -187,6 +204,8 @@ class App extends Component {
       scannedBy, lastScanTime, error,
       instructions, loading, highlightRescan
     } = this.state
+
+    const isDev = process.env.NODE_ENV === 'development'
 
     let content = null
 
@@ -204,7 +223,7 @@ class App extends Component {
 
     if (error) {
       content = (
-        <ErrorMessage message={error.message} />
+        <ErrorMessage showStack={isDev} message={error.message} stack={error.stack} />
       )
     }
 

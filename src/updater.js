@@ -87,7 +87,7 @@ module.exports = function (env, mainWindow) {
         updater = menuItem
         if (updater) updater.enabled = false
       }
-      autoUpdater.checkForUpdates().catch(() => {})
+      return autoUpdater.checkForUpdates()
     }
   }
 }

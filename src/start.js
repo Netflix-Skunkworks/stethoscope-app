@@ -1,18 +1,21 @@
 const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
-const log = require('electron-log')
+const log = require('winston')
 const initMenu = require('./Menu')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
+const moment = require('moment')
 
 let mainWindow,
     tray,
     appStartTime = Date.now(),
     server,
-    updater
+    updater,
+    launchIntoUpdater = false,
+    deeplinkingUrl
 
 const statusImages = {
   PASS: nativeImage.createFromPath(findIcon('scope-icon.png')),
@@ -20,9 +23,17 @@ const statusImages = {
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 }
 
+const logFolder = path.resolve(app.getPath("userData"));
+const logFile = moment().format('YYYY-MM-DD') + '.log';
+log.add(log.transports.File, { filename: path.join(logFolder, logFile) });
+
+global.log = log
+
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
 function createWindow () {
+  log.info('starting stethoscope')
+
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -30,6 +41,10 @@ function createWindow () {
       if (mainWindow.isMinimized()) {
         mainWindow.restore()
       }
+    }
+    if (process.platform == 'win32') {
+      // Keep only command line / deep linked arguments
+      deeplinkingUrl = commandLine.slice(1)
     }
   })
 
@@ -49,6 +64,11 @@ function createWindow () {
       webSecurity: false,
       sandbox: false
     }
+  }
+
+  if (process.platform == 'win32') {
+    // Keep only command line / deep linked arguments
+    deeplinkingUrl = process.argv.slice(1)
   }
 
   // only allow resize if debugging production build
@@ -141,6 +161,13 @@ app.on('ready', () => {
     callback(args)
   })
 
+  if (launchIntoUpdater || (deeplinkingUrl && deeplinkingUrl.includes('update'))) {
+    log.info('Launching into updater', launchIntoUpdater, deeplinkingUrl)
+    updater.checkForUpdates(env, mainWindow).catch(err => {
+      log.info('error', err)
+    })
+  }
+
   server = runLocalServer(env, log, {
     setScanStatus (status = 'PASS') {
       tray.setImage(statusImages[status])
@@ -176,14 +203,21 @@ app.on('window-all-closed', () => {
 
 app.on('open-url', function (event, url) {
   event.preventDefault()
+
   if (url.includes('update')) {
-    updater.checkForUpdates(env, mainWindow)
+    launchIntoUpdater = true
   }
+
   if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
     }
     mainWindow.focus()
+    if (launchIntoUpdater) {
+      updater.checkForUpdates(env, mainWindow).catch(err => {
+        log.info('error checking for update', err)
+      })
+    }
   }
 })
 

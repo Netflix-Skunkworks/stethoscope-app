@@ -166,6 +166,7 @@ module.exports = function startServer (env, log, appActions) {
       res.json(result)
     }).catch(err => {
       console.log(err)
+      log.error(err.message)
       io.sockets.emit('scan:error')
       res.status(500).json({ error: err })
     })

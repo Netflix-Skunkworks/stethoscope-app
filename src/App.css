@@ -55,15 +55,6 @@ tr.FAIL, td.OFF {
 .center {
   text-align: center;
 }
-/*
-.buttonRow button {
-  margin-left: 15px;
-  margin-bottom: 15px;
-  padding: 5px;
-  font-size: 12px;
-  background-color: #eee;
-  color: #aaa;
-}*/
 
 .buttonRow button:hover {
   color: #333;

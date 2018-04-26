@@ -115,6 +115,7 @@ export default class Stethoscope {
           type
           mac
           lastChange
+          physicalAdapter
         }
 
         security {
@@ -149,10 +150,14 @@ export default class Stethoscope {
             return res
         }
       })
-      .then(({ data }) => {
-        const result = data.policy.validate
-        const { device } = data
-        resolve({ result, device })
+      .then(({ errors, data = {} }) => {
+        const { policy, device } = data
+        if (errors) {
+          reject({ errors })
+        } else {
+          const { validate: result } = policy
+          resolve({ result, device })
+        }
       })
       .catch((err) => {
         if (err.message === 'retry') {
