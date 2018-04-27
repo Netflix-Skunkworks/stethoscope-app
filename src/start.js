@@ -1,10 +1,12 @@
 const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
-const log = require('winston')
+const winston = require('winston')
+require('winston-daily-rotate-file')
 const initMenu = require('./Menu')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
+const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
 const moment = require('moment')
@@ -23,10 +25,29 @@ const statusImages = {
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 }
 
-const logFolder = path.resolve(app.getPath("userData"));
-const logFile = moment().format('YYYY-MM-DD') + '.log';
-log.add(log.transports.File, { filename: path.join(logFolder, logFile) });
+const transport = new (winston.transports.DailyRotateFile)({
+  filename: 'application-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  dirname: path.resolve(app.getPath("userData")),
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '3d'
+})
 
+const consoleTransport = new winston.transports.Console()
+
+const log = new winston.Logger({
+  rewriters: [(level, msg, meta) => {
+    meta.version = pkg.version
+    return meta
+  }],
+  transports: [
+    transport,
+    consoleTransport
+  ]
+})
+
+// make the winston logger available to the renderer
 global.log = log
 
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
@@ -42,9 +63,15 @@ function createWindow () {
         mainWindow.restore()
       }
     }
+
     if (process.platform == 'win32') {
-      // Keep only command line / deep linked arguments
       deeplinkingUrl = commandLine.slice(1)
+    }
+
+    if (String(deeplinkingUrl).indexOf('update') > -1) {
+      updater.checkForUpdates(env, mainWindow).catch(err => {
+        log.error('error checking for update: ' + err)
+      })
     }
   })
 
@@ -67,7 +94,6 @@ function createWindow () {
   }
 
   if (process.platform == 'win32') {
-    // Keep only command line / deep linked arguments
     deeplinkingUrl = process.argv.slice(1)
   }
 
@@ -139,6 +165,17 @@ function createWindow () {
     mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
   })
 
+  ipcMain.on('app:loaded', () => {
+    if (String(deeplinkingUrl).indexOf('update') > -1) {
+      updater.checkForUpdates(env, mainWindow).then(err => {
+        deeplinkingUrl = ''
+      }).catch(err => {
+        deeplinkingUrl = ''
+        log.error(err)
+      })
+    }
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
@@ -161,10 +198,10 @@ app.on('ready', () => {
     callback(args)
   })
 
-  if (launchIntoUpdater || (deeplinkingUrl && deeplinkingUrl.includes('update'))) {
-    log.info('Launching into updater', launchIntoUpdater, deeplinkingUrl)
+  if (launchIntoUpdater) {
+    log.info('Launching into updater', launchIntoUpdater)
     updater.checkForUpdates(env, mainWindow).catch(err => {
-      log.info('error', err)
+      log.error(err)
     })
   }
 
@@ -213,9 +250,10 @@ app.on('open-url', function (event, url) {
       mainWindow.restore()
     }
     mainWindow.focus()
+
     if (launchIntoUpdater) {
       updater.checkForUpdates(env, mainWindow).catch(err => {
-        log.info('error checking for update', err)
+        log.error(err)
       })
     }
   }

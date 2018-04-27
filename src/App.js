@@ -135,6 +135,7 @@ class App extends Component {
       }
 
       this.setState(newState, () => {
+        ipcRenderer.send('app:loaded')
         if (this.state.result.status !== 'PASS' && showNotification) {
           let notification = new Notification('Security recommendation', {
             body: 'You can improve the security settings on this device. Click for more information.'
@@ -190,6 +191,8 @@ class App extends Component {
         lastScanTime,
         scannedBy: 'Stethoscope',
         loading: false
+      }, () => {
+        ipcRenderer.send('app:loaded')
       })
     }).catch(err => {
       this.handleResponseError({ message: JSON.stringify(err.errors) })
