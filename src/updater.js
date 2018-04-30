@@ -8,12 +8,16 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function (env, mainWindow) {
+module.exports = function (env, mainWindow, isFirstLaunch = false) {
   autoUpdater.autoDownload = false
+
   const isDev = env === 'development'
 
   const eventHandlers = {
     'error': error => {
+      // first launch, don't show network errors
+      if (isFirstLaunch) return
+
       let err = (isDev ? error.stack : error.message).toString()
       if (error.message.includes('ERR_CONNECTION_REFUSED')) {
         err = 'Update server unavailable'
@@ -47,10 +51,14 @@ module.exports = function (env, mainWindow) {
       })
     },
     'update-not-available': () => {
+      // no need to show the dialog on first launch
+      if (isFirstLaunch) return
+
       dialog.showMessageBox({
         title: 'No Updates',
         message: 'You already have the latest version.'
       })
+
       attemptingUpdate = false
       if (updater) updater.enabled = true
       updater = null
@@ -82,7 +90,9 @@ module.exports = function (env, mainWindow) {
 
   return {
     checkForUpdates (menuItem, focusedWindow, event) {
+      // don't allow multiple concurrent attempts
       attemptingUpdate = true
+
       if (menuItem) {
         updater = menuItem
         if (updater) updater.enabled = false

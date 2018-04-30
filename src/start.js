@@ -10,6 +10,7 @@ const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
 const moment = require('moment')
+const { AppUpdater } = require('electron-updater')
 
 let mainWindow,
     tray,
@@ -17,14 +18,17 @@ let mainWindow,
     server,
     updater,
     launchIntoUpdater = false,
-    deeplinkingUrl
+    deeplinkingUrl,
+    isFirstLaunch = true
 
+// icons that are displayed in the Menu bar
 const statusImages = {
   PASS: nativeImage.createFromPath(findIcon('scope-icon.png')),
   NUDGE: nativeImage.createFromPath(findIcon('scope-icon-nudge.png')),
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
 }
 
+// setup winston logging
 const transport = new (winston.transports.DailyRotateFile)({
   filename: 'application-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
@@ -33,9 +37,7 @@ const transport = new (winston.transports.DailyRotateFile)({
   maxSize: '20m',
   maxFiles: '3d'
 })
-
 const consoleTransport = new winston.transports.Console()
-
 const log = new winston.Logger({
   rewriters: [(level, msg, meta) => {
     meta.version = pkg.version
@@ -50,10 +52,17 @@ const log = new winston.Logger({
 // make the winston logger available to the renderer
 global.log = log
 
+// process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
 function createWindow () {
   log.info('starting stethoscope')
+
+  if (isFirstLaunch) {
+    const appUpdater = new AppUpdater()
+    appUpdater.checkForUpdatesAndNotify()
+    isFirstLaunch = false
+  }
 
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
@@ -70,7 +79,7 @@ function createWindow () {
 
     if (String(deeplinkingUrl).indexOf('update') > -1) {
       updater.checkForUpdates(env, mainWindow).catch(err => {
-        log.error('error checking for update: ' + err)
+        log.error(`error checking for update: ${err}`)
       })
     }
   })
@@ -199,20 +208,21 @@ app.on('ready', () => {
   })
 
   if (launchIntoUpdater) {
-    log.info('Launching into updater', launchIntoUpdater)
-    updater.checkForUpdates(env, mainWindow).catch(err => {
-      log.error(err)
-    })
+    log.info(`Launching into updater: ${launchIntoUpdater}`)
+    updater.checkForUpdates(env, mainWindow).catch(err => log.error(err))
   }
 
-  server = runLocalServer(env, log, {
+  const appHooksForServer = {
     setScanStatus (status = 'PASS') {
       tray.setImage(statusImages[status])
     },
     requestUpdate () {
       updater.checkForUpdates()
     }
-  })
+  }
+
+  // start GraphQL server
+  server = runLocalServer(env, log, appHooksForServer)
 
   server.on('error', (err) => {
     if (err.message.includes('EADDRINUSE')) {
