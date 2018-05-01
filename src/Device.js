@@ -130,13 +130,13 @@ class Device extends Component {
             </Accessible>
           </header>
 
+          {deviceInfo}
+
           <div className={`panel device-summary ${deviceClass}`}>
             {deviceMessages[deviceClass]}
           </div>
 
           <h4>{org} baseline policy</h4>
-
-          {deviceInfo}
 
           <div className='action-list'>
             <ul>
