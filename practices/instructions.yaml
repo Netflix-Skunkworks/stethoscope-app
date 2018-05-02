@@ -21,6 +21,9 @@ practices:
         1. Select Turn Windows Firewall on or off
         1. Ensure Turn Windows Firewall On is selected
         1. Click OK
+          - [privateFirewall] Private Firewall status
+          - [publicFirewall] Public Firewall status
+          - [domainFirewall] Domain Firewall status
 
   stethoscopeVersion:
     title:
@@ -66,8 +69,8 @@ practices:
         1. Click "Turn On FileVault" to start the process.
       win32: |
         1. Open [System Settings](ms-settings:)
-        1. Click ["Encryption"](prefs://BitLocker)
-        1. Verify that disk encryption is enabled
+        1. Click "[Encryption](prefs://BitLocker)"
+        1. Click "Turn on BitLocker"
 
   automaticUpdates:
     title:

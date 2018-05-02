@@ -1,5 +1,5 @@
 const { dialog } = require('electron')
-const { autoUpdater } = require('electron-updater')
+const electronUpdater = require('electron-updater')
 
 let updater
 let attemptingUpdate = false
@@ -9,6 +9,7 @@ const eventRegistration = {}
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
 module.exports = function (env, mainWindow, isFirstLaunch = false) {
+  const { autoUpdater } = electronUpdater
   autoUpdater.autoDownload = false
 
   const isDev = env === 'development'

@@ -72,6 +72,12 @@ type SecurityInfo {
   automaticDownloadUpdates: FeatureState
   # whether system config data is set to auto update
   automaticConfigDataInstall: FeatureState
+  # Windows
+  publicFirewall: FeatureState
+  # Windows
+  privateFirewall: FeatureState
+  # Windows
+  domainFirewall: FeatureState
 }
 
 type Application {
@@ -164,6 +170,9 @@ type Security {
   automaticAppUpdates(requirement: RequirementOption!): Boolean!
   automaticDownloadUpdates(requirement: RequirementOption!): Boolean!
   automaticConfigDataInstall(requirement: RequirementOption!): Boolean!
+  publicFirewall(requirement: RequirementOption!): Boolean!
+  privateFirewall(requirement: RequirementOption!): Boolean!
+  domainFirewall(requirement: RequirementOption!): Boolean!
 }
 
 type IpAddress {

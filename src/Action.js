@@ -53,7 +53,7 @@ class Action extends Component {
     })
   }
 
-  parseDirections() {
+  parseDirections () {
     const { action, security } = this.props
     let { directions } = action
     const piped = Object.keys(security).join('|')
@@ -70,18 +70,18 @@ class Action extends Component {
         let iconString = ''
 
         if (security[cleanKey] !== targetStatus) {
-           status = 'suggested'
+          status = 'suggested'
 
-           iconString = ReactDOMServer.renderToStaticMarkup(
-             <ActionIcon
-               className='action-icon'
-               name={this.iconName(status)}
-               color={this.iconColor(status)}
-               title={this.hoverText(status)}
-               width='18px'
-               height='18px'
-             />
-           )
+          iconString = ReactDOMServer.renderToStaticMarkup(
+            <ActionIcon
+              className='action-icon'
+              name={this.iconName(status)}
+              color={this.iconColor(status)}
+              title={this.hoverText(status)}
+              width='18px'
+              height='18px'
+            />
+          )
         } else {
           key = new RegExp(`- \\[${cleanKey}\\] (.*)`, 'g')
         }

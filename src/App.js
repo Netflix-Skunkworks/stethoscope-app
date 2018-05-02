@@ -114,12 +114,12 @@ class App extends Component {
           level: 'error',
           message: 'Error scanning',
           policy: appPolicy,
-          variables,
+          variables
         })
         return this.setState({ loading: false, errors: errors.map(({ message }) => message) })
       }
 
-      const { data: { policy = {} }} = Object(result)
+      const { data: { policy = {} } } = Object(result)
 
       let newState = {
         result: policy.validate,

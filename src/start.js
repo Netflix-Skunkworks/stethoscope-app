@@ -9,17 +9,15 @@ const env = process.env.NODE_ENV || 'production'
 const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const runLocalServer = require('../server')
-const moment = require('moment')
-const { AppUpdater } = require('electron-updater')
 
-let mainWindow,
-    tray,
-    appStartTime = Date.now(),
-    server,
-    updater,
-    launchIntoUpdater = false,
-    deeplinkingUrl,
-    isFirstLaunch = true
+let mainWindow
+let tray
+let appStartTime = Date.now()
+let server
+let updater
+let launchIntoUpdater = false
+let deeplinkingUrl
+let isFirstLaunch = true
 
 // icons that are displayed in the Menu bar
 const statusImages = {
@@ -32,7 +30,7 @@ const statusImages = {
 const transport = new (winston.transports.DailyRotateFile)({
   filename: 'application-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
-  dirname: path.resolve(app.getPath("userData")),
+  dirname: path.resolve(app.getPath('userData')),
   zippedArchive: true,
   maxSize: '20m',
   maxFiles: '3d'
@@ -59,6 +57,7 @@ function createWindow () {
   log.info('starting stethoscope')
 
   if (isFirstLaunch) {
+    const { AppUpdater } = require('electron-updater')
     const appUpdater = new AppUpdater()
     appUpdater.checkForUpdatesAndNotify()
     isFirstLaunch = false
@@ -73,7 +72,7 @@ function createWindow () {
       }
     }
 
-    if (process.platform == 'win32') {
+    if (process.platform === 'win32') {
       deeplinkingUrl = commandLine.slice(1)
     }
 
@@ -102,7 +101,7 @@ function createWindow () {
     }
   }
 
-  if (process.platform == 'win32') {
+  if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
   }
 
@@ -177,6 +176,7 @@ function createWindow () {
   ipcMain.on('app:loaded', () => {
     if (String(deeplinkingUrl).indexOf('update') > -1) {
       updater.checkForUpdates(env, mainWindow).then(err => {
+        if (err) { log.error(err) }
         deeplinkingUrl = ''
       }).catch(err => {
         deeplinkingUrl = ''

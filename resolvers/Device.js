@@ -1,9 +1,9 @@
 const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
-const macFriendlyName = require('../sources/macmodels')
 const Security = require('./Security')
-const { ON, OFF, UNKNOWN, NUDGE } = require('../src/constants')
+const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE } = require('../src/constants')
+const { Device: PlatformResolvers } = require('./platform')
 
 const securityToDeviceStatus = status => {
   if (typeof status === 'boolean') {
@@ -16,7 +16,6 @@ const securityToDeviceStatus = status => {
 
   return UNKNOWN
 }
-
 
 const Device = {
   async deviceId (root, args, context) {
@@ -60,13 +59,12 @@ const Device = {
   },
 
   async friendlyName (root, args, context) {
-    const { hardware_model: hardwareModel } = await context.systemInfo
-
-    switch (context.platform) {
-      case 'darwin':
-        return macFriendlyName(hardwareModel)
+    const os = PlatformResolvers[context.platform]
+    if ('friendlyName' in os) {
+      return os.friendlyName(root, args, context)
     }
-    return hardwareModel
+
+    return UNSUPPORTED
   },
 
   async hardwareModel (root, args, context) {
@@ -80,24 +78,16 @@ const Device = {
   },
 
   async applications (root, args, context) {
-    switch (context.platform) {
-      case 'darwin':
-        const apps = await OSQuery.all('apps', {
-          fields: ['name', 'display_name as displayName', 'bundle_version as version', 'last_opened_time as lastOpenedTime']
-        })
-        return apps
-      case 'win32':
-        const programs = await OSQuery.all('programs', {
-          fields: ['name', 'version', 'install_date as installDate']
-        })
-        return programs
-      default:
-        return []
+    const os = PlatformResolvers[context.platform]
+    if ('applications' in os) {
+      return os.applications(root, args, context)
     }
+
+    return UNSUPPORTED
   },
 
   policyResult (root, args, context) {
-    return 'UNKNOWN'
+    return UNKNOWN
   },
 
   // can/should these be filtered down?
@@ -126,7 +116,6 @@ const Device = {
   },
 
   async security (root, args, context) {
-
     return {
       async firewall () {
         const status = await Security.firewall(root, args, context)
@@ -148,12 +137,12 @@ const Device = {
         return securityToDeviceStatus(status)
       },
 
-      async automaticConfigDataInstall (root, args, context) {
+      async automaticConfigDataInstall () {
         const status = await Security.automaticConfigDataInstall(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      async automaticDownloadUpdates (root, args, context) {
+      async automaticDownloadUpdates () {
         const status = await Security.automaticDownloadUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
@@ -173,20 +162,35 @@ const Device = {
         return securityToDeviceStatus(status)
       },
 
-      async remoteLogin (root, args, context) {
+      async remoteLogin () {
         const status = await Security.remoteLogin(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async publicFirewall () {
+        const status = await Security.publicFirewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async privateFirewall () {
+        const status = await Security.privateFirewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async domainFirewall () {
+        const status = await Security.domainFirewall(root, args, context)
         return securityToDeviceStatus(status)
       }
     }
   },
 
   async disks (root, args, context) {
-    const userPartitions = await OSQuery.all('mounts m join disk_encryption de ON m.device_alias = de.name join block_devices bd ON bd.name = de.name', {
-      where: "m.path = '/'",
-      // where: 'bd.type != "Virtual Interface"', // this will exclude DMGs
-      fields: ['label', 'de.name as name', 'de.uuid as uuid', 'encrypted']
-    })
-    return userPartitions
+    const os = PlatformResolvers[context.platform]
+    if ('disks' in os) {
+      return os.disks(root, args, context)
+    }
+
+    return UNSUPPORTED
   }
 }
 

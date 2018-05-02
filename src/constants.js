@@ -12,6 +12,7 @@ const IF_SUPPORTED = 'IF_SUPPORTED'
 const ON = 'ON'
 const OFF = 'OFF'
 const UNKNOWN = 'UNKNOWN'
+const UNSUPPORTED = 'UNSUPPORTED'
 
 const PORT = 37370
 const HOST = `http://localhost:${PORT}`
@@ -30,6 +31,7 @@ module.exports = {
   ON,
   OFF,
   UNKNOWN,
+  UNSUPPORTED,
 
   PORT,
   HOST

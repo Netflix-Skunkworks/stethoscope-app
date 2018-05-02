@@ -20,6 +20,8 @@ const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
 
+require('./src/lib/softwareUpdate')(os.platform())
+
 // used to ensure that user is not shown multiple notifications for a login scan
 // sessionId is used as a key
 const alertCache = new Map()
@@ -106,7 +108,7 @@ module.exports = function startServer (env, log, appActions) {
     OSQuery.flushCache()
 
     const context = {
-      platform: os.platform(),
+      platform: os.platform() || process.platform,
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
       osVersion: OSQuery.first('os_version')
