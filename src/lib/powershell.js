@@ -50,7 +50,7 @@ const getScreenLockActive = async () => {
 
 const getDisableLockWorkStation = async () => {
   const commands = [
-    '$name = "DisableLockWorkStation"'
+    '$name = "DisableLockWorkStation"',
     '$key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"',
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
