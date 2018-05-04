@@ -36,6 +36,36 @@ const firewallStatus = async () => {
   return output
 }
 
+const getScreenLockActive = async () => {
+  const ps = new Shell(options)
+  const commands = [
+    `$key = 'HKCU:\\Control Panel\\Desktop'`,
+    `$name = 'ScreenSaveActive'`,
+    '(Get-ItemProperty -Path $key -Name $name).$name'
+  ]
+  ps.addCommand(commands.join(';'))
+  const output = await ps.invoke()
+  return output.includes('1')
+}
+
+const getDisableLockWorkStation = async () => {
+  const commands = [
+    '$name = "DisableLockWorkStation"'
+    '$key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"',
+    '(Get-ItemProperty -Path $key -Name $name).$name'
+  ]
+
+  const ps = new Shell(options)
+  ps.addCommand(commands.join('; '))
+
+  try {
+    const output = await ps.invoke()
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 const disks = async (disks = []) => {
   const status = await Promise.all(
     disks.map(async ({ label }) => {
@@ -55,4 +85,12 @@ const disks = async (disks = []) => {
   return status
 }
 
-module.exports = { run, openPreferences, getUserId, disks, firewallStatus }
+module.exports = {
+  run,
+  openPreferences,
+  getScreenLockActive,
+  getUserId,
+  disks,
+  firewallStatus,
+  getDisableLockWorkStation
+}

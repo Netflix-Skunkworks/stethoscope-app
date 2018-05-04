@@ -49,11 +49,17 @@ const WindowsSecurity = {
     where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
    */
   async screenLock (root, args, context) {
-    const response = await OSQuery.first('registry', {
-      fields: ['name', 'data'],
+    const { autoAdminLogin } = await OSQuery.first('registry', {
+      fields: ['name', 'data as autoAdminLogin'],
       where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
     })
-    return response.data !== '1'
+    const screenLockIsActive = await powershell.getScreenLockActive()
+    const workstationLockIsDisabled = await powershell.getDisableLockWorkStation()
+    return (
+      workstationLockIsDisabled === false &&
+      screenLockIsActive === true &&
+      autoAdminLogin !== '1'
+    )
   },
 
   async publicFirewall (root, args, context) {
@@ -78,9 +84,9 @@ const WindowsSecurity = {
   // const result = await OSQuery.first('registry', { fields: ['name', 'data'], where: `key like 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile' and name = 'EnableFirewall'` })
   // return result && result.data === '1'
   async firewall (root, args, context) {
-    const publicFirewall = WindowsSecurity.publicFirewall()
-    const privateFirewall = WindowsSecurity.privateFirewall()
-    const domainFirewall = WindowsSecurity.domainFirewall()
+    const publicFirewall = await WindowsSecurity.publicFirewall()
+    const privateFirewall = await WindowsSecurity.privateFirewall()
+    const domainFirewall = await WindowsSecurity.domainFirewall()
 
     // all must be ON for the overall Firewall test to pass
     return [

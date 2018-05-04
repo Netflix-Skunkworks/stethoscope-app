@@ -190,7 +190,9 @@ function createWindow () {
   })
 }
 
-app.on('ready', () => {
+// wrap ready callback in 0-delay setTimeout to reduce serious jank
+// issues on Windows
+app.on('ready', () => setTimeout(() => {
   createWindow()
   initProtocols(mainWindow)
 
@@ -232,7 +234,7 @@ app.on('ready', () => {
       app.quit()
     }
   })
-})
+}, 0))
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()

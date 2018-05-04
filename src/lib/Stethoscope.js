@@ -120,6 +120,9 @@ export default class Stethoscope {
 
         security {
           firewall
+          publicFirewall
+          privateFirewall
+          domainFirewall
           automaticUpdates
           diskEncryption
           screenLock

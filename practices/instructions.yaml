@@ -17,9 +17,9 @@ practices:
         1. Click "Turn On Firewall" or "Start" to enable the firewall.
         1. Click Advanced to customize the firewall configuration.
       win32: |
-        1. Open [Windows Firewall](prefs://Firewall)
-        1. Select Turn Windows Firewall on or off
-        1. Ensure Turn Windows Firewall On is selected
+        1. Open [Windows Firewall Settings](ps://wf.msc)
+        1. Click "Windows Defender Firewall Properties" in the center pane
+        1. Ensure "Firewall state" is set to "On (recommended)" on the Domain, Public, and Private Profile tabs
         1. Click OK
           - [privateFirewall] Private Firewall status
           - [publicFirewall] Public Firewall status
