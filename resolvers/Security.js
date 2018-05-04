@@ -1,7 +1,7 @@
 const semver = require('semver')
 const pkg = require('../package.json')
 const { NUDGE, UNSUPPORTED } = require('../src/constants')
-const { Security: PlatformResolvers } = require('./platform')
+const { Security: PlatformResolvers } = require('./platform/')
 
 const Security = {
   async automaticAppUpdates (root, args, context) {
