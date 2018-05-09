@@ -111,7 +111,7 @@ input DevicePolicy {
   # add extensions
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
-  maxScreenLockTimeout: Int
+  windowsMaxScreenLockTimeout: Int
 }
 
 # Defines a requirement for an installed application

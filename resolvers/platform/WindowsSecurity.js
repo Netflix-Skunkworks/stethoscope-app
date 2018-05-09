@@ -54,7 +54,7 @@ const WindowsSecurity = {
       where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
     })
 
-    const { maxScreenLockTimeout = 600 } = args
+    const { windowsMaxScreenLockTimeout = 600 } = args
 
     const screenLockIsActive = await powershell.getScreenLockActive()
     const workstationLockIsDisabled = await powershell.getDisableLockWorkStation()
@@ -64,8 +64,8 @@ const WindowsSecurity = {
       workstationLockIsDisabled === false &&
       screenLockIsActive === true &&
       autoAdminLogin !== '1' &&
-      pluggedIn <= maxScreenLockTimeout &&
-      battery <= maxScreenLockTimeout
+      pluggedIn <= windowsMaxScreenLockTimeout &&
+      battery <= windowsMaxScreenLockTimeout
     )
   },
 

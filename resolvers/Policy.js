@@ -12,6 +12,9 @@ const Policy = {
     for (const verification in policy) {
       // get policy requirement for current property
       const requirement = policy[verification]
+
+      if (!Security[verification]) continue;
+
       // determine device state
       const passing = await Security[verification](root, policy, context)
 

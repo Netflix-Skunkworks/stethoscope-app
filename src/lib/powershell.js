@@ -1,36 +1,44 @@
 const { UNSUPPORTED } = require('../constants')
-let Shell
-let ps
+const Shell = require('node-powershell')
+const Cache = require('./Cache')
 
-if (process.platform === 'win32') {
-  Shell = require('node-powershell')
-  ps = new Shell({
-    debugMsg: false
-  })
+const cache = new Cache()
+const shellOptions = {
+  debugMsg: false
 }
 
 const openPreferences = pane => {
   const cmd = `Get-ControlPanelItem *${pane.replace(/[^\w]/g, '')}* | Show-ControlPanelItem`
-  ps._cmds = []
+  const ps = new Shell(shellOptions)
   ps.addCommand(cmd)
   return ps.invoke()
 }
 
 const run = cmd => {
-  ps._cmds = []
+  const ps = new Shell(shellOptions)
   ps.addCommand(cmd)
   return ps.invoke()
 }
 
 const getUserId = async () => {
-  ps._cmds = []
+  if (cache.has('getUserId')) {
+    return cache.get('getUserId')
+  }
+
+  const ps = new Shell(shellOptions)
   ps.addCommand('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
   const output = await ps.invoke()
+  // cache for an hour
+  cache.set('getUserId', 1000 * 60 * 60)
   return output.split(/[\r\n]+/).pop()
 }
 
 const firewallStatus = async () => {
-  ps._cmds = []
+  if (cache.get('firewallStatus')) {
+    return cache.get('firewallStatus')
+  }
+
+  const ps = new Shell(shellOptions)
   ps.addCommand('netsh advfirewall show allprofiles')
   const output = await ps.invoke().then((output) => {
     const firewalls = ['domainFirewall', 'privateFirewall', 'publicFirewall']
@@ -39,11 +47,17 @@ const firewallStatus = async () => {
       return p
     }, {})
   })
+  // cache for 10 seconds
+  cache.set('firewallStatus', output, 1000 * 10)
   return output
 }
 
 const getScreenLockActive = async () => {
-  ps._cmds = []
+  if (cache.get('getScreenLockActive')) {
+    return cache.get('getScreenLockActive')
+  }
+
+  const ps = new Shell(shellOptions)
   const commands = [
     `$key = 'HKCU:\\Control Panel\\Desktop'`,
     `$name = 'ScreenSaveActive'`,
@@ -51,6 +65,8 @@ const getScreenLockActive = async () => {
   ]
   ps.addCommand(commands.join(';'))
   const output = await ps.invoke()
+  // cache for 10 seconds
+  cache.set('getScreenLockActive', output.includes('1'), 1000 * 10)
   return output.includes('1')
 }
 
@@ -61,19 +77,28 @@ const getScreenLockActive = async () => {
 // the subkeys (DISPLAY > SCREEN SLEEP) under that. The output is incredibly
 // verbose, hence all of the string parsing.
 const getScreenLockTimeout = async () => {
-  ps._cmds = []
+  if (cache.get('getScreenLockTimeout')) {
+    return cache.get('getScreenLockTimeout')
+  }
+
+  const ps = new Shell(shellOptions)
   // determine the GUID of the user's active power scheme
   ps.addCommand('powercfg /getactivescheme')
   const output = await ps.invoke()
   const match = output.match(/:\s([\w-]+)/)
   let activePowerGUID = null
 
+  let response = {
+    pluggedIn: Infinity,
+    battery: Infinity
+  }
+
   if (match && match.length) {
     activePowerGUID = match[1]
   }
 
   if (activePowerGUID) {
-    ps._cmds = []
+    const ps = new Shell(shellOptions)
     // ewwwwww
     const displayGUID = '7516b95f-f776-4464-8c53-06167f40cc99'
     const screenSleepGUID = '3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e'
@@ -89,41 +114,49 @@ const getScreenLockTimeout = async () => {
         }, {})
 
     // values come back as hex, convert to int Seconds
-    return {
+    response = {
       pluggedIn: parseInt(data['Current AC Power Setting Index'], 16),
       battery: parseInt(data['Current DC Power Setting Index'], 16),
     }
   }
 
-  // something went wrong, assume they have no timeout set
-  return {
-    pluggedIn: Infinity,
-    battery: Infinity
-  }
+  // cache for 10 seconds
+  cache.set('getScreenLockTimeout', response, 1000 * 10)
+  return response
 }
 
 const getDisableLockWorkStation = async () => {
+  if (cache.get('getDisableLockWorkStation')) {
+    return cache.get('getDisableLockWorkStation')
+  }
+
   const commands = [
     '$name = "DisableLockWorkStation"',
     '$key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"',
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
 
-  ps._cmds = []
+  const ps = new Shell(shellOptions)
   ps.addCommand(commands.join('; '))
 
   try {
     const output = await ps.invoke()
+    cache.set('getDisableLockWorkStation', true, 1000 * 10)
     return true
   } catch (e) {
+    cache.set('getDisableLockWorkStation', false, 1000 * 10)
     return false
   }
 }
 
 const disks = async (disks = []) => {
+  if (cache.get('disks')) {
+    return cache.get('disks')
+  }
+
   const status = await Promise.all(
     disks.map(async ({ label }) => {
-      ps._cmds = []
+      const ps = new Shell(shellOptions)
       let encrypted
 
       try {
@@ -149,6 +182,10 @@ const disks = async (disks = []) => {
       }
     })
   )
+
+  // cache for 10 minutes
+  cache.set('disks', status, 1000 * 60 * 10)
+
   return status
 }
 

@@ -36,6 +36,7 @@ class App extends Component {
     policy: {},
     result: {},
     instructions: {},
+    scanIsRunning: false,
     loading: false,
     // determines loading screen language
     remoteScan: false,
@@ -166,7 +167,11 @@ class App extends Component {
         fetch(`${HOST}/policy`).then(d => d.json()).catch(this.handleResponseError),
         fetch(`${HOST}/instructions`).then(d => d.json()).catch(this.handleResponseError)
       ]).then(([config, policy, instructions]) => {
-        this.setState({ config, policy, instructions }, () => this.scan())
+        this.setState({ config, policy, instructions }, () => {
+          if (!this.state.scanIsRunning) {
+            this.scan()
+          }
+        })
       }).catch(this.handleResponseError)
     })
   }
@@ -183,19 +188,22 @@ class App extends Component {
   }
 
   scan = () => {
-    Stethoscope.validate(this.state.policy).then(({ device, result }) => {
-      const lastScanTime = Date.now()
-      this.setState({
-        device,
-        result,
-        lastScanTime,
-        scannedBy: 'Stethoscope',
-        loading: false
-      }, () => {
-        ipcRenderer.send('app:loaded')
+    this.setState({ scanIsRunning: true }, () => {
+      Stethoscope.validate(this.state.policy).then(({ device, result }) => {
+        const lastScanTime = Date.now()
+        this.setState({
+          device,
+          result,
+          lastScanTime,
+          scanIsRunning: false,
+          scannedBy: 'Stethoscope',
+          loading: false
+        }, () => {
+          ipcRenderer.send('app:loaded')
+        })
+      }).catch(err => {
+        this.handleResponseError({ message: JSON.stringify(err.errors) })
       })
-    }).catch(err => {
-      this.handleResponseError({ message: JSON.stringify(err.errors) })
     })
   }
 
