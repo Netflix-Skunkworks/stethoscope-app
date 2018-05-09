@@ -21,9 +21,9 @@ let isFirstLaunch = true
 
 // icons that are displayed in the Menu bar
 const statusImages = {
-  PASS: nativeImage.createFromPath(findIcon('scope-icon.png')),
-  NUDGE: nativeImage.createFromPath(findIcon('scope-icon-nudge.png')),
-  FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn.png'))
+  PASS: nativeImage.createFromPath(findIcon('scope-icon-ok2@2x.png')),
+  NUDGE: nativeImage.createFromPath(findIcon('scope-icon-nudge2@2x.png')),
+  FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn2@2x.png'))
 }
 
 // setup winston logging

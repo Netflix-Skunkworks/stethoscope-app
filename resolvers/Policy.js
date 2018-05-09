@@ -36,9 +36,6 @@ const Policy = {
               response[verification] = NUDGE
               break
 
-            // passing is only required if platform supports
-            case IF_SUPPORTED:
-              break
             // failure is required
             case NEVER:
               break

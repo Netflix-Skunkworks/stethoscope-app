@@ -110,6 +110,8 @@ input DevicePolicy {
   suggestedApplications: [AppRequirement]
   # add extensions
   stethoscopeVersion: Semver
+  # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
+  maxScreenLockTimeout: Int
 }
 
 # Defines a requirement for an installed application
@@ -131,7 +133,9 @@ input AppRequirement {
 }
 
 type PolicyResult {
+  # overall policy result
   status: FeatureState
+  # status indicating whether osVersion passed test
   osVersion: FeatureState
   # current firewall state
   firewall: FeatureState

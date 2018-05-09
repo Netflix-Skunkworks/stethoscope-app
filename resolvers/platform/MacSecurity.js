@@ -1,7 +1,7 @@
 const semver = require('semver')
 const Device = require('../Device')
 const OSQuery = require('../../sources/osquery')
-const powershell = require('../../src/lib/powershell')
+const { getScreenLock } = require('../../src/lib/applescript')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
 
@@ -132,6 +132,13 @@ const MacSecurity = {
 
       return screenLock === '1'
     } else {
+      // hey look, we can query screen lock status again!
+      if (semver.satisfies(version, '>10.13.3')) {
+        // osascript -e 'tell application "System Events" to tell security
+        //  preferences to get require password to wake'
+        const screenLockStatus = await getScreenLock()
+        return screenLockStatus
+      }
       // macOS High Sierra removed support screen lock querying
       return UNKNOWN
     }
