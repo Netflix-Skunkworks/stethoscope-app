@@ -15,16 +15,19 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = 'darwin'
-let shell, ipcRenderer
+let shell, ipcRenderer, log, remote
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
   shell = window.require('electron').shell
+  remote = window.require('electron').remote
+  log = remote.getGlobal('log')
   platform = os.platform()
   ipcRenderer = window.require('electron').ipcRenderer
 } catch (e) {
   // browser polyfill
   ipcRenderer = { on () {}, send () {} }
+  log = console
 }
 
 class App extends Component {
@@ -33,6 +36,7 @@ class App extends Component {
     policy: {},
     result: {},
     instructions: {},
+    scanIsRunning: false,
     loading: false,
     // determines loading screen language
     remoteScan: false,
@@ -72,6 +76,7 @@ class App extends Component {
 
     ipcRenderer.on('download:error', (event, error) => {
       ipcRenderer.send('download:complete')
+      log.error('Error downloading app update: ' + error)
       this.setState({
         downloadProgress: null,
         error
@@ -99,12 +104,23 @@ class App extends Component {
     })
 
     // setup a socket io listener to refresh the app when a scan is performed
-    socket.on('scan:complete', ({ noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
+    socket.on('scan:complete', ({ errors = [], noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
+      // device only scan with no policy completed
       if (noResults) {
         return this.setState({ loading: false, scannedBy: 'Stethoscope' })
       }
 
-      const { data: { policy } } = Object(result)
+      if (errors && errors.length) {
+        log.log({
+          level: 'error',
+          message: 'Error scanning',
+          policy: appPolicy,
+          variables
+        })
+        return this.setState({ loading: false, errors: errors.map(({ message }) => message) })
+      }
+
+      const { data: { policy = {} } } = Object(result)
 
       let newState = {
         result: policy.validate,
@@ -120,6 +136,7 @@ class App extends Component {
       }
 
       this.setState(newState, () => {
+        ipcRenderer.send('app:loaded')
         if (this.state.result.status !== 'PASS' && showNotification) {
           let notification = new Notification('Security recommendation', {
             body: 'You can improve the security settings on this device. Click for more information.'
@@ -139,8 +156,8 @@ class App extends Component {
   }
 
   handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    console.log('handling response error', new Error(err))
-    this.setState({ error: new Error(err) })
+    log.error(err)
+    this.setState({ error: err })
   }
 
   loadPractices = () => {
@@ -150,7 +167,11 @@ class App extends Component {
         fetch(`${HOST}/policy`).then(d => d.json()).catch(this.handleResponseError),
         fetch(`${HOST}/instructions`).then(d => d.json()).catch(this.handleResponseError)
       ]).then(([config, policy, instructions]) => {
-        this.setState({ config, policy, instructions }, () => this.scan())
+        this.setState({ config, policy, instructions }, () => {
+          if (!this.state.scanIsRunning) {
+            this.scan()
+          }
+        })
       }).catch(this.handleResponseError)
     })
   }
@@ -167,16 +188,23 @@ class App extends Component {
   }
 
   scan = () => {
-    Stethoscope.validate(this.state.policy).then(({ device, result }) => {
-      const lastScanTime = Date.now()
-      this.setState({
-        device,
-        result,
-        lastScanTime,
-        scannedBy: 'Stethoscope',
-        loading: false
+    this.setState({ scanIsRunning: true }, () => {
+      Stethoscope.validate(this.state.policy).then(({ device, result }) => {
+        const lastScanTime = Date.now()
+        this.setState({
+          device,
+          result,
+          lastScanTime,
+          scanIsRunning: false,
+          scannedBy: 'Stethoscope',
+          loading: false
+        }, () => {
+          ipcRenderer.send('app:loaded')
+        })
+      }).catch(err => {
+        this.handleResponseError({ message: JSON.stringify(err.errors) })
       })
-    }).catch(this.handleResponseError)
+    })
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })
@@ -187,6 +215,8 @@ class App extends Component {
       scannedBy, lastScanTime, error,
       instructions, loading, highlightRescan
     } = this.state
+
+    const isDev = process.env.NODE_ENV === 'development'
 
     let content = null
 
@@ -204,7 +234,7 @@ class App extends Component {
 
     if (error) {
       content = (
-        <ErrorMessage message={error.message} />
+        <ErrorMessage showStack={isDev} message={error.message} stack={error.stack} />
       )
     }
 

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
 import showdown from 'showdown'
@@ -52,6 +53,46 @@ class Action extends Component {
     })
   }
 
+  parseDirections () {
+    const { action, security } = this.props
+    let { directions } = action
+    const piped = Object.keys(security).join('|')
+    const regex = new RegExp(`\\[(${piped})\\]`, 'g')
+
+    let matches = directions.match(regex)
+    let targetStatus = 'ON'
+
+    if (matches) {
+      matches.forEach((k) => {
+        let key = k
+        let status = 'done'
+        let cleanKey = key.replace(/[^A-Za-z]+/g, '')
+        let iconString = ''
+
+        if (security[cleanKey] !== targetStatus) {
+          status = 'suggested'
+
+          iconString = ReactDOMServer.renderToStaticMarkup(
+            <ActionIcon
+              className='action-icon'
+              name={this.iconName(status)}
+              color={this.iconColor(status)}
+              title={this.hoverText(status)}
+              width='18px'
+              height='18px'
+            />
+          )
+        } else {
+          key = new RegExp(`- \\[${cleanKey}\\] (.*)`, 'g')
+        }
+
+        directions = directions.replace(key, iconString)
+      })
+    }
+
+    return converter.makeHtml(directions)
+  }
+
   render () {
     const { action, type, status } = this.props
     let description = null
@@ -74,7 +115,7 @@ class Action extends Component {
           { action.directions && (
             <div
               className='instructions'
-              dangerouslySetInnerHTML={{__html: converter.makeHtml(action.directions)}}
+              dangerouslySetInnerHTML={{__html: this.parseDirections()}}
             />
           )}
         </div>

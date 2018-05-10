@@ -8,7 +8,7 @@ const env = process.env.NODE_ENV || 'production'
 let about
 
 module.exports = function (mainWindow) {
-  const { checkForUpdates } = require('./updater')(env, mainWindow)
+  const { checkForUpdates } = require('./updater')(env, mainWindow, false)
   const template = [
     {
       label: 'Edit',

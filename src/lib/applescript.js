@@ -21,9 +21,17 @@ const openApp = async function (appName) {
   return execString(script)
 }
 
+const getScreenLock = async () => {
+  const script = `tell application "System Events" to tell security preferences to get require password to wake`
+  const response = await execString(script)
+  // setting seems to be the opposite
+  return response === 'false'
+}
+
 module.exports = {
   openPreferences,
-  openApp
+  openApp,
+  getScreenLock
 }
 
 if (require.main === module) {

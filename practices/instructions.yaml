@@ -17,10 +17,13 @@ practices:
         1. Click "Turn On Firewall" or "Start" to enable the firewall.
         1. Click Advanced to customize the firewall configuration.
       win32: |
-        1. Open [Windows Firewall](prefs://Firewall)
-        1. Select Turn Windows Firewall on or off
-        1. Ensure Turn Windows Firewall On is selected
+        1. Open [Windows Firewall Settings](ps://wf.msc)
+        1. Click "Windows Defender Firewall Properties" in the center pane
+        1. Ensure "Firewall state" is set to "On (recommended)" on the Domain, Public, and Private Profile tabs
         1. Click OK
+          - [privateFirewall] Private Firewall status
+          - [publicFirewall] Public Firewall status
+          - [domainFirewall] Domain Firewall status
 
   stethoscopeVersion:
     title:
@@ -65,9 +68,8 @@ practices:
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
         1. Click "Turn On FileVault" to start the process.
       win32: |
-        1. Open [System Settings](ms-settings:)
-        1. Click ["Encryption"](prefs://BitLocker)
-        1. Verify that disk encryption is enabled
+        1. Open [BitLocker Drive Encryption](prefs://BitLocker)
+        1. Click "Turn on BitLocker"
 
   automaticUpdates:
     title:
@@ -80,7 +82,12 @@ practices:
         1. Choose System Preferences from the Apple menu.
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
-        1. Make sure "Install macOS updates" and "Install system data files and security updates" are checked.
+        1. Make sure the following are checked:
+            - [automaticDownloadUpdates] Download newly available updates in the background
+            - [automaticAppUpdates] Install app updates
+            - [automaticOsUpdates] Install macOS updates
+            - [automaticSecurityUpdates] Install system data files and security updates
+            - [automaticConfigDataInstall] Install system data files and security updates
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
         1. Scroll down to find "Windows Update" and double-click the name
@@ -102,8 +109,14 @@ practices:
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
         1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins
       win32: |
+        Standard settings:
+        1. Open [Lock screen settings](ms-settings:lockscreen)
+        1. Scroll down and click on "Screen timeout settings"
+        1. Ensure that Screen settings for "On battery power" and "When plugged in" are less than or equal to 10 minutes
+
+        If fixing the standard settings doesn't resolve the issue:
         1. Open [User Account Settings](ps://netplwiz)
-        1. Check Users must enter a user name and password to use this computer
+        1. Ensure that "Users must enter a user name and password to use this computer" is checked
         1. Click "Apply"
         1. Click "OK"
 

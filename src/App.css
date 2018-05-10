@@ -55,15 +55,6 @@ tr.FAIL, td.OFF {
 .center {
   text-align: center;
 }
-/*
-.buttonRow button {
-  margin-left: 15px;
-  margin-bottom: 15px;
-  padding: 5px;
-  font-size: 12px;
-  background-color: #eee;
-  color: #aaa;
-}*/
 
 .buttonRow button:hover {
   color: #333;
@@ -105,6 +96,13 @@ footer button {
   margin: 0 auto;
   text-align: center;
   color: #aaa;
+}
+
+.subtask {
+  padding-left: 15px;
+}
+.suggested-value {
+  color: #737b73;
 }
 
 progress {
