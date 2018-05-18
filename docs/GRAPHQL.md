@@ -1,4 +1,4 @@
-When running in development, the graphql server (and graphiql) can be access at [http://localhost:37370](http://localhost:37370)
+When running in development, the graphql server (and graphiql) can be accessed at [http://localhost:37370](http://localhost:37370)
 
 # Querying GraphQL
 
