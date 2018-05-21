@@ -1,5 +1,8 @@
 allowHosts:
   - "stethoscope://main"
-allowRegex:
-  - "^https://(meechum|stethoscope)\\.((test|prod)\\.)?netflix\\.(com|net)$"
+hostLabels:
+  - pattern: "^https://stethoscope\\.((test|prod)\\.)?netflix\\.net$"
+    name: Stethoscope
+  - pattern: "^https://meechum\\.((test|prod)\\.)?netflix\\.(com|net)$"
+    name: Meechum
 policyServer:

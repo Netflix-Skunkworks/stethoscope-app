@@ -8,7 +8,7 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function (env, mainWindow, isFirstLaunch = false) {
+module.exports = function (env, mainWindow, log = console, isFirstLaunch = false) {
   const { autoUpdater } = electronUpdater
   autoUpdater.autoDownload = false
 
@@ -98,7 +98,10 @@ module.exports = function (env, mainWindow, isFirstLaunch = false) {
         updater = menuItem
         if (updater) updater.enabled = false
       }
-      return autoUpdater.checkForUpdates()
+
+      return autoUpdater.checkForUpdates().catch(err => {
+        log.error('Error updating', err)
+      })
     }
   }
 }

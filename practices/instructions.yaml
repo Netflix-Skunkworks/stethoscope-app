@@ -33,9 +33,9 @@ practices:
       Keeping the Stethoscope app up-to-date gives you access to the latest features, security patches, and performance improvements.
     directions:
       darwin: |
-        <a href='action://update' class="btn">Update Stethoscope</a>
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
       win32: |
-        <a href='link://https://drive.google.com/open?id=1b65mt-a4cPmYmINIzyc8CSMXKCvdoxaf' class="btn">Update Stethoscope</a>
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
 
   remoteLogin:
     title:

@@ -94,17 +94,17 @@ class App extends Component {
 
     // the server emits this event when a remote scan begins
     // TODO don't hardcode Meechum and Stethoscope
-    socket.on('scan:init', ({ remote }) => {
+    socket.on('scan:init', ({ remote, remoteLabel }) => {
       ipcRenderer.send('scan:init')
       this.setState({
         loading: true,
         remoteScan: remote,
-        scannedBy: remote ? 'Meechum' : 'Stethoscope'
+        scannedBy: remote ? remoteLabel : 'Stethoscope'
       })
     })
 
     // setup a socket io listener to refresh the app when a scan is performed
-    socket.on('scan:complete', ({ errors = [], noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
+    socket.on('scan:complete', ({ errors = [], noResults = false, remote, remoteLabel, result, policy: appPolicy, showNotification }) => {
       // device only scan with no policy completed
       if (noResults) {
         return this.setState({ loading: false, scannedBy: 'Stethoscope' })
@@ -114,8 +114,7 @@ class App extends Component {
         log.log({
           level: 'error',
           message: 'Error scanning',
-          policy: appPolicy,
-          variables
+          policy: appPolicy
         })
         return this.setState({ loading: false, errors: errors.map(({ message }) => message) })
       }
@@ -126,7 +125,7 @@ class App extends Component {
         result: policy.validate,
         loading: false,
         remoteScan: remote,
-        scannedBy: remote ? 'Meechum' : 'Stethoscope'
+        scannedBy: remote ? remoteLabel : 'Stethoscope'
       }
 
       if (newState.result.status !== 'PASS') {

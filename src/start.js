@@ -77,7 +77,7 @@ function createWindow () {
     }
 
     if (String(deeplinkingUrl).indexOf('update') > -1) {
-      updater.checkForUpdates(env, mainWindow).catch(err => {
+      updater.checkForUpdates(env, mainWindow, log).catch(err => {
         log.error(`error checking for update: ${err}`)
       })
     }
@@ -123,7 +123,7 @@ function createWindow () {
       mainWindow.focus()
     } else {
       mainWindow = new BrowserWindow(windowPrefs)
-      initMenu(mainWindow)
+      initMenu(mainWindow, log)
       mainWindow.loadURL(
         process.env.ELECTRON_START_URL ||
         url.format({
@@ -139,7 +139,7 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  initMenu(mainWindow)
+  initMenu(mainWindow, log)
 
   mainWindow.loadURL(
     process.env.ELECTRON_START_URL ||
@@ -196,7 +196,7 @@ app.on('ready', () => setTimeout(() => {
   createWindow()
   initProtocols(mainWindow)
 
-  updater = require('./updater')(env, mainWindow)
+  updater = require('./updater')(env, mainWindow, log)
 
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details

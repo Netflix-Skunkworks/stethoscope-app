@@ -1,20 +1,20 @@
 module.exports = class Cache {
-  constructor() {
+  constructor () {
     this.store = new Map()
   }
 
-  set(key, value, expiration = Infinity) {
+  set (key, value, expiration = Infinity) {
     this.store.set(key, value)
     setTimeout(() => {
       this.store.delete(key)
     }, expiration)
   }
 
-  has(key) {
+  has (key) {
     return this.store.has(key)
   }
 
-  get(key) {
+  get (key) {
     if (this.store.has(key)) {
       return this.store.get(key)
     }

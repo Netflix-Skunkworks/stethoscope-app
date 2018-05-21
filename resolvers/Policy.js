@@ -1,6 +1,6 @@
 const Security = require('./Security')
 const {
-  PASS, FAIL, NUDGE, SUGGESTED, IF_SUPPORTED, NEVER
+  PASS, FAIL, NUDGE, SUGGESTED, NEVER
 } = require('../src/constants')
 
 const Policy = {
@@ -13,7 +13,7 @@ const Policy = {
       // get policy requirement for current property
       const requirement = policy[verification]
 
-      if (!Security[verification]) continue;
+      if (!Security[verification]) continue
 
       // determine device state
       const passing = await Security[verification](root, policy, context)

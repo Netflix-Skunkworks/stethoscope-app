@@ -106,17 +106,17 @@ const getScreenLockTimeout = async () => {
     ps.addCommand(query)
     const out = await ps.invoke()
     const data = out.split(/([\r\n]+)/)
-        .filter(i => i !== '\n')
-        .map(l => l.trim().split(': '))
-        .reduce((p, [key, value]) => {
-          p[key] = value
-          return p
-        }, {})
+      .filter(i => i !== '\n')
+      .map(l => l.trim().split(': '))
+      .reduce((p, [key, value]) => {
+        p[key] = value
+        return p
+      }, {})
 
     // values come back as hex, convert to int Seconds
     response = {
       pluggedIn: parseInt(data['Current AC Power Setting Index'], 16),
-      battery: parseInt(data['Current DC Power Setting Index'], 16),
+      battery: parseInt(data['Current DC Power Setting Index'], 16)
     }
   }
 
@@ -142,7 +142,7 @@ const getDisableLockWorkStation = async () => {
   try {
     const output = await ps.invoke()
     cache.set('getDisableLockWorkStation', true, 1000 * 10)
-    return true
+    return !!output
   } catch (e) {
     cache.set('getDisableLockWorkStation', false, 1000 * 10)
     return false
@@ -163,12 +163,12 @@ const disks = async (disks = []) => {
         ps.addCommand(`manage-bde -status ${label}`)
         const out = await ps.invoke()
         const data = out.split(/[\r\n]+/)
-           .map(line =>
-             line.trim().split(':').map(w => w.trim())
-           ).reduce((p, [key, value]) => {
-             p[key] = value
-             return p
-           }, {})
+          .map(line =>
+            line.trim().split(':').map(w => w.trim())
+          ).reduce((p, [key, value]) => {
+            p[key] = value
+            return p
+          }, {})
 
         encrypted = data && data['Percentage Encrypted'] === '100%'
       } catch (e) {
