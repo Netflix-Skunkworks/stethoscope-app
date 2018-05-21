@@ -20,8 +20,7 @@ const WindowsSecurity = {
   },
 
   /*
-    select data from registry
-    where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
+    select data from registry where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
    */
   async remoteLogin (root, args, context) {
     const result = await OSQuery.first('registry', {

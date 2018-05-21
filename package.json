@@ -1,18 +1,12 @@
 {
   "name": "Stethoscope",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "main": "src/start.js",
   "build": {
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/"
-      }
-    ],
     "appId": "com.netflix.stethoscope-local",
     "extends": null,
     "productName": "Stethoscope",
@@ -37,7 +31,6 @@
     },
     "win": {
       "target": "nsis",
-      "certificateSubjectName": "Netflix, Inc.",
       "files": [
         "bin/osqueryi.exe",
         "practices/*",
@@ -91,7 +84,6 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
     "electron": "electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
