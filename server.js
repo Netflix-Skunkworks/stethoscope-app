@@ -96,9 +96,11 @@ module.exports = function startServer (env, log, appActions) {
     const remote = req.get('origin') !== 'stethoscope://main'
     let remoteLabel
 
-    if (remote) {
+    if (env === 'production' && remote) {
       remoteLabel = hostLabels
         .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+    } else {
+      remoteLabel = 'Remote'
     }
 
     let { query, variables: policy, sessionId = false } = req[key]
@@ -133,7 +135,7 @@ module.exports = function startServer (env, log, appActions) {
     }).catch(err => {
       log.error(err.message)
       io.sockets.emit('scan:error')
-      res.status(500).json({ error: err })
+      res.status(500).json({ error: err.message })
     })
   })
 
@@ -189,6 +191,7 @@ module.exports = function startServer (env, log, appActions) {
   // const httpsServer = https.createServer(creds, app)
   const serverInstance = http.listen(PORT, 'localhost', () => {
     console.log(`local server listening on ${PORT}`)
+    serverInstance.emit('server:ready')
   })
 
   return serverInstance

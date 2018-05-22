@@ -8,7 +8,7 @@ const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
-const runLocalServer = require('../server')
+const startGraphQLServer = require('../server')
 
 let mainWindow
 let tray
@@ -123,7 +123,7 @@ function createWindow () {
       mainWindow.focus()
     } else {
       mainWindow = new BrowserWindow(windowPrefs)
-      initMenu(mainWindow, log)
+      initMenu(mainWindow, env, log)
       mainWindow.loadURL(
         process.env.ELECTRON_START_URL ||
         url.format({
@@ -139,7 +139,7 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  initMenu(mainWindow, log)
+  initMenu(mainWindow, env, log)
 
   mainWindow.loadURL(
     process.env.ELECTRON_START_URL ||
@@ -169,8 +169,10 @@ function createWindow () {
     }
   })
 
-  ipcMain.on('download:complete', (event, arg) => {
-    mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
+  ipcMain.on('download:complete', (event, { resize }) => {
+    if (resize) {
+      mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
+    }
   })
 
   ipcMain.on('app:loaded', () => {
@@ -198,6 +200,7 @@ app.on('ready', () => setTimeout(() => {
 
   updater = require('./updater')(env, mainWindow, log)
 
+  // override internal request origin to give express CORS policy something to check
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
     const base = 'stethoscope://main'
@@ -224,7 +227,7 @@ app.on('ready', () => setTimeout(() => {
   }
 
   // start GraphQL server
-  server = runLocalServer(env, log, appHooksForServer)
+  server = startGraphQLServer(env, log, appHooksForServer)
 
   server.on('error', (err) => {
     if (err.message.includes('EADDRINUSE')) {
