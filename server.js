@@ -97,8 +97,12 @@ module.exports = function startServer (env, log, appActions) {
     let remoteLabel
 
     if (env === 'production' && remote) {
-      remoteLabel = hostLabels
-        .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+      try {
+        remoteLabel = hostLabels
+          .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+      } catch (e) {
+        remoteLabel = 'Unknown App'
+      }
     } else {
       remoteLabel = 'Remote'
     }
