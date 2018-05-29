@@ -96,7 +96,7 @@ module.exports = function startServer (env, log, appActions) {
     const remote = req.get('origin') !== 'stethoscope://main'
     let remoteLabel
 
-    if (env === 'production' && remote) {
+    if (remote) {
       try {
         remoteLabel = hostLabels
           .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
