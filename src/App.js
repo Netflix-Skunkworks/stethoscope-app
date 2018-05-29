@@ -243,7 +243,10 @@ class App extends Component {
 
     if (loading) {
       content = (
-        <Loader remoteScan={this.state.remoteScan} />
+        <Loader
+          remoteScan={this.state.remoteScan}
+          remoteLabel={this.state.scannedBy}
+        />
       )
     }
 

@@ -108,7 +108,7 @@ const MacSecurity = {
       where: "m.path = '/'",
       // where: 'bd.type != "Virtual Interface"', // this will exclude DMGs
       fields: ['encrypted', 'path']
-    })
+    }) || []
 
     // because array.every will return true on an empty set
     if (userPartitions.length === 0) {

@@ -34,7 +34,7 @@ const Device = {
   },
 
   async platformName (root, args, context) {
-    const { vendor } = await context.platformInfo
+    const { vendor = '' } = await context.platformInfo
     return vendor.trim()
   },
 
@@ -99,7 +99,7 @@ const Device = {
   async macAddresses (root, args, context) {
     const addresses = await OSQuery.all('interface_details', {
       fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
-    })
+    }) || []
 
     const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
 
