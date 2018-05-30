@@ -59,21 +59,25 @@ For information not sufficiently covered with osquery, we maintain a small set o
 
 The Electron app also runs a web server that is only accessible locally, not over the network. This web server presents a GraphQL api for device information and policy status.
 
-[GraphQL example](docs/GRAPHQL.md)
-
 ### Local device checks and instructions
 
 The app is built with a default policy, which specifies recommended OS versions and security settings: disk encryption, screensaver password, no remote login, etc. When you open the app, it will run the osquery device queries, evaluate the results against the policy, and show instructions for any recommended actions.
 
 This will work as a standalone checklist, without needing to report any data to a central server. In fact, it doesn’t even require internet connectivity.
 
-### Data reporting
+You can update the policy guidelines (OS versions, required settings, etc.) in [practices/policy.yaml](practices/policy.yaml), and change the instructions in [practices/instructions.yaml](practices/instructions.yaml).
+
+Queries from a website provide their own policy and policy variables.
+
+### Data collection and reporting
 
 Rather than automatically reporting to a central server, data from the Stethoscope app is requested in client side JavaScript from allowed web pages. The allowed sites are listed in [practices/config.yaml](practices/config.yaml), and is enforced via a [CORS policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). This local web server is only accessible on the loopback interface, so other devices on the network cannot reach it.
 
 This method works in Chrome and Firefox, which properly support allowing requests to http://127.0.0.1 even from https pages. If you need this reporting mechanism to work in unsupported browsers, browser extensions can broker the communication.
 
 The Stethoscope app can also be launched from a web page using the [stethoscope://](stethoscope://) protocol handler.
+
+[GraphQL query and response examples](docs/GRAPHQL.md)
 
 Local development
 -----------------
