@@ -121,6 +121,7 @@
     "winston-daily-rotate-file": "^3.1.3"
   },
   "devDependencies": {
+    "@heroku/foreman": "^2.0.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
@@ -129,11 +130,8 @@
     "electron-builder": "^20.8.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "foreman": "^2.0.0",
-    "husky": "^1.0.0-rc.8",
     "mocha": "^5.2.0",
     "react-scripts": "^1.1.4",
-    "spectron": "^3.8.0",
     "standard": "^11.0.1"
   }
 }
