@@ -78,10 +78,9 @@ The Stethoscope app can also be launched from a web page using the [stethoscope:
 Local development
 -----------------
 
-\* Requires port 12000 for webpack dev server, and port 37370 for the GraphQL server
-
 `yarn start` will run the Electron app, the GraphQL server, and a webpack dev server with the React UI, which allows for live reloading and a faster development cycle.
 
+This requires port 12000 for webpack dev server, and port 37370 for the GraphQL server.
 
 Building and deploying
 ----------------------
