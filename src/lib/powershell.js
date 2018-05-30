@@ -115,8 +115,8 @@ const getScreenLockTimeout = async () => {
 
     // values come back as hex, convert to int Seconds
     response = {
-      pluggedIn: parseInt(data['Current AC Power Setting Index'], 16),
-      battery: parseInt(data['Current DC Power Setting Index'], 16)
+      pluggedIn: parseInt(data['Current AC Power Setting Index'], 16) || Infinity,
+      battery: parseInt(data['Current DC Power Setting Index'], 16) || Infinity
     }
   }
 
