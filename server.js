@@ -104,7 +104,7 @@ module.exports = function startServer (env, log, appActions) {
         remoteLabel = 'Unknown App'
       }
     } else {
-      remoteLabel = 'Remote'
+      remoteLabel = 'Stethoscope'
     }
 
     let { query, variables: policy, sessionId = false } = req[key]

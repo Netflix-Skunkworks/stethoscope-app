@@ -2,15 +2,10 @@
   "menu": {
     "help": [{
       "label": "Email Support",
-      "link": "mailto:stethoscope-alert-response@netflix.com"
+      "link": "mailto:support@your-company.com"
     }, {
       "label": "Slack Support",
-      "link": "slack://channel?id=C1QPA0V63&team=T029N2L97"
-    }, {
-      "label": "Feedback",
-      "link": "https://docs.google.com/forms/d/e/1FAIpQLSfrazgTWhLHlyu1Ezf4jtbqzPNM_D4cUQN0cyDzg3JxhIrwBA/viewform"
+      "link": "slack://channel?id=YOUR_CHANNEL_ID&team=YOUR_TEAM_ID"
     }]
-  },
-  "scanIntervalSeconds": 30,
-  "showStethoscopeLink": true
+  }
 }

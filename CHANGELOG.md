@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 - Stopped including osqueryi binaries for all platforms in build
 
 
-## [1.0.0](https://github.com/Netflix/stethoscope-app/tree/1.0.0) - 2018-04-05
+## [1.0.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/1.0.0) - 2018-04-05
 
 ----
 
@@ -47,7 +47,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Commented logic in policy evaluation, simplified policy processing
 
-## [0.3.2](https://github.com/Netflix/stethoscope-app/tree/0.3.2) - 2018-03-22
+## [0.3.2](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/0.3.2) - 2018-03-22
 
 ----
 

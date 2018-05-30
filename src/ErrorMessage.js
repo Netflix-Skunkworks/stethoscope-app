@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import config from './config.json'
 import './ErrorMessage.css'
 
 let clipboard
@@ -14,6 +13,8 @@ export default class ErrorMessage extends Component {
   }
 
   render () {
+    const { config } = this.props;
+
     return (
       <div className='error'>
         <h1>Oh no!</h1>

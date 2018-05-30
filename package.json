@@ -84,7 +84,7 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "electron": "react-scripts build && electron .",
+    "electron": "electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",

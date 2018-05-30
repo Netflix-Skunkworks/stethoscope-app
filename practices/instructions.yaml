@@ -59,7 +59,7 @@ practices:
       PASS: Disk Encryption is enabled
       FAIL: Disk Encryption should be enabled
     description: >
-      Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing Netflix internal data should be encrypted. It is every employee's responsibility to keep Netflix internal data safe.
+      Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing internal data should be encrypted. It is every employee's responsibility to keep internal data safe.
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.

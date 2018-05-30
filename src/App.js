@@ -9,6 +9,7 @@ import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
 import getBadge from './lib/getBadge'
 import { HOST } from './constants'
+import appConfig from './config.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
 
@@ -237,7 +238,12 @@ class App extends Component {
 
     if (error) {
       content = (
-        <ErrorMessage showStack={isDev} message={error.message} stack={error.stack} />
+        <ErrorMessage
+          showStack={isDev}
+          message={error.message}
+          stack={error.stack}
+          config={appConfig}
+        />
       )
     }
 
@@ -274,14 +280,15 @@ class App extends Component {
                 onClick={this.scan}>
                 <span className='icon icon-arrows-ccw' />rescan
               </button>
-
-              <button
-                className='btn pull-right'
-                href='https://stethoscope.prod.netflix.net/'
-                onClick={this.openExternal}
-              >
-                <span className='icon icon-monitor white' />view all devices
-              </button>
+              {appConfig.stethoscopeWebURI && (
+                <button
+                  className='btn pull-right'
+                  href={appConfig.stethoscopeWebURI}
+                  onClick={this.openExternal}
+                >
+                  <span className='icon icon-monitor white' />view all devices
+                </button>
+              )}
             </div>
           </footer>
         </div>
