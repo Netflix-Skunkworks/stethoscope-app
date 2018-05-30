@@ -25,7 +25,7 @@ Run the app and GraphQL server (currently requires ports 12000 and 37370)
 
 ```
 yarn install
-yarn run
+yarn start
 ```
 
 About the Stethoscope app
@@ -49,7 +49,7 @@ The Stethoscope app does not continuously monitor–it scans and reports when th
 
 #### Report when needed
 
-Device information is never reported straight from the app to a central server. It is only collected when required by a requesting website. This approach is more privacy respecting, and is more appropriate for situations where people are using devices that aren’t issued by a corporate IT department.  
+Device information is never reported straight from the app to a central server. It is only collected when required by a requesting website. This approach is more privacy respecting, and is more appropriate for situations where people are using devices that aren’t issued by a corporate IT department.
 
 ### Technical approach
 
@@ -63,7 +63,7 @@ The Electron app also runs a web server that is only accessible locally, not ove
 
 ### Local device checks and instructions
 
-The app is build with a default policy, which specifies recommended OS versions and security settings: disk encryption, screensaver password, no remote login, etc. When you open the app, it will run the osquery device queries, evaluate the results against the policy, and show instructions for any recommended actions.
+The app is built with a default policy, which specifies recommended OS versions and security settings: disk encryption, screensaver password, no remote login, etc. When you open the app, it will run the osquery device queries, evaluate the results against the policy, and show instructions for any recommended actions.
 
 This will work as a standalone checklist, without needing to report any data to a central server. In fact, it doesn’t even require internet connectivity.
 
