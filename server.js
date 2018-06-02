@@ -1,21 +1,23 @@
-const express = require('express')
-const helmet = require('helmet')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
+
+const express = require('express')
+const { HOST, PORT } = require('./src/constants')
+const helmet = require('helmet')
 const cors = require('cors')
+const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
+
 const { graphql } = require('graphql')
-const bodyParser = require('body-parser')
 const { makeExecutableSchema } = require('graphql-tools')
-const { graphiqlExpress } = require('graphql-server-express')
 const Resolvers = require('./resolvers/')
 const OSQuery = require('./sources/osquery')
-const { HOST, PORT } = require('./src/constants')
+const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const defaultPolicyServer = HOST
-const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
+
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
@@ -39,30 +41,24 @@ module.exports = function startServer (env, log, appActions) {
     resolvers: Resolvers
   })
 
-  const {
+  let {
     allowHosts = [],
-    allowRegex = []
+    hostLabels = [],
+    policyServer = defaultPolicyServer
   } = defaultConfig
-
-  let { policyServer = defaultPolicyServer } = defaultConfig
 
   const corsOptions = {
     origin (origin, callback) {
-      if (env === 'development') {
-        return callback(null, true)
-      }
+      if (env === 'development') return callback(null, true)
+      if (allowHosts.includes(origin)) return callback(null, true)
+      if (hostLabels.length) {
+        const isAllowed = hostLabels
+          .map(({ pattern }) => new RegExp(pattern))
+          .some(regex => regex.test(origin))
 
-      if (allowHosts.includes(origin)) {
-        callback(null, true)
-      } else if (allowRegex.length) {
-        const isAllowed = allowRegex.some(pattern => {
-          const reg = new RegExp(pattern)
-          return reg.test(origin)
-        })
-        callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
-      } else {
-        callback(new Error(`Unauthorized request from ${origin}`), false)
+        return callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
       }
+      callback(new Error(`Unauthorized request from ${origin}`), false)
     },
     methods: 'GET,OPTIONS,HEAD,POST'
   }
@@ -70,7 +66,7 @@ module.exports = function startServer (env, log, appActions) {
   // policy, instructions and config data should only be served to app
   const policyRequestOptions = {
     origin (origin, callback) {
-      const allowed = ['http://localhost', 'stethoscope://', 'http://127.0.0.1']
+      const allowed = ['http://localhost:', 'stethoscope://', 'http://127.0.0.1:']
       if (origin && allowed.some(hostname => origin.startsWith(hostname))) {
         callback(null, true)
       } else {
@@ -80,25 +76,9 @@ module.exports = function startServer (env, log, appActions) {
   }
 
   if (env === 'development') {
+    const { graphiqlExpress } = require('graphql-server-express')
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
-
-  app.use(cors(corsOptions), (req, res, next) => {
-    if (req.headers['user-agent'].includes('curl/')) {
-      log.error('curl request to stethoscope')
-    }
-
-    // if a policyServer is present in the URL, set it and refresh app
-    // TODO - run check against server and ensure policy files are accessible
-    // rollback to defaultPolicyServer if not
-    if (req.query.policyServer) {
-      policyServer = req.query.policyServer
-      io.sockets.emit('rescan', policyServer)
-
-      delete req.query.policyServer
-    }
-    next()
-  })
 
   // TODO remove raw query for validation and device info??
   app.use(['/scan', '/graphql'], cors(corsOptions), (req, res) => {
@@ -106,68 +86,60 @@ module.exports = function startServer (env, log, appActions) {
     OSQuery.flushCache()
 
     const context = {
-      platform: os.platform(),
+      platform: os.platform() || process.platform,
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
       osVersion: OSQuery.first('os_version')
     }
 
     const key = req.method === 'POST' ? 'body' : 'query'
-    const origin = req.get('origin')
-    const remote = origin !== 'stethoscope://main'
+    const remote = req.get('origin') !== 'stethoscope://main'
+    let remoteLabel
 
-    let { query, variables, sessionId = false } = req[key]
+    if (remote) {
+      try {
+        remoteLabel = hostLabels
+          .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+      } catch (e) {
+        remoteLabel = 'Unknown App'
+      }
+    } else {
+      remoteLabel = 'Stethoscope'
+    }
+
+    let { query, variables: policy, sessionId = false } = req[key]
     let showNotification = sessionId && !alertCache.has(sessionId)
 
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)
     }
 
-    if (typeof variables === 'string') {
-      variables = JSON.parse(variables)
-    }
-
-    if (variables) {
+    if (typeof policy === 'string') {
+      policy = JSON.parse(policy)
       // show the scan is happening in the UI
-      io.sockets.emit('scan:init', { remote })
+      io.sockets.emit('scan:init', { remote, remoteLabel })
     }
 
-    graphql(schema, query, null, context, variables).then((result) => {
+    graphql(schema, query, null, context, policy).then((result) => {
       const { data = {} } = result
-      const scanResult = data.policy && data.policy.validate
+      let scanResult = { noResults: true }
 
-      if (scanResult) {
-        let status = data.policy.validate.status
-        let upToDate = scanResult.stethoscopeVersion !== 'FAIL'
-
-        appActions.setScanStatus(status)
-
-        if (!upToDate && !origin.startsWith('stethoscope')) {
-          // TODO removed to keep similar workflows between Windows and Mac
-          // until Windows app is signed
-          // appActions.requestUpdate()
-        }
-
-        // inform UI that scan is complete
-        io.sockets.emit('scan:complete', {
-          result,
-          remote,
-          variables,
-          policy: variables,
-          showNotification
-        })
-      } else {
-        io.sockets.emit('scan:complete', { noResults: true })
+      if (data.policy && data.policy.validate) {
+        appActions.setScanStatus(data.policy.validate.status)
+        scanResult = { result, remote, remoteLabel, policy, showNotification }
       }
+
+      // inform UI that scan is complete
+      io.sockets.emit('scan:complete', scanResult)
 
       if (!result.extensions) result.extensions = {}
       result.extensions.timing = OSQuery.getTimingInfo()
 
       res.json(result)
     }).catch(err => {
-      console.log(err)
+      log.error(err.message)
       io.sockets.emit('scan:error')
-      res.status(500).json({ error: err })
+      res.status(500).json({ error: err.message })
     })
   })
 
@@ -197,13 +169,11 @@ module.exports = function startServer (env, log, appActions) {
     }
   })
 
-  // const defaultConfig = yaml.safeLoad(fs.readFileSync(path.resolve('./practices/config.yaml'), 'utf8'))
-
   app.get('/config', cors(policyRequestOptions), (req, res) => {
     if (!policyServer) {
       res.json(defaultConfig)
     } else {
-      fetch(`${policyServer}/policy.yaml`)
+      fetch(`${policyServer}/config.yaml`)
         .then(body => body.text())
         .then(yml => yaml.safeLoad(yml, 'utf8'))
         .then(data => res.json(data))
@@ -211,13 +181,11 @@ module.exports = function startServer (env, log, appActions) {
   })
 
   // handles all other routes
-  app.get('*', (req, res) => {
-    res.status(403).end()
-  })
+  app.get('*', (req, res) => res.status(403).end())
 
   // error handler
   app.use((err, req, res, next) => {
-    log.warn(err.message)
+    log.error(err.message)
     res.status(500).send(err.message)
   })
 
@@ -227,6 +195,7 @@ module.exports = function startServer (env, log, appActions) {
   // const httpsServer = https.createServer(creds, app)
   const serverInstance = http.listen(PORT, 'localhost', () => {
     console.log(`local server listening on ${PORT}`)
+    serverInstance.emit('server:ready')
   })
 
   return serverInstance

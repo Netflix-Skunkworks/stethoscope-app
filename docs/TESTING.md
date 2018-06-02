@@ -22,7 +22,7 @@ These tests should cover the following features:
 - Notifications
 - CORS controls
 
-1. Download and install the current version of the application from S3 ([Mac](https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/Stethoscope-1.0.3.dmg), [Windows](https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/Stethoscope%20Setup%201.0.3.exe))
+1. Download and install the latest version of the application
 2. Launch the application [click here to launch](stethoscope://main)
 3. If all default policy items are passing, disable the Firewall, wait ~5 seconds and click the "rescan" button
 4. Verify that the app is now showing the firewall is disabled

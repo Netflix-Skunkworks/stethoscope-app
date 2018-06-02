@@ -1,5 +1,6 @@
 allowHosts:
   - "stethoscope://main"
-allowRegex:
-  - "^https://(meechum|stethoscope)\\.((test|prod)\\.)?netflix\\.(com|net)$"
+hostLabels:
+  - pattern: "^http://localhost:3000"
+    name: Local Server
 policyServer:

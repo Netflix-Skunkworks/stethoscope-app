@@ -46,7 +46,7 @@ type Device {
   osqueryVersion: String
   # available hard disks
   disks: [Disk]
-  security: SecurityInfo
+  security(policy:DevicePolicy): SecurityInfo
   policyResult: FeatureState
 }
 
@@ -66,8 +66,18 @@ type SecurityInfo {
   automaticAppUpdates: FeatureState
   # whether automatic security updates are enabled
   automaticSecurityUpdates: FeatureState
-  # whether OS Updates are automatically downloaded
+  # whether OS Updates are automatically downloaded (Mac only)
   automaticOsUpdates: FeatureState
+  # whether software updates are downloaded in background (Mac only)
+  automaticDownloadUpdates: FeatureState
+  # whether system config data is set to auto update
+  automaticConfigDataInstall: FeatureState
+  # Windows
+  publicFirewall: FeatureState
+  # Windows
+  privateFirewall: FeatureState
+  # Windows
+  domainFirewall: FeatureState
 }
 
 type Application {
@@ -96,8 +106,12 @@ input DevicePolicy {
   requiredApplications: [AppRequirement]
   # ban applications from being installed on user's machine
   bannedApplications: [AppRequirement]
+  # placeholder for suggested applications
+  suggestedApplications: [AppRequirement]
   # add extensions
   stethoscopeVersion: Semver
+  # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
+  windowsMaxScreenLockTimeout: Int
 }
 
 # Defines a requirement for an installed application
@@ -112,10 +126,16 @@ input AppRequirement {
   exactMatch: Boolean
   # controls whether bin packages are checked (homebrew, chocolatey, etc)
   includePackages: Boolean
+  # install URL
+  url: String
+  # explanation to show user
+  description: String
 }
 
 type PolicyResult {
+  # overall policy result
   status: FeatureState
+  # status indicating whether osVersion passed test
   osVersion: FeatureState
   # current firewall state
   firewall: FeatureState
@@ -131,6 +151,8 @@ type PolicyResult {
   requiredApplications: [ApplicationFeatureState]
   # whether or not any bannedApplications are installed
   bannedApplications: [ApplicationFeatureState]
+  # placeholder for suggested applications
+  suggestedApplications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
 }
@@ -144,11 +166,17 @@ type Security {
   remoteLogin(requirement: RequirementOption!): Boolean!
   requiredApplications(requirement: RequirementOption!): [Boolean!]!
   bannedApplications(requirement: RequirementOption!): [Boolean!]!
+  suggestedApplications(requirement: RequirementOption!): [Boolean!]!
   stethoscopeVersion(requirement: Semver!): Boolean!
   automaticUpdates(requirment: RequirementOption!): Boolean!
   automaticOsUpdates(requirement: RequirementOption!): Boolean!
   automaticSecurityUpdates(requirement: RequirementOption!): Boolean!
   automaticAppUpdates(requirement: RequirementOption!): Boolean!
+  automaticDownloadUpdates(requirement: RequirementOption!): Boolean!
+  automaticConfigDataInstall(requirement: RequirementOption!): Boolean!
+  publicFirewall(requirement: RequirementOption!): Boolean!
+  privateFirewall(requirement: RequirementOption!): Boolean!
+  domainFirewall(requirement: RequirementOption!): Boolean!
 }
 
 type IpAddress {
@@ -216,7 +244,6 @@ enum FeatureState {
   NUDGE
   ON
   OFF
-  UNSUPPORTED
   UNKNOWN
 }
 

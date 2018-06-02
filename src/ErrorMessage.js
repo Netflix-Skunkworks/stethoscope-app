@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import config from './config.json'
 import './ErrorMessage.css'
 
 let clipboard
@@ -9,16 +8,19 @@ try {
 
 export default class ErrorMessage extends Component {
   copyToClipboard = event => {
-    clipboard.writeText(this.props.message)
+    clipboard.writeText(this.props.message + '\n' + this.props.stack)
     window.alert('Copied!')
   }
 
   render () {
+    const { config } = this.props;
+
     return (
       <div className='error'>
         <h1>Oh no!</h1>
         <p>Something went wrong. Here's what we know:</p>
         <pre>{this.props.message}</pre>
+        {this.props.showStack ? <pre>{this.props.stack}</pre> : null}
         <button onClick={this.copyToClipboard}>Copy Error to Clipboard</button>
         <div id='helpBubble'>
           <strong>Need some help?</strong>

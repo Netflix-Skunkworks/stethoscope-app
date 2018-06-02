@@ -1,4 +1,3 @@
-# netflix default policy
 os version:
   darwin:
     # High Sierra
@@ -15,6 +14,6 @@ os version:
     nudge: ">=4.2.0"
 firewall: ALWAYS
 disk encryption: ALWAYS
-automatic updates: SUGGESTED
+automatic updates: ALWAYS
 screen lock: IF_SUPPORTED
 remote login: NEVER

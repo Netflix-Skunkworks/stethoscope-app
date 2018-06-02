@@ -1,18 +1,12 @@
 {
   "name": "Stethoscope",
-  "version": "1.0.3",
+  "version": "1.1.7",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "main": "src/start.js",
   "build": {
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2/"
-      }
-    ],
     "appId": "com.netflix.stethoscope-local",
     "extends": null,
     "productName": "Stethoscope",
@@ -26,7 +20,7 @@
         "practices/*",
         "build/**",
         "public/**",
-        "resolvers/*",
+        "resolvers/**",
         "sources/*",
         "src/lib/*.js",
         "src/*.json",
@@ -37,13 +31,12 @@
     },
     "win": {
       "target": "nsis",
-      "certificateSubjectName": "Netflix, Inc.",
       "files": [
         "bin/osqueryi.exe",
         "practices/*",
         "build/**",
         "public/**",
-        "resolvers/*",
+        "resolvers/**",
         "sources/*",
         "src/lib/*.js",
         "src/*.json",
@@ -63,7 +56,7 @@
         "practices/*",
         "build/**",
         "public/**",
-        "resolvers/*",
+        "resolvers/**",
         "sources/*",
         "src/lib/*.js",
         "src/*.json",
@@ -91,12 +84,12 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
     "electron": "electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",
     "postinstall": "electron-builder install-app-deps",
+    "build:react": "react-scripts build",
     "build:mac": "rm -r dist/; react-scripts build && electron-builder -m",
     "build:windows": "react-scripts build && electron-builder -w",
     "build:linux": "rm -r dist/ ; react-scripts build && electron-builder -l",
@@ -107,7 +100,7 @@
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
-    "electron-log": "^2.2.11",
+    "electron-settings": "^3.1.4",
     "electron-updater": "^2.21.4",
     "es6-promisify": "^6.0.0",
     "express": "^4.16.2",
@@ -124,17 +117,21 @@
     "react-dom": "^16.2.0",
     "semver": "^5.4.1",
     "showdown": "^1.8.6",
-    "socket.io": "^2.0.4"
+    "socket.io": "^2.0.4",
+    "winston": "^2.4.2",
+    "winston-daily-rotate-file": "^3.1.3"
   },
   "devDependencies": {
+    "@heroku/foreman": "^2.0.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
     "electron": "^1.8.4",
     "electron-builder": "^20.8.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "foreman": "^2.0.0",
-    "nsp": "^3.2.1",
+    "mocha": "^5.2.0",
     "react-scripts": "^1.1.4",
     "standard": "^11.0.1"
   }

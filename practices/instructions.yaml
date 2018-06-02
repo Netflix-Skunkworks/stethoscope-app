@@ -1,11 +1,14 @@
-organization: Netflix
+organization: Stethoscope
 version: 1.0
 policyFormat: 1.0
 practices:
   firewall:
-    title: Your Firewall {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
-#      PASS: Your Firewall is enabled
-#      FAIL: Your Firewall should be enabled
+    title: >
+      {{#if passing}}
+        Your Firewall is enabled
+      {{else}}
+        Your Firewall should be enabled
+      {{/if}}
     description: >
       Firewalls control network traffic into and out of a system. Enabling the firewall on your device can prevent network-based attacks on your system, and is especially important if you make use of insecure wireless networks (such as at coffee shops and airports).
     directions:
@@ -16,28 +19,39 @@ practices:
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
         1. Click "Turn On Firewall" or "Start" to enable the firewall.
         1. Click Advanced to customize the firewall configuration.
+
       win32: |
-        1. Open [Windows Firewall](prefs://Firewall)
-        1. Select Turn Windows Firewall on or off
-        1. Ensure Turn Windows Firewall On is selected
+        1. Open [Windows Firewall Settings](ps://wf.msc)
+        1. Click "Windows Defender Firewall Properties" in the center pane
+        1. Ensure "Firewall state" is set to "On (recommended)" on the Domain, Public, and Private Profile tabs
         1. Click OK
+          - {{{statusIcon privateFirewall 'Enable Private Firewall'}}}
+          - {{{statusIcon publicFirewall 'Enable Public Firewall'}}}
+          - {{{statusIcon domainFirewall 'Enable Domain Firewall'}}}
 
   stethoscopeVersion:
-    title: Stethoscope {{#ifPassing}} is up-to-date {{else}} needs to be updated {{/ifPassing}}
-#      PASS: Stethoscope is up-to-date
-#      FAIL: Stethoscope needs to be updated
+    title: >
+      {{#if passing}}
+        Stethoscope is up-to-date
+      {{else}}
+        Stethoscope needs to be updated
+      {{/if}}
     description: >
       Keeping the Stethoscope app up-to-date gives you access to the latest features, security patches, and performance improvements.
     directions:
       darwin: |
-        <a href='action://update' class="btn">Update Stethoscope</a>
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
+
       win32: |
-        <a href='action://update' class="btn">Update Stethoscope</a>
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
 
   remoteLogin:
-    title: Remote Login {{#ifPassing}} is {{else}} should be {{/ifPassing}} disabled
-#      PASS: Remote Login is disabled
-#      FAIL: Remote Login should be disabled
+    title: >
+      {{#if passing}}
+        Remote Login is disabled
+      {{else}}
+        Remote Login should be disabled
+      {{/if}}
     description: >
       The 'Remote Login' setting on your device controls whether users can login remotely to the system. If you don't know what this is or why you would want it, you should disable 'Remote Login'.
     directions:
@@ -45,6 +59,7 @@ practices:
         1. Choose System Preferences from the Apple menu.
         1. Click [Sharing](x-apple.systempreferences:com.apple.preferences.sharing?Services_RemoteLogin).
         1. Uncheck "Remote Login" on the left.
+
       win32: |
         1. Open [Advanced System Preferences](ps://SystemPropertiesRemote)
         1. Under "Remote Desktop" heading, select "Don't allow remote connections to this computer"
@@ -52,11 +67,14 @@ practices:
         1. Click OK
 
   diskEncryption:
-    title: Disk Encryption {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
-#    PASS: Disk Encryption is enabled
-#      FAIL: Disk Encryption should be enabled
+    title: >
+      {{#if passing}}
+        Disk Encryption is enabled
+      {{else}}
+        Disk Encryption should be enabled
+      {{/if}}
     description: >
-      Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing Netflix internal data should be encrypted. It is every employee's responsibility to keep Netflix internal data safe.
+      Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing internal data should be encrypted. It is every employee's responsibility to keep internal data safe.
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.
@@ -76,14 +94,16 @@ practices:
         {{/each}}
 
       win32: |
-        1. Open [System Settings](ms-settings:)
-        1. Click ["Encryption"](prefs://BitLocker)
-        1. Verify that disk encryption is enabled
+        1. Open [BitLocker Drive Encryption](prefs://BitLocker)
+        1. Click "Turn on BitLocker"
 
   automaticUpdates:
-    title: Automatic Updates {{#ifPassing}} are {{else}} should be {{/ifPassing}} enabled
-#      PASS: Automatic Updates are enabled
-#      FAIL: Automatic Updates should be enabled
+    title: >
+      {{#if passing}}
+        Automatic Updates are enabled
+      {{else}}
+        Automatic Updates should be enabled
+      {{/if}}
     description: >
       One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures. Enabling automatic updating helps ensure your machine is up-to-date without having to manually install updates.
     directions:
@@ -91,11 +111,15 @@ practices:
         1. Choose System Preferences from the Apple menu.
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
+        {{#unless passing}}
         1. Make sure the following are checked:
 
-        - {{{statusIcon 'automaticAppUpdates' 'Install app updates'}}}
-        - {{{statusIcon 'automaticOsUpdates' 'Install macOS updates'}}}
-        - {{{statusIcon 'automaticSecurityUpdates' 'Install system data files and security updates'}}}
+          {{{statusIcon automaticDownloadUpdates 'Download newly available updates in the background'}}}
+          {{{statusIcon automaticAppUpdates 'Install app updates'}}}
+          {{{statusIcon automaticOsUpdates 'Install macOS updates'}}}
+          {{{statusIcon automaticSecurityUpdates 'Install system data files and \*security updates\*'}}}
+          {{{statusIcon automaticConfigDataInstall 'Install \*system data files\* and security updates'}}}
+        {{/unless}}
 
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
@@ -105,9 +129,12 @@ practices:
         1. Click "OK"
 
   screenLock:
-    title: Screen Lock {{#ifPassing}} is {{else}} should be {{/ifPassing}} enabled
-#      PASS: Screen Lock is enabled
-#      FAIL: Screen Lock should be enabled
+    title:  >
+      {{#if passing}}
+        Screen Lock is enabled
+      {{else}}
+        Screen Lock should be enabled
+      {{/if}}
     description: >
       Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode. Setting the timeout, i.e., the length of idle time before the screen saver takes effect, to 10 minutes or less is also recommended.
     directions:
@@ -118,15 +145,24 @@ practices:
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
         1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins
       win32: |
+        Standard settings:
+        1. Open [Lock screen settings](ms-settings:lockscreen)
+        1. Scroll down and click on "Screen timeout settings"
+        1. Ensure that Screen settings for "On battery power" and "When plugged in" are less than or equal to 10 minutes
+
+        If fixing the standard settings doesn't resolve the issue:
         1. Open [User Account Settings](ps://netplwiz)
-        1. Check Users must enter a user name and password to use this computer
+        1. Ensure that "Users must enter a user name and password to use this computer" is checked
         1. Click "Apply"
         1. Click "OK"
 
   osVersion:
-    title: System {{#ifPassing}} is up-to-date {{else}} needs to be updated {{/ifPassing}}
-#      PASS: System is up-to-date
-#      FAIL: System needs to be updated
+    title: >
+      {{#if passing}}
+        System is up-to-date
+      {{else}}
+        System needs to be updated
+      {{/if}}
     description: >
       One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures.
     directions:
@@ -135,9 +171,10 @@ practices:
         1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
         1. Install any outstanding updates.
 
-        {{{requirement 'osVersion' 'darwin'}}}
+        {{requirement "osVersion" "darwin"}}
+
       win32: |
         1. Open [Windows Update](ms-settings:windowsupdate) in the Settings.
         1. Click "Restart now"
 
-        {{{requirement 'osVersion' 'win32'}}}
+        {{requirement "osVersion" "win32"}}

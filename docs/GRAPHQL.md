@@ -1,4 +1,4 @@
-When running in development, the graphql server (and graphiql) can be access at [http://localhost:37370](http://localhost:37370)
+When running in development, the graphql server (and graphiql) can be accessed at [http://localhost:37370](http://localhost:37370)
 
 # Querying GraphQL
 
@@ -108,7 +108,7 @@ Response:
       }
     },
     "device": {
-      "deviceId": "A3B6EA78-EDDA-5B0C-9AC6-AB7748ED2EE6",
+      "deviceId": "AAAAAAA-BBBB-CCCC-1111-2222222222",
       "deviceName": "nfml-Y4H",
       "platform": "darwin",
       "platformName": "Apple Inc.",
@@ -118,8 +118,8 @@ Response:
       "osBuild": "17E199",
       "firmwareVersion": "173 (B&I)",
       "hardwareModel": "MacBookPro14,3 ",
-      "hardwareSerial": "C02TP3Y4HTD6",
-      "stethoscopeVersion": "1.0.3",
+      "hardwareSerial": "<SERIAL>",
+      "stethoscopeVersion": "1.1.7",
       "osqueryVersion": "2.11.2",
       "ipAddresses": [
         {
@@ -151,14 +151,14 @@ Response:
         {
           "interface": "en0",
           "type": "6",
-          "mac": "dc:a9:12:35:f5:d5",
+          "mac": "ab:cd:ef:12:34:56",
           "physicalAdapter": false,
           "lastChange": "1523200793"
         },
         {
           "interface": "en6",
           "type": "6",
-          "mac": "ac:de:40:12:11:22",
+          "mac": "ab:cd:ef:12:34:56",
           "physicalAdapter": false,
           "lastChange": "1523197723"
         }

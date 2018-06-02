@@ -9,22 +9,26 @@ import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
 import getBadge from './lib/getBadge'
 import { HOST } from './constants'
+import appConfig from './config.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
 
 const socket = openSocket(HOST)
 
 let platform = 'darwin'
-let shell, ipcRenderer
+let shell, ipcRenderer, log, remote
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
   shell = window.require('electron').shell
+  remote = window.require('electron').remote
+  log = remote.getGlobal('log')
   platform = os.platform()
   ipcRenderer = window.require('electron').ipcRenderer
 } catch (e) {
   // browser polyfill
   ipcRenderer = { on () {}, send () {} }
+  log = console
 }
 
 class App extends Component {
@@ -33,6 +37,7 @@ class App extends Component {
     policy: {},
     result: {},
     instructions: {},
+    scanIsRunning: false,
     loading: false,
     // determines loading screen language
     remoteScan: false,
@@ -50,113 +55,133 @@ class App extends Component {
   componentWillMount () {
     // perform the initial policy load & scan
     this.loadPractices()
-    // this handler tells the main process (in start.js) to resize the window
-    // via ipcRenderer.send('download:start') to just contain the progress bar
-    // while an update is downloading. 'download:complete' restores the
-    // original size when the download is compmlete
-    let downloadStartSent = false
-    ipcRenderer.on('download:progress', (event, downloadProgress) => {
-      // trigger the app resize first time through
-      if (!downloadStartSent) {
-        ipcRenderer.send('download:start')
-        downloadStartSent = true
-      }
-
-      if (downloadProgress && downloadProgress.percent >= 99) {
-        ipcRenderer.send('download:complete')
-        return this.setState({ downloadProgress: null }, () => { downloadStartSent = false })
-      } else {
-        this.setState({ downloadProgress })
-      }
-    })
-
-    ipcRenderer.on('download:error', (event, error) => {
-      ipcRenderer.send('download:complete')
-      this.setState({
-        downloadProgress: null,
-        error
-      }, () => { downloadStartSent = false })
-    })
-
-    // the focus/blur handlers are used to update the last scanned time
-    window.addEventListener('focus', () => this.setState({
-      focused: true
-    }), false)
-
-    window.addEventListener('blur', () => this.setState({
-      focused: false
-    }), false)
-
+    // flag ensures the download:start event isn't sent multiple times
+    this.downloadStartSent = false
+    // handle App update download progress
+    ipcRenderer.on('download:progress', this.onDownloadProgress)
+    // handles any errors that occur when updating (restores window size, etc.)
+    ipcRenderer.on('download:error', this.onDownloadError)
     // the server emits this event when a remote scan begins
-    // TODO don't hardcode Meechum and Stethoscope
-    socket.on('scan:init', ({ remote }) => {
-      ipcRenderer.send('scan:init')
-      this.setState({
-        loading: true,
-        remoteScan: remote,
-        scannedBy: remote ? 'Meechum' : 'Stethoscope'
-      })
-    })
-
+    socket.on('scan:init', this.onScanInit)
     // setup a socket io listener to refresh the app when a scan is performed
-    socket.on('scan:complete', ({ noResults = false, variables, remote, result, policy: appPolicy, showNotification }) => {
-      if (noResults) {
-        return this.setState({ loading: false, scannedBy: 'Stethoscope' })
-      }
+    socket.on('scan:complete', this.onScanComplete)
+    // the focus/blur handlers are used to update the last scanned time
+    window.addEventListener('focus', () => this.setState({ focused: true }))
+    window.addEventListener('blur', () => this.setState({ focused: false }))
+  }
 
-      const { data: { policy } } = Object(result)
+  onDownloadProgress = (event, downloadProgress) => {
+    // trigger the app resize first time through
+    if (!this.downloadStartSent) {
+      ipcRenderer.send('download:start')
+      this.downloadStartSent = true
+    }
 
-      let newState = {
-        result: policy.validate,
-        loading: false,
-        remoteScan: remote,
-        scannedBy: remote ? 'Meechum' : 'Stethoscope'
-      }
+    if (downloadProgress && downloadProgress.percent >= 99) {
+      ipcRenderer.send('download:complete')
+    } else {
+      this.setState({ downloadProgress })
+    }
+  }
 
-      if (newState.result.status !== 'PASS') {
-        const len = Object.keys(newState.result).filter(k => newState.result[k] === 'FAIL').length
-        const violationCount = len > 1 ? len - 1 : 1
-        ipcRenderer.send('scan:violation', getBadge(violationCount), violationCount)
-      }
-
-      this.setState(newState, () => {
-        if (this.state.result.status !== 'PASS' && showNotification) {
-          let notification = new Notification('Security recommendation', {
-            body: 'You can improve the security settings on this device. Click for more information.'
-          })
-          notification.onerror = () => {
-            console.log('unable to show desktop notification')
-          }
-        }
-      })
+  onDownloadError = (event, error) => {
+    ipcRenderer.send('download:complete', { resize: true })
+    const msg = `Error downloading app update: ${error}`
+    log.error(msg)
+    this.setState({
+      downloadProgress: null,
+      error: msg
+    }, () => {
+      // reset this so downloading can start again
+      this.downloadStartSent = false
     })
+  }
 
-    // emitted by the server if a new policyServer was sent in a request
-    // forces app to download new policy/config/instructions
-    socket.on('rescan', () => {
-      this.loadPractices()
+  onScanInit = ({ remote, remoteLabel }) => {
+    ipcRenderer.send('scan:init')
+    this.setState({
+      loading: true,
+      remoteScan: remote,
+      scannedBy: remote ? remoteLabel : 'Stethoscope'
+    })
+  }
+
+  onScanComplete = payload => {
+    const {
+      errors = [],
+      noResults = false,
+      remote: remoteScan,
+      remoteLabel,
+      result,
+      policy: appPolicy,
+      showNotification
+    } = payload
+
+    // device only scan with no policy completed
+    if (noResults) {
+      return this.setState({ loading: false, scannedBy: 'Stethoscope' })
+    }
+
+    if (errors && errors.length) {
+      log.log({
+        level: 'error',
+        message: 'Error scanning',
+        policy: appPolicy
+      })
+
+      return this.setState({
+        loading: false,
+        errors: errors.map(({ message }) => message)
+      })
+    }
+
+    const { data: { policy = {} } } = Object(result)
+    const scannedBy = remote ? remoteLabel : 'Stethoscope'
+
+    let newState = {
+      result: policy.validate,
+      loading: false,
+      remoteScan,
+      scannedBy
+    }
+
+    if (policy.validate.status !== 'PASS') {
+      const violations = Object.keys(newState.result).filter(k => newState.result[k] === 'FAIL')
+      const violationCount = violations.length > 1 ? violations.length - 1 : 1
+      ipcRenderer.send('scan:violation', getBadge(violationCount), violationCount)
+    }
+
+    this.setState(newState, () => {
+      ipcRenderer.send('app:loaded')
+      if (this.state.result.status !== 'PASS' && showNotification) {
+        const note = new Notification('Security recommendation', {
+          body: 'You can improve the security settings on this device. Click for more information.'
+        })
+        note.onerror = err => console.error(err)
+      }
     })
   }
 
   handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    console.log('handling response error', new Error(err))
-    this.setState({ error: new Error(err) })
+    log.error(err)
+    this.setState({ error: err })
   }
 
   loadPractices = () => {
     this.setState({ loading: true }, () => {
-      Promise.all([
-        fetch(`${HOST}/config`).then(d => d.json()).catch(this.handleResponseError),
-        fetch(`${HOST}/policy`).then(d => d.json()).catch(this.handleResponseError),
-        fetch(`${HOST}/instructions`).then(d => d.json()).catch(this.handleResponseError)
-      ]).then(([config, policy, instructions]) => {
-        this.setState({ config, policy, instructions }, () => this.scan())
+      const files = ['config', 'policy', 'instructions']
+      const promises = files.map(item =>
+        fetch(`${HOST}/${item}`).then(res => res.json()).catch(this.handleResponseError)
+      )
+
+      Promise.all(promises).then(([config, policy, instructions]) => {
+        this.setState({ config, policy, instructions }, () => {
+          if (!this.state.scanIsRunning) {
+            this.scan()
+          }
+        })
       }).catch(this.handleResponseError)
     })
-  }
-
-  loadRemote = (url) => {
-    this.loadPractices(url)
   }
 
   openExternal = event => {
@@ -167,16 +192,23 @@ class App extends Component {
   }
 
   scan = () => {
-    Stethoscope.validate(this.state.policy).then(({ device, result }) => {
-      const lastScanTime = Date.now()
-      this.setState({
-        device,
-        result,
-        lastScanTime,
-        scannedBy: 'Stethoscope',
-        loading: false
+    this.setState({ scanIsRunning: true }, () => {
+      Stethoscope.validate(this.state.policy).then(({ device, result }) => {
+        const lastScanTime = Date.now()
+        this.setState({
+          device,
+          result,
+          lastScanTime,
+          scanIsRunning: false,
+          scannedBy: 'Stethoscope',
+          loading: false
+        }, () => {
+          ipcRenderer.send('app:loaded')
+        })
+      }).catch(err => {
+        this.handleResponseError({ message: JSON.stringify(err.errors) })
       })
-    }).catch(this.handleResponseError)
+    })
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })
@@ -187,6 +219,8 @@ class App extends Component {
       scannedBy, lastScanTime, error,
       instructions, loading, highlightRescan
     } = this.state
+
+    const isDev = process.env.NODE_ENV === 'development'
 
     let content = null
 
@@ -204,13 +238,21 @@ class App extends Component {
 
     if (error) {
       content = (
-        <ErrorMessage message={error.message} />
+        <ErrorMessage
+          showStack={isDev}
+          message={error.message}
+          stack={error.stack}
+          config={appConfig}
+        />
       )
     }
 
     if (loading) {
       content = (
-        <Loader remoteScan={this.state.remoteScan} />
+        <Loader
+          remoteScan={this.state.remoteScan}
+          remoteLabel={this.state.scannedBy}
+        />
       )
     }
 
@@ -238,14 +280,15 @@ class App extends Component {
                 onClick={this.scan}>
                 <span className='icon icon-arrows-ccw' />rescan
               </button>
-
-              <button
-                className='btn pull-right'
-                href='https://stethoscope.prod.netflix.net/'
-                onClick={this.openExternal}
-              >
-                <span className='icon icon-monitor white' />view all devices
-              </button>
+              {appConfig.stethoscopeWebURI && (
+                <button
+                  className='btn pull-right'
+                  href={appConfig.stethoscopeWebURI}
+                  onClick={this.openExternal}
+                >
+                  <span className='icon icon-monitor white' />view all devices
+                </button>
+              )}
             </div>
           </footer>
         </div>

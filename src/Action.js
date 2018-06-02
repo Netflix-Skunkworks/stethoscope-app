@@ -1,20 +1,20 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
-import semver from 'semver'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
-import showdown from 'showdown'
 import Handlebars from 'handlebars'
+import semver from 'semver'
+import showdown from 'showdown'
 
 const converter = new showdown.Converter()
 
 class Action extends Component {
+  state = {
+    showDescription: false
+  }
+
   constructor (props) {
     super(props)
-    this.state = {
-      showDescription: false
-    }
-    this.toggleDescription = this.toggleDescription.bind(this)
     this.registerHelpers(props)
   }
 
@@ -45,7 +45,7 @@ class Action extends Component {
     }
   }
 
-  toggleDescription () {
+  toggleDescription = () => {
     if (!this.state.showDescription && this.props.status === 'FAIL') {
       this.props.onExpandPolicyViolation()
     }
@@ -58,24 +58,26 @@ class Action extends Component {
 
   registerHelpers = ({ security, policy, device }) => {
     const getIcon = (status, msg) => {
-      return ReactDOMServer.renderToStaticMarkup(
-        <div className='subtask'>
-          <ActionIcon
-            className='action-icon'
-            name={this.iconName(status)}
-            color={this.iconColor(status)}
-            title={this.hoverText(status)}
-            width='18px'
-            height='18px'
-          />
-          <span style={{ color: this.iconColor(status)}}>{msg}</span>
-        </div>
+      return new Handlebars.SafeString(
+        ReactDOMServer.renderToStaticMarkup(
+          <div className='subtask'>
+            <ActionIcon
+              className='action-icon'
+              name={this.iconName(status)}
+              color={this.iconColor(status)}
+              title={this.hoverText(status)}
+              width='18px'
+              height='18px'
+            />
+            <strong style={{ color: this.iconColor(status)}}>{msg}</strong>
+          </div>
+        )
       )
     }
 
-    Handlebars.registerHelper('statusIcon', (key, msg) => {
-      if (security[key] === 'ON') return
-      return getIcon('suggested', msg)
+    Handlebars.registerHelper('statusIcon', (status, altMessage) => {
+      if (status === 'ON') return
+      return getIcon('suggested', altMessage)
     })
 
     Handlebars.registerHelper('okIcon', label => {
@@ -86,34 +88,32 @@ class Action extends Component {
       return getIcon('critical', label)
     })
 
-    Handlebars.registerHelper('ifPassing', options => {
-      const { action: { name, status }} = this.props
-      const trueFn = options.fn
-      const falseFn = options.inverse
-
-      if (status === 'PASS') {
-        return trueFn(options.context)
-      } else {
-        return falseFn(options.context).trim()
-      }
-    })
-
     Handlebars.registerHelper('requirement', (key, platform) => {
-      try {
-        const version = semver.coerce(policy[key][platform].ok)
-        return ReactDOMServer.renderToStaticMarkup(
-          <div>
-            Suggested version: <span class="suggested-value">${version}</span><br />
-            Your version: <span class="suggested-value">${device[key]}</span>
-          </div>
+      const version = semver.coerce(policy[key][platform].ok)
+      return new Handlebars.SafeString(
+        ReactDOMServer.renderToStaticMarkup(
+          <table style={{width: 'auto'}}>
+            <tbody>
+              <tr>
+                <td>Suggested version:</td>
+                <td>
+                  <span className="suggested-value">{String(version)}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Your version:</td>
+                <td>
+                  <span className="suggested-value">{String(device[key])}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         )
-      } catch (e) {
-        return ''
-      }
+      )
     })
   }
 
-  parseDirections() {
+  parseDirections () {
     const { security, device, action: { directions } } = this.props
     const html = converter.makeHtml(directions)
     const template = Handlebars.compile(html)
@@ -123,8 +123,8 @@ class Action extends Component {
   parseTitle() {
     const { action: { status, title }} = this.props
     const template = Handlebars.compile(title)
-    console.log(template(), { status })
-    return template()
+    const passing = status === 'PASS'
+    return template({ passing })
   }
 
   render () {

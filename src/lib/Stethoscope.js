@@ -66,16 +66,24 @@ export default class Stethoscope {
           automaticUpdates
           remoteLogin
           stethoscopeVersion
+
           requiredApplications {
             name
             status
           }
+
           bannedApplications {
+            name
+            status
+          }
+
+          suggestedApplications {
             name
             status
           }
         }
       }
+
       device {
         deviceId
         deviceName
@@ -88,25 +96,33 @@ export default class Stethoscope {
         hardwareSerial
         stethoscopeVersion
         osqueryVersion
+
         disks {
           label
           name
           encrypted
         }
+
         ipAddresses {
           interface
           address
           mask
           broadcast
         }
+
         macAddresses {
           interface
           type
           mac
           lastChange
+          physicalAdapter
         }
+
         security {
           firewall
+          publicFirewall
+          privateFirewall
+          domainFirewall
           automaticUpdates
           diskEncryption
           screenLock
@@ -114,6 +130,8 @@ export default class Stethoscope {
           automaticAppUpdates
           automaticSecurityUpdates
           automaticOsUpdates
+          automaticDownloadUpdates
+          automaticConfigDataInstall
         }
       }
     }`
@@ -135,10 +153,14 @@ export default class Stethoscope {
             return res
         }
       })
-      .then(({ data }) => {
-        const result = data.policy.validate
-        const { device } = data
-        resolve({ result, device })
+      .then(({ errors, data = {} }) => {
+        const { policy, device } = data
+        if (errors) {
+          reject({ errors })
+        } else {
+          const { validate: result } = policy
+          resolve({ result, device })
+        }
       })
       .catch((err) => {
         if (err.message === 'retry') {

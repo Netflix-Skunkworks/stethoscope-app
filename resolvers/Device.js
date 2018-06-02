@@ -1,7 +1,21 @@
 const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
-const macFriendlyName = require('../sources/macmodels')
+const Security = require('./Security')
+const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE } = require('../src/constants')
+const { Device: PlatformResolvers } = require('./platform')
+
+const securityToDeviceStatus = status => {
+  if (typeof status === 'boolean') {
+    return status ? ON : OFF
+  }
+
+  if (status === NUDGE) {
+    return OFF
+  }
+
+  return UNKNOWN
+}
 
 const Device = {
   async deviceId (root, args, context) {
@@ -20,7 +34,7 @@ const Device = {
   },
 
   async platformName (root, args, context) {
-    const { vendor } = await context.platformInfo
+    const { vendor = '' } = await context.platformInfo
     return vendor.trim()
   },
 
@@ -45,13 +59,12 @@ const Device = {
   },
 
   async friendlyName (root, args, context) {
-    const { hardware_model: hardwareModel } = await context.systemInfo
-
-    switch (context.platform) {
-      case 'darwin':
-        return macFriendlyName(hardwareModel)
+    const os = PlatformResolvers[context.platform]
+    if ('friendlyName' in os) {
+      return os.friendlyName(root, args, context)
     }
-    return hardwareModel
+
+    return UNSUPPORTED
   },
 
   async hardwareModel (root, args, context) {
@@ -65,24 +78,16 @@ const Device = {
   },
 
   async applications (root, args, context) {
-    switch (context.platform) {
-      case 'darwin':
-        const apps = await OSQuery.all('apps', {
-          fields: ['name', 'display_name as displayName', 'bundle_version as version', 'last_opened_time as lastOpenedTime']
-        })
-        return apps
-      case 'win32':
-        const programs = await OSQuery.all('programs', {
-          fields: ['name', 'version', 'install_date as installDate']
-        })
-        return programs
-      default:
-        return []
+    const os = PlatformResolvers[context.platform]
+    if ('applications' in os) {
+      return os.applications(root, args, context)
     }
+
+    return UNSUPPORTED
   },
 
   policyResult (root, args, context) {
-    return 'UNKNOWN'
+    return UNKNOWN
   },
 
   // can/should these be filtered down?
@@ -94,7 +99,7 @@ const Device = {
   async macAddresses (root, args, context) {
     const addresses = await OSQuery.all('interface_details', {
       fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
-    })
+    }) || []
 
     const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
 
@@ -111,16 +116,81 @@ const Device = {
   },
 
   async security (root, args, context) {
-    return true
+    return {
+      async firewall () {
+        const status = await Security.firewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticUpdates () {
+        const status = await Security.automaticUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticSecurityUpdates () {
+        const status = await Security.automaticSecurityUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticOsUpdates () {
+        const status = await Security.automaticOsUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticConfigDataInstall () {
+        const status = await Security.automaticConfigDataInstall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticDownloadUpdates () {
+        const status = await Security.automaticDownloadUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticAppUpdates () {
+        const status = await Security.automaticAppUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async diskEncryption () {
+        const status = await Security.diskEncryption(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async screenLock () {
+        const status = await Security.screenLock(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async remoteLogin () {
+        const status = await Security.remoteLogin(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async publicFirewall () {
+        const status = await Security.publicFirewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async privateFirewall () {
+        const status = await Security.privateFirewall(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async domainFirewall () {
+        const status = await Security.domainFirewall(root, args, context)
+        return securityToDeviceStatus(status)
+      }
+    }
   },
 
   async disks (root, args, context) {
-    const userPartitions = await OSQuery.all('mounts m join disk_encryption de ON m.device_alias = de.name join block_devices bd ON bd.name = de.name', {
-      where: "m.path = '/'",
-      // where: 'bd.type != "Virtual Interface"', // this will exclude DMGs
-      fields: ['label', 'de.name as name', 'de.uuid as uuid', 'encrypted']
-    })
-    return userPartitions
+    const os = PlatformResolvers[context.platform]
+    if ('disks' in os) {
+      return os.disks(root, args, context)
+    }
+
+    return UNSUPPORTED
   }
 }
 
