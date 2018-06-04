@@ -1,4 +1,4 @@
-const { UNSUPPORTED } = require('../constants')
+const { UNSUPPORTED, UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
 
 /*
@@ -59,7 +59,7 @@ const getScreenLockActive = async () => {
     `$name = 'ScreenSaveActive'`,
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
-  const output = execPowershell(commands.join(';'))
+  const output = await execPowershell(commands.join(';'))
 
   if (output === UNKNOWN) return UNKNOWN
   return output.includes('1')
