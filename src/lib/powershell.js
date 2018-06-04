@@ -17,7 +17,7 @@ const execPowershell = async (cmd) => {
   } catch (e) {
     ps.dispose()
     log.error(`powershell error: ${e} | cmd: ${cmd}`)
-    throw new Exception(e)
+    throw new Error(e)
   }
 }
 
