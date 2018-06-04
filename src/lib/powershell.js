@@ -1,5 +1,6 @@
 const { UNSUPPORTED, UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
+const log = require('./logger')
 
 /*
   NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
@@ -15,7 +16,8 @@ const execPowershell = async (cmd) => {
     return output
   } catch (e) {
     ps.dispose()
-    return UNKNOWN
+    log.error(`powershell error: ${e} | cmd: ${cmd}`)
+    throw new Exception(e)
   }
 }
 
@@ -26,30 +28,28 @@ const openPreferences = pane => {
 const run = cmd => execPowershell(cmd)
 
 const getUserId = async () => {
-  const output = await execPowershell('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
-
-  if (output !== UNKNOWN) {
+  try {
+    const output = await execPowershell('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
     return output.split(/[\r\n]+/).pop()
+  } catch (e) {
+    return UNKNOWN
   }
-
-  return output
 }
 
 const firewallStatus = async () => {
-  const output = await execPowershell('netsh advfirewall show allprofiles')
-
-  if (output === UNKNOWN) {
-    return {
-      domainFirewall: UNKNOWN,
-      privateFirewall: UNKNOWN,
-      publicFirewall: UNKNOWN
-    }
-  } else {
+  try {
+    const output = await execPowershell('netsh advfirewall show allprofiles')
     const firewalls = ['domainFirewall', 'privateFirewall', 'publicFirewall']
     return output.match(/State[\s\t]*(ON|OFF)/g).reduce((p, c, i) => {
       p[firewalls[i]] = c.includes('ON') ? 'ON' : 'OFF'
       return p
     }, {})
+  } catch (e) {
+    return {
+      domainFirewall: UNKNOWN,
+      privateFirewall: UNKNOWN,
+      publicFirewall: UNKNOWN
+    }
   }
 }
 
@@ -59,10 +59,12 @@ const getScreenLockActive = async () => {
     `$name = 'ScreenSaveActive'`,
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
-  const output = await execPowershell(commands.join(';'))
-
-  if (output === UNKNOWN) return UNKNOWN
-  return output.includes('1')
+  try {
+    const output = await execPowershell(commands.join(';'))
+    return output.includes('1')
+  } catch (e) {
+    return UNKNOWN
+  }
 }
 
 // I'm sorry
@@ -74,7 +76,6 @@ const getScreenLockActive = async () => {
 const getScreenLockTimeout = async () => {
   // determine the GUID of the user's active power scheme
   const output = await execPowershell('powercfg /getactivescheme')
-
   const match = output.match(/:\s([\w-]+)/)
   let activePowerGUID = null
 

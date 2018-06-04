@@ -192,7 +192,7 @@ class App extends Component {
   }
 
   scan = () => {
-    this.setState({ scanIsRunning: true }, () => {
+    this.setState({ loading: true, scanIsRunning: true }, () => {
       Stethoscope.validate(this.state.policy).then(({ device, result }) => {
         const lastScanTime = Date.now()
         this.setState({
