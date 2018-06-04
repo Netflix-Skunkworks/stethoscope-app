@@ -32,11 +32,10 @@ const getUserId = async () => {
   }
 
   const ps = new Shell(shellOptions)
-  let output = ''
 
   ps.addCommand('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
   try {
-    output = await ps.invoke()
+    const output = await ps.invoke()
     ps.dispose()
     // cache for an hour
     cache.set('getUserId', 1000 * 60 * 60)
