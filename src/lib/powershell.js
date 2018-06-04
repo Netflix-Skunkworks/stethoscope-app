@@ -11,13 +11,19 @@ const openPreferences = pane => {
   const cmd = `Get-ControlPanelItem *${pane.replace(/[^\w]/g, '')}* | Show-ControlPanelItem`
   const ps = new Shell(shellOptions)
   ps.addCommand(cmd)
-  return ps.invoke()
+  return ps.invoke().then(output => {
+    ps.dispose()
+    return output
+  }).catch(err => ps.dispose())
 }
 
 const run = cmd => {
   const ps = new Shell(shellOptions)
   ps.addCommand(cmd)
-  return ps.invoke()
+  return ps.invoke().then(output => {
+    ps.dispose()
+    return output
+  }).catch(err => ps.dispose())
 }
 
 const getUserId = async () => {
@@ -26,11 +32,20 @@ const getUserId = async () => {
   }
 
   const ps = new Shell(shellOptions)
+  let output = ''
+
   ps.addCommand('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
-  const output = await ps.invoke()
-  // cache for an hour
-  cache.set('getUserId', 1000 * 60 * 60)
-  return output.split(/[\r\n]+/).pop()
+  try {
+    output = await ps.invoke()
+    ps.dispose()
+    // cache for an hour
+    cache.set('getUserId', 1000 * 60 * 60)
+    return output.split(/[\r\n]+/).pop()
+  } catch (e) {
+    ps.dispose()
+    return UNKNOWN
+  }
+
 }
 
 const firewallStatus = async () => {
@@ -40,16 +55,29 @@ const firewallStatus = async () => {
 
   const ps = new Shell(shellOptions)
   ps.addCommand('netsh advfirewall show allprofiles')
-  const output = await ps.invoke().then((output) => {
-    const firewalls = ['domainFirewall', 'privateFirewall', 'publicFirewall']
-    return output.match(/State[\s\t]*(ON|OFF)/g).reduce((p, c, i) => {
-      p[firewalls[i]] = c.includes('ON') ? 'ON' : 'OFF'
-      return p
-    }, {})
-  })
-  // cache for 10 seconds
-  cache.set('firewallStatus', output, 1000 * 10)
-  return output
+
+  try {
+    const output = await ps.invoke().then((output) => {
+      ps.dispose()
+      const firewalls = ['domainFirewall', 'privateFirewall', 'publicFirewall']
+      return output.match(/State[\s\t]*(ON|OFF)/g).reduce((p, c, i) => {
+        p[firewalls[i]] = c.includes('ON') ? 'ON' : 'OFF'
+        return p
+      }, {})
+    })
+
+    // cache for 10 seconds
+    cache.set('firewallStatus', output, 1000 * 10)
+    return output
+  } catch (e) {
+    ps.dispose()
+    return {
+      domainFirewall: UNKNOWN,
+      privateFirewall: UNKNOWN,
+      publicFirewall: UNKNOWN
+    }
+  }
+
 }
 
 const getScreenLockActive = async () => {
@@ -64,10 +92,17 @@ const getScreenLockActive = async () => {
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
   ps.addCommand(commands.join(';'))
-  const output = await ps.invoke()
-  // cache for 10 seconds
-  cache.set('getScreenLockActive', output.includes('1'), 1000 * 10)
-  return output.includes('1')
+  try {
+    const output = await ps.invoke()
+    ps.dispose()
+    // cache for 10 seconds
+    cache.set('getScreenLockActive', output.includes('1'), 1000 * 10)
+    return output.includes('1')
+  } catch (e) {
+    ps.dispose()
+    return UNKNOWN
+  }
+
 }
 
 // I'm sorry
@@ -85,6 +120,8 @@ const getScreenLockTimeout = async () => {
   // determine the GUID of the user's active power scheme
   ps.addCommand('powercfg /getactivescheme')
   const output = await ps.invoke()
+  ps.dispose()
+
   const match = output.match(/:\s([\w-]+)/)
   let activePowerGUID = null
 
@@ -118,6 +155,8 @@ const getScreenLockTimeout = async () => {
       pluggedIn: parseInt(data['Current AC Power Setting Index'], 16) || Infinity,
       battery: parseInt(data['Current DC Power Setting Index'], 16) || Infinity
     }
+
+    ps.dispose()
   }
 
   // cache for 10 seconds
@@ -142,9 +181,11 @@ const getDisableLockWorkStation = async () => {
   try {
     const output = await ps.invoke()
     cache.set('getDisableLockWorkStation', true, 1000 * 10)
+    ps.dispose()
     return !!output
   } catch (e) {
     cache.set('getDisableLockWorkStation', false, 1000 * 10)
+    ps.dispose()
     return false
   }
 }
@@ -174,6 +215,8 @@ const disks = async (disks = []) => {
       } catch (e) {
         encrypted = UNSUPPORTED
       }
+
+      ps.dispose()
 
       return {
         label,
