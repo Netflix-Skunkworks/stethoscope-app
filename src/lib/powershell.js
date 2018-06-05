@@ -1,73 +1,72 @@
-const { UNSUPPORTED } = require('../constants')
+const { UNSUPPORTED, UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
-const Cache = require('./Cache')
+const log = require('./logger')
 
-const cache = new Cache()
-const shellOptions = {
-  debugMsg: false
+/*
+  NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
+*/
+const execPowershell = async (cmd, logError = true) => {
+  const ps = new Shell({
+    debugMsg: false
+  })
+  ps.addCommand(cmd)
+  try {
+    const output = await ps.invoke()
+    ps.dispose()
+    return output
+  } catch (e) {
+    ps.dispose()
+    if (logError !== false) {
+      log.error(`powershell error: ${e} | cmd: ${cmd}`)
+    }
+    throw new Error(e)
+  }
 }
 
 const openPreferences = pane => {
-  const cmd = `Get-ControlPanelItem *${pane.replace(/[^\w]/g, '')}* | Show-ControlPanelItem`
-  const ps = new Shell(shellOptions)
-  ps.addCommand(cmd)
-  return ps.invoke()
+  return execPowershell(`Get-ControlPanelItem *${pane.replace(/[^\w]/g, '')}* | Show-ControlPanelItem`)
 }
 
-const run = cmd => {
-  const ps = new Shell(shellOptions)
-  ps.addCommand(cmd)
-  return ps.invoke()
-}
+const run = cmd => execPowershell(cmd)
 
 const getUserId = async () => {
-  if (cache.has('getUserId')) {
-    return cache.get('getUserId')
+  try {
+    const output = await execPowershell('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
+    return output.split(/[\r\n]+/).pop()
+  } catch (e) {
+    return UNKNOWN
   }
-
-  const ps = new Shell(shellOptions)
-  ps.addCommand('[System.Security.Principal.WindowsIdentity]::GetCurrent().User | Select Value')
-  const output = await ps.invoke()
-  // cache for an hour
-  cache.set('getUserId', 1000 * 60 * 60)
-  return output.split(/[\r\n]+/).pop()
 }
 
 const firewallStatus = async () => {
-  if (cache.get('firewallStatus')) {
-    return cache.get('firewallStatus')
-  }
-
-  const ps = new Shell(shellOptions)
-  ps.addCommand('netsh advfirewall show allprofiles')
-  const output = await ps.invoke().then((output) => {
+  try {
+    const output = await execPowershell('netsh advfirewall show allprofiles')
     const firewalls = ['domainFirewall', 'privateFirewall', 'publicFirewall']
     return output.match(/State[\s\t]*(ON|OFF)/g).reduce((p, c, i) => {
       p[firewalls[i]] = c.includes('ON') ? 'ON' : 'OFF'
       return p
     }, {})
-  })
-  // cache for 10 seconds
-  cache.set('firewallStatus', output, 1000 * 10)
-  return output
+  } catch (e) {
+    return {
+      domainFirewall: UNKNOWN,
+      privateFirewall: UNKNOWN,
+      publicFirewall: UNKNOWN
+    }
+  }
 }
 
 const getScreenLockActive = async () => {
-  if (cache.get('getScreenLockActive')) {
-    return cache.get('getScreenLockActive')
-  }
-
-  const ps = new Shell(shellOptions)
   const commands = [
     `$key = 'HKCU:\\Control Panel\\Desktop'`,
     `$name = 'ScreenSaveActive'`,
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
-  ps.addCommand(commands.join(';'))
-  const output = await ps.invoke()
-  // cache for 10 seconds
-  cache.set('getScreenLockActive', output.includes('1'), 1000 * 10)
-  return output.includes('1')
+  try {
+    const output = await execPowershell(commands.join(';'))
+    return output.includes('1')
+  } catch (e) {
+    return UNKNOWN
+  }
 }
 
 // I'm sorry
@@ -77,14 +76,8 @@ const getScreenLockActive = async () => {
 // the subkeys (DISPLAY > SCREEN SLEEP) under that. The output is incredibly
 // verbose, hence all of the string parsing.
 const getScreenLockTimeout = async () => {
-  if (cache.get('getScreenLockTimeout')) {
-    return cache.get('getScreenLockTimeout')
-  }
-
-  const ps = new Shell(shellOptions)
   // determine the GUID of the user's active power scheme
-  ps.addCommand('powercfg /getactivescheme')
-  const output = await ps.invoke()
+  const output = await execPowershell('powercfg /getactivescheme')
   const match = output.match(/:\s([\w-]+)/)
   let activePowerGUID = null
 
@@ -98,13 +91,10 @@ const getScreenLockTimeout = async () => {
   }
 
   if (activePowerGUID) {
-    const ps = new Shell(shellOptions)
-    // ewwwwww
     const displayGUID = '7516b95f-f776-4464-8c53-06167f40cc99'
     const screenSleepGUID = '3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e'
     const query = `powercfg /query ${activePowerGUID} ${displayGUID} ${screenSleepGUID}`
-    ps.addCommand(query)
-    const out = await ps.invoke()
+    const out = await execPowershell(query)
     const data = out.split(/([\r\n]+)/)
       .filter(i => i !== '\n')
       .map(l => l.trim().split(': '))
@@ -119,49 +109,31 @@ const getScreenLockTimeout = async () => {
       battery: parseInt(data['Current DC Power Setting Index'], 16) || Infinity
     }
   }
-
-  // cache for 10 seconds
-  cache.set('getScreenLockTimeout', response, 1000 * 10)
   return response
 }
 
 const getDisableLockWorkStation = async () => {
-  if (cache.get('getDisableLockWorkStation')) {
-    return cache.get('getDisableLockWorkStation')
-  }
-
   const commands = [
     '$name = "DisableLockWorkStation"',
     '$key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"',
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
 
-  const ps = new Shell(shellOptions)
-  ps.addCommand(commands.join('; '))
-
   try {
-    const output = await ps.invoke()
-    cache.set('getDisableLockWorkStation', true, 1000 * 10)
-    return !!output
+    const output = await execPowershell(commands.join('; '), false)
+    return true
   } catch (e) {
-    cache.set('getDisableLockWorkStation', false, 1000 * 10)
     return false
   }
 }
 
 const disks = async (disks = []) => {
-  if (cache.get('disks')) {
-    return cache.get('disks')
-  }
-
   const status = await Promise.all(
     disks.map(async ({ label }) => {
-      const ps = new Shell(shellOptions)
       let encrypted
 
       try {
-        ps.addCommand(`manage-bde -status ${label}`)
-        const out = await ps.invoke()
+        const out = await execPowershell(`manage-bde -status ${label}`)
         const data = out.split(/[\r\n]+/)
           .map(line =>
             line.trim().split(':').map(w => w.trim())
@@ -182,9 +154,6 @@ const disks = async (disks = []) => {
       }
     })
   )
-
-  // cache for 10 minutes
-  cache.set('disks', status, 1000 * 60 * 10)
 
   return status
 }
