@@ -5,7 +5,7 @@ const log = require('./logger')
 /*
   NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
 */
-const execPowershell = async (cmd) => {
+const execPowershell = async (cmd, logError = true) => {
   const ps = new Shell({
     debugMsg: false
   })
@@ -16,7 +16,9 @@ const execPowershell = async (cmd) => {
     return output
   } catch (e) {
     ps.dispose()
-    log.error(`powershell error: ${e} | cmd: ${cmd}`)
+    if (logError !== false) {
+      log.error(`powershell error: ${e} | cmd: ${cmd}`)
+    }
     throw new Error(e)
   }
 }
@@ -116,9 +118,13 @@ const getDisableLockWorkStation = async () => {
     '$key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"',
     '(Get-ItemProperty -Path $key -Name $name).$name'
   ]
-  const output = await execPowershell(commands.join('; '))
 
-  return output !== UNKNOWN
+  try {
+    const output = await execPowershell(commands.join('; '), false)
+    return true
+  } catch (e) {
+    return false
+  }
 }
 
 const disks = async (disks = []) => {
