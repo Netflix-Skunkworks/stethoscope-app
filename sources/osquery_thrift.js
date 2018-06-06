@@ -12,9 +12,9 @@ const osqueryPlatforms = {
   linux: '../bin/osqueryi_linux'
 }
 
-const sockets = {
-  darwin: `/Users/${process.env.USER}/.osquery/shell.em`,
-  win32: `\\\\.\\pipe\\shell.em`
+const socketPath = {
+  darwin: `/Users/${process.env.USER}/.osquery`,
+  win32: `\\\\.\\pipe`
 }
 
 const defaultOptions = {
@@ -39,15 +39,20 @@ class OSQuery {
   }
 
   static start() {
+    const socket = socketPath[platform] + path.sep + 'shell.em'
+    const binary = osqueryPlatforms[platform]
+    const prefix = process.env.NODE_ENV === 'development' ? '' : '../'
+    const osqueryPath = path.resolve(__dirname, prefix + binary)
+
+    log.info(`startup: ${osqueryPath, ['--nodisable_extensions', `--extensions_socket=${socket}`].join(' ')}`)
+
     return new Promise((resolve, reject) => {
-      const prefix = process.env.NODE_ENV === 'development' ? '' : '../'
-      const osqueryPath = path.resolve(__dirname, prefix + osqueryPlatforms[platform])
-      const osqueryi = spawn(osqueryPath, ['--nodisable_extensions', `--extensions_socket=${sockets[platform]}`], {
+      const osqueryi = spawn(osqueryPath, ['--nodisable_extensions', `--extensions_socket=${socket}`], {
         windowsHide: true,
       })
 
       setTimeout(() => {
-        this.connection = ThriftClient.getInstance({ path: sockets[platform] })
+        this.connection = ThriftClient.getInstance({ path: socket })
         resolve()
       }, 100)
 
@@ -60,7 +65,7 @@ class OSQuery {
           this.connection.end()
         }
         log.error(`osquery execution error: ${err}`)
-        reject({ message: `Unable to spawn osquery: ${err}` })
+        reject(new Error(`Unable to spawn osquery: ${err}`))
       })
 
       osqueryi.on('close', code => {
