@@ -12,9 +12,9 @@ const osqueryPlatforms = {
   linux: '../bin/osqueryi_linux'
 }
 
-const paths = {
-  darwin: `/Users/rmcvey/.osquery/shell.em`,
-  win32: `\\\\.\\pipe\\osquery.em`
+const sockets = {
+  darwin: `/Users/${process.env.USER}/.osquery/shell.em`,
+  win32: `\\\\.\\pipe\\shell.em`
 }
 
 const defaultOptions = {
@@ -40,19 +40,14 @@ class OSQuery {
 
   static start() {
     return new Promise((resolve, reject) => {
-      if (this.process) {
-        this.stop()
-        this.process = null
-      }
-
       const prefix = process.env.NODE_ENV === 'development' ? '' : '../'
       const osqueryPath = path.resolve(__dirname, prefix + osqueryPlatforms[platform])
-      const osqueryi = spawn(osqueryPath, ['--nodisable_extensions'], {
+      const osqueryi = spawn(osqueryPath, ['--nodisable_extensions', `--extensions_socket=${sockets[platform]}`], {
         windowsHide: true,
       })
 
       setTimeout(() => {
-        this.connection = ThriftClient.getInstance({ path: paths[platform] })
+        this.connection = ThriftClient.getInstance({ path: sockets[platform] })
         resolve()
       }, 100)
 
