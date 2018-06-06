@@ -13,7 +13,7 @@ const yaml = require('js-yaml')
 const { graphql } = require('graphql')
 const { makeExecutableSchema } = require('graphql-tools')
 const Resolvers = require('./resolvers/')
-const OSQuery = require('./sources/osquery')
+const OSQuery = require('./sources/osquery_thrift')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const defaultPolicyServer = HOST
@@ -21,6 +21,8 @@ const defaultPolicyServer = HOST
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
+
+OSQuery.start()
 
 // used to ensure that user is not shown multiple notifications for a login scan
 // sessionId is used as a key
@@ -80,7 +82,6 @@ module.exports = function startServer (env, log, appActions) {
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
 
-  // TODO remove raw query for validation and device info??
   app.use(['/scan', '/graphql'], cors(corsOptions), (req, res) => {
     // flush any cached queries from the previous request
     OSQuery.flushCache()

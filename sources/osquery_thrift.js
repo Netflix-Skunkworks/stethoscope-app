@@ -1,12 +1,20 @@
-const { execFile } = require('child_process')
+const util = require('util')
+const { spawn } = require('child_process')
 const os = require('os')
 const path = require('path')
+const log = require('../src/lib/logger')
+const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 
 const osqueryPlatforms = {
   darwin: '../bin/osqueryi_darwin',
   win32: '../bin/osqueryi.exe',
   linux: '../bin/osqueryi_linux'
+}
+
+const paths = {
+  darwin: `/Users/rmcvey/.osquery/shell.em`,
+  win32: `\\\\.\\pipe\\osquery.em`
 }
 
 const defaultOptions = {
@@ -17,7 +25,7 @@ const defaultOptions = {
 const cache = new Map()
 const timers = new Map()
 
-module.exports = class OSQuery {
+class OSQuery {
   static getTimingInfo () {
     let timerValues = [...timers.values()]
     let queries = [...timers.entries()]
@@ -27,6 +35,52 @@ module.exports = class OSQuery {
     return {
       total: timerValues.reduce((p, v) => p + v, 0),
       queries
+    }
+  }
+
+  static start() {
+    return new Promise((resolve, reject) => {
+      if (this.process) {
+        this.stop()
+        this.process = null
+      }
+
+      const osqueryPath = path.resolve(__dirname, osqueryPlatforms[platform])
+      const osqueryi = spawn(osqueryPath, ['--nodisable_extensions'], {
+        windowsHide: true,
+        detached: true
+      })
+
+      setTimeout(() => {
+        this.connection = ThriftClient.getInstance({ path: paths[platform] })
+        resolve()
+      }, 500)
+
+      osqueryi.stderr.on('data', (data) => {
+        log.error(`osquery process stderr: ${data}`);
+      });
+
+      osqueryi.on('error', (err) => {
+        if (this.connection) {
+          this.connection.end()
+        }
+        log.error(`osquery execution error: ${err}`)
+        reject({ message: `Unable to spawn osquery: ${err}` })
+      })
+
+      osqueryi.on('close', code => {
+        if (this.connection) {
+          this.connection.end()
+        }
+      })
+
+      this.osqueryi = osqueryi
+    })
+  }
+
+  static stop() {
+    if (this.osqueryi) {
+      this.osqueryi.kill('SIGKILL')
     }
   }
 
@@ -65,35 +119,30 @@ module.exports = class OSQuery {
    * @param  {String|Array} queries  Query(ies) to run
    * @return {Promise}
    */
-  static exec (queries) {
+  static exec (query) {
     return new Promise((resolve, reject) => {
-      const commands = Array.isArray(queries) ? queries : [queries]
-      const key = commands.join('')
-      const osqueryPath = path.resolve(__dirname, osqueryPlatforms[platform])
-
-      if (cache.has(key)) {
-        return resolve(cache.get(key))
+      if (cache.has(query)) {
+        return resolve(cache.get(query))
       }
 
       let start = process.hrtime()
 
-      execFile(osqueryPath, ['--json', commands], (error, stdout, stderr) => {
+      this.connection.query(query, (error, { response: result }) => {
         if (error) return reject(error)
-        if (stderr) return reject(new Error(stderr))
-
-        const result = JSON.parse(stdout)
-        cache.set(key, result)
+        cache.set(query, result)
         // timing data
         const [s, n] = process.hrtime(start)
         const nanoseconds = (s * 1e9 + n)
         const milliseconds = nanoseconds * 1e-6
         const end = Math.floor(milliseconds * 100) / 100
-        timers.set(key, end)
+        timers.set(query, end)
 
         resolve(result)
       })
     }).catch((err) => {
-      console.error('OSQUERY ERROR', err)
+      log.error('OSQUERY ERROR', err)
     })
   }
 }
+
+module.exports = OSQuery
