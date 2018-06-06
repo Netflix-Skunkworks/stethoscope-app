@@ -149,6 +149,8 @@ class App extends Component {
       const violations = Object.keys(newState.result).filter(k => newState.result[k] === 'FAIL')
       const violationCount = violations.length > 1 ? violations.length - 1 : 1
       ipcRenderer.send('scan:violation', getBadge(violationCount), violationCount)
+    } else {
+      ipcRenderer.send('scan:violation', getBadge(0), 0)
     }
 
     this.setState(newState, () => {
@@ -192,7 +194,7 @@ class App extends Component {
   }
 
   scan = () => {
-    this.setState({ scanIsRunning: true }, () => {
+    this.setState({ loading: true, scanIsRunning: true }, () => {
       Stethoscope.validate(this.state.policy).then(({ device, result }) => {
         const lastScanTime = Date.now()
         this.setState({

@@ -1,12 +1,13 @@
 const { protocol } = require('electron')
 const os = require('os')
+const log = require('./logger')
 const applescript = require('./applescript')
-const powershell = require('./powershell')
 const { shell } = require('electron')
 const env = process.env.NODE_ENV || 'production'
 
 module.exports = function initProtocols (mainWindow) {
   const { checkForUpdates } = require('../updater')(env, mainWindow)
+  const powershell = require('./powershell')
 
   protocol.registerHttpProtocol('app', (request, cb) => {
     applescript.openApp(decodeURIComponent(request.url.replace('app://', '')))
@@ -31,7 +32,7 @@ module.exports = function initProtocols (mainWindow) {
       try {
         checkForUpdates()
       } catch (e) {
-        console.log(e)
+        log.error(e)
       }
     }
   })

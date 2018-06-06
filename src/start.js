@@ -1,8 +1,7 @@
 const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
-const winston = require('winston')
-require('winston-daily-rotate-file')
+const log = require('./lib/logger')
 const initMenu = require('./Menu')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
@@ -25,30 +24,6 @@ const statusImages = {
   NUDGE: nativeImage.createFromPath(findIcon('scope-icon-nudge2@2x.png')),
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn2@2x.png'))
 }
-
-// setup winston logging
-const transport = new (winston.transports.DailyRotateFile)({
-  filename: 'application-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  dirname: path.resolve(app.getPath('userData')),
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '3d'
-})
-const consoleTransport = new winston.transports.Console()
-const log = new winston.Logger({
-  rewriters: [(level, msg, meta) => {
-    meta.version = pkg.version
-    return meta
-  }],
-  transports: [
-    transport,
-    consoleTransport
-  ]
-})
-
-// make the winston logger available to the renderer
-global.log = log
 
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))

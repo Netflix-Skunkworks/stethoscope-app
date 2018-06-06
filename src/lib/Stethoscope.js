@@ -103,21 +103,6 @@ export default class Stethoscope {
           encrypted
         }
 
-        ipAddresses {
-          interface
-          address
-          mask
-          broadcast
-        }
-
-        macAddresses {
-          interface
-          type
-          mac
-          lastChange
-          physicalAdapter
-        }
-
         security {
           firewall
           publicFirewall
