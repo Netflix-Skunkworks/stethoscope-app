@@ -45,17 +45,16 @@ class OSQuery {
         this.process = null
       }
 
-      const osqueryPath = path.resolve(__dirname, osqueryPlatforms[platform])
+      const prefix = process.env.NODE_ENV === 'development' ? '' : '../'
+      const osqueryPath = path.resolve(__dirname, prefix + osqueryPlatforms[platform])
       const osqueryi = spawn(osqueryPath, ['--nodisable_extensions'], {
         windowsHide: true,
-        detached: true,
-        shell: true
       })
 
       setTimeout(() => {
         this.connection = ThriftClient.getInstance({ path: paths[platform] })
         resolve()
-      }, 1500)
+      }, 100)
 
       osqueryi.stderr.on('data', (data) => {
         log.error(`osquery process stderr: ${data}`);
