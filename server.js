@@ -90,7 +90,10 @@ module.exports = function startServer (env, log, appActions) {
       platform: os.platform() || process.platform,
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
-      osVersion: OSQuery.first('os_version').then(v => v.version = semver.coerce(v.version))
+      osVersion: OSQuery.first('os_version').then(v => {
+        v.version = semver.coerce(v.version)
+        return v
+      })
     }
 
     const key = req.method === 'POST' ? 'body' : 'query'
