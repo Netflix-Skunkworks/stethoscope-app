@@ -9,6 +9,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
+const semver = require('semver')
 
 const { graphql } = require('graphql')
 const { makeExecutableSchema } = require('graphql-tools')
@@ -89,7 +90,7 @@ module.exports = function startServer (env, log, appActions) {
       platform: os.platform() || process.platform,
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
-      osVersion: OSQuery.first('os_version')
+      osVersion: OSQuery.first('os_version').then(v => v.version = semver.coerce(v.version))
     }
 
     const key = req.method === 'POST' ? 'body' : 'query'
