@@ -68,6 +68,8 @@ class App extends Component {
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({ focused: true }))
     window.addEventListener('blur', () => this.setState({ focused: false }))
+    document.addEventListener('dragover', event => event.preventDefault())
+    document.addEventListener('drop', event => event.preventDefault())
   }
 
   onDownloadProgress = (event, downloadProgress) => {
