@@ -15,7 +15,9 @@
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "extraResources": ["bin/osqueryi_darwin"],
+      "extraResources": [
+        "bin/osqueryi_darwin"
+      ],
       "files": [
         "practices/*",
         "build/**",
@@ -31,7 +33,9 @@
     },
     "win": {
       "target": "nsis",
-      "extraResources": ["bin/osqueryi.exe"],
+      "extraResources": [
+        "bin/osqueryd.exe"
+      ],
       "files": [
         "practices/*",
         "build/**",
@@ -51,7 +55,9 @@
     "linux": {
       "target": "AppImage",
       "category": "System",
-      "extraResources": ["bin/osqueryi_linux"],
+      "extraResources": [
+        "bin/osqueryi_linux"
+      ],
       "files": [
         "practices/*",
         "build/**",
@@ -84,7 +90,7 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "electron": "electron .",
+    "electron": "cross-env NODE_ENV=development electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",
@@ -100,6 +106,7 @@
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
+    "cross-env": "^5.2.0",
     "electron-settings": "^3.1.4",
     "electron-updater": "^2.21.4",
     "es6-promisify": "^6.0.0",

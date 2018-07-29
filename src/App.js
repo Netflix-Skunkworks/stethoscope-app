@@ -68,6 +68,8 @@ class App extends Component {
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({ focused: true }))
     window.addEventListener('blur', () => this.setState({ focused: false }))
+    document.addEventListener('dragover', event => event.preventDefault())
+    document.addEventListener('drop', event => event.preventDefault())
   }
 
   onDownloadProgress = (event, downloadProgress) => {
@@ -165,8 +167,8 @@ class App extends Component {
   }
 
   handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    log.error(err)
-    this.setState({ error: err })
+    log.error('App:response error',err)
+    this.setState({ error: err, loading: false })
   }
 
   loadPractices = () => {
@@ -208,7 +210,13 @@ class App extends Component {
           ipcRenderer.send('app:loaded')
         })
       }).catch(err => {
-        this.handleResponseError({ message: JSON.stringify(err.errors) })
+        console.log(err)
+        log.error(err)
+        let message = new Error('Request timeout');
+        if (err.errors) {
+          message = new Error(JSON.stringify(err.errors));
+        }
+        this.handleResponseError({ message })
       })
     })
   }
