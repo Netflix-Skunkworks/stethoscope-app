@@ -8,10 +8,14 @@ const WindowsDevice = {
   },
 
   async disks (root, args, context) {
-    const descriptors = await OSQuery.all('logical_drives', {
-      fields: ['device_id as label']
-    })
-    return powershell.disks(descriptors)
+    const descriptors = await OSQuery.all('bitlocker_info')
+
+    return descriptors.map(disk => ({
+      label: disk.drive_letter,
+      name: disk.drive_letter,
+      uuid: disk.persistent_volume_id,
+      encrypted: disk.protection_status === '1' && disk.conversion_status === '1'
+    }))
   },
 
   async applications (root, args, context) {

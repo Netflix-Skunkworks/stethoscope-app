@@ -10,21 +10,27 @@ class ThriftClient {
     return this.instance
   }
 
-  constructor(opts = { path: '/Users/' + process.env.USER + '/.osquery/shell.em'}) {
-    const path = opts.path || '/Users/' + process.env.USER + '/.osquery/shell.em'
-    const conn = thrift.createConnection(0, path)
-    this._em = thrift.createClient(ExtensionManager, conn)
-    this._socketPath = path
-    this._conn = conn
+  constructor(opts = { path: '' }) {
+    this.path = opts.path
+    this.port = 0
+  }
+
+  connect() {
+    this._connection = thrift.createConnection(this.port, this.path)
+    this._client = thrift.createClient(ExtensionManager, this._connection)
+  }
+
+  on(event, callback) {
+    this._connection.on(event, callback)
   }
 
   query (sql, cb) {
-    this._em.query(sql, cb)
+    this._client.query(sql, cb)
   }
 
   end() {
-    this._conn.end()
-    this._conn.destroy()
+    this._connection.end()
+    this._connection.destroy()
   }
 }
 
