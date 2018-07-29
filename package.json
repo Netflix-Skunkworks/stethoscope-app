@@ -15,7 +15,9 @@
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "extraResources": ["bin/osqueryi_darwin"],
+      "extraResources": [
+        "bin/osqueryd_darwin"
+      ],
       "files": [
         "practices/*",
         "build/**",
@@ -31,7 +33,9 @@
     },
     "win": {
       "target": "nsis",
-      "extraResources": ["bin/osqueryi.exe"],
+      "extraResources": [
+        "bin/osqueryd.exe"
+      ],
       "files": [
         "practices/*",
         "build/**",
@@ -51,7 +55,9 @@
     "linux": {
       "target": "AppImage",
       "category": "System",
-      "extraResources": ["bin/osqueryi_linux"],
+      "extraResources": [
+        "bin/osqueryi_linux"
+      ],
       "files": [
         "practices/*",
         "build/**",
