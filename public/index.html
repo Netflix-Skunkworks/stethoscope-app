@@ -23,6 +23,10 @@
     <title>Stethoscope</title>
   </head>
   <body style="-webkit-app-region: drag">
+    <script>
+      document.addEventListener('dragover', event => event.preventDefault())
+      document.addEventListener('drop', event => event.preventDefault())
+    </script>
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>
