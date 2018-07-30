@@ -1,7 +1,7 @@
 os version:
   darwin:
     # High Sierra
-    ok: ">=10.13.4"
+    ok: ">=10.13.6"
     # Sierra
     nudge: ">=10.12.6"
   win32:
