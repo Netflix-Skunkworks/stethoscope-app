@@ -73,7 +73,13 @@ function createWindow () {
     webPreferences: {
       webSecurity: false,
       sandbox: false
-    }
+    },
+    skipTaskbar: true,
+    autoHideMenuBar: true
+  }
+
+  if (process.platform === 'darwin') {
+    app.dock.hide()
   }
 
   if (process.platform === 'win32') {
@@ -114,7 +120,11 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  initMenu(mainWindow, env, log)
+  let appMenu = initMenu(mainWindow, env, log)
+
+  tray.on('right-click', () => {
+    tray.popUpContextMenu(appMenu)
+  })
 
   mainWindow.loadURL(
     process.env.ELECTRON_START_URL ||
