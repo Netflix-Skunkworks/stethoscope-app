@@ -1,6 +1,6 @@
 {
   "name": "Stethoscope",
-  "version": "1.1.10",
+  "version": "1.2.0",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
@@ -15,14 +15,16 @@
     },
     "mac": {
       "category": "public.app-category.utilities",
+      "extraResources": [
+        "bin/osqueryd_darwin"
+      ],
       "files": [
-        "bin/osqueryi_darwin",
         "practices/*",
         "build/**",
         "public/**",
         "resolvers/**",
         "sources/*",
-        "src/lib/*.js",
+        "src/lib/**",
         "src/*.json",
         "src/*.js",
         "server.js",
@@ -31,14 +33,16 @@
     },
     "win": {
       "target": "nsis",
+      "extraResources": [
+        "bin/osqueryd.exe"
+      ],
       "files": [
-        "bin/osqueryi.exe",
         "practices/*",
         "build/**",
         "public/**",
         "resolvers/**",
         "sources/*",
-        "src/lib/*.js",
+        "src/lib/**",
         "src/*.json",
         "src/*.js",
         "server.js",
@@ -51,14 +55,16 @@
     "linux": {
       "target": "AppImage",
       "category": "System",
+      "extraResources": [
+        "bin/osqueryi_linux"
+      ],
       "files": [
-        "bin/osqueryi_linux",
         "practices/*",
         "build/**",
         "public/**",
         "resolvers/**",
         "sources/*",
-        "src/lib/*.js",
+        "src/lib/**",
         "src/*.json",
         "src/*.js",
         "server.js",
@@ -84,7 +90,7 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "electron": "electron .",
+    "electron": "cross-env NODE_ENV=development electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",
@@ -100,6 +106,7 @@
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
+    "cross-env": "^5.2.0",
     "electron-settings": "^3.1.4",
     "electron-updater": "^2.21.4",
     "es6-promisify": "^6.0.0",
@@ -117,6 +124,7 @@
     "semver": "^5.4.1",
     "showdown": "^1.8.6",
     "socket.io": "^2.0.4",
+    "thrift": "^0.11.0",
     "winston": "^2.4.2",
     "winston-daily-rotate-file": "^3.1.3"
   },

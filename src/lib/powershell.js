@@ -1,26 +1,54 @@
 const { UNSUPPORTED, UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
 const log = require('./logger')
+const IS_DEV = process.env.NODE_ENV === 'development'
 
+const cache = new Map()
+const timers = new Map()
 /*
   NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
 */
-const execPowershell = async (cmd, logError = true) => {
-  const ps = new Shell({
-    debugMsg: false
-  })
-  ps.addCommand(cmd)
-  try {
-    const output = await ps.invoke()
-    ps.dispose()
-    return output
-  } catch (e) {
-    ps.dispose()
-    if (logError !== false) {
-      log.error(`powershell error: ${e} | cmd: ${cmd}`)
-    }
-    throw new Error(e)
+const execPowershell = (cmd, logError = true) => {
+  if (cache.has(cmd)) return cache.get(cmd)
+  const ps = new Shell({ debugMsg: false })
+
+  return cache.set(cmd, new Promise((resolve, reject) => {
+    let start = process.hrtime()
+
+    ps.addCommand(cmd).then(() => {
+      ps.invoke().then(output => {
+        const [s, n] = process.hrtime(start)
+        const nanoseconds = (s * 1e9 + n)
+        const milliseconds = nanoseconds * 1e-6
+        const end = Math.floor(milliseconds * 100) / 100
+        timers.set(cmd, end)
+        IS_DEV && log.info('powershell:output', output)
+        resolve(output)
+        ps.dispose()
+      }).catch (e => {
+        ps.dispose()
+        // ps._cmds = []
+        if (logError !== false) log.error(`powershell error: ${e} | cmd: ${cmd}`)
+        reject(new Error(e))
+      })
+    })
+  })).get(cmd)
+}
+
+function getTimingInfo () {
+  const timerValues = [...timers.values()]
+  const queries = [...timers.entries()]
+
+  timers.clear()
+
+  return {
+    total: timerValues.reduce((p, v) => p + v, 0),
+    queries
   }
+}
+
+function flushCache() {
+  cache.clear()
 }
 
 const openPreferences = pane => {
@@ -127,44 +155,14 @@ const getDisableLockWorkStation = async () => {
   }
 }
 
-const disks = async (disks = []) => {
-  const status = await Promise.all(
-    disks.map(async ({ label }) => {
-      let encrypted
-
-      try {
-        const out = await execPowershell(`manage-bde -status ${label}`)
-        const data = out.split(/[\r\n]+/)
-          .map(line =>
-            line.trim().split(':').map(w => w.trim())
-          ).reduce((p, [key, value]) => {
-            p[key] = value
-            return p
-          }, {})
-
-        encrypted = data && data['Percentage Encrypted'] === '100%'
-      } catch (e) {
-        encrypted = UNSUPPORTED
-      }
-
-      return {
-        label,
-        name: label,
-        encrypted
-      }
-    })
-  )
-
-  return status
-}
-
 module.exports = {
+  flushCache,
   run,
   openPreferences,
   getScreenLockTimeout,
   getScreenLockActive,
+  getTimingInfo,
   getUserId,
-  disks,
   firewallStatus,
   getDisableLockWorkStation
 }
