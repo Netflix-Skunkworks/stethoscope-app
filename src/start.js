@@ -91,8 +91,7 @@ function createWindow () {
 
   if (tray) tray.destroy()
 
-  tray = new Tray(statusImages.PASS)
-  tray.on('click', () => {
+  const focusOrCreateWindow = () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore()
@@ -110,13 +109,16 @@ function createWindow () {
         })
       )
     }
-  })
+  }
+
+  tray = new Tray(statusImages.PASS)
+  tray.on('click', focusOrCreateWindow)
 
   if (enableDebugger) {
     mainWindow.webContents.openDevTools()
   }
 
-  initMenu(mainWindow, env, log)
+  initMenu(mainWindow, focusOrCreateWindow, env, log)
 
   if (!starting) {
     log.info('Starting osquery')

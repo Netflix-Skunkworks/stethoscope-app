@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV || 'production'
 // let changelog
 let about
 
-module.exports = function (mainWindow, env, log) {
+module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
   const { checkForUpdates } = require('./updater')(env, mainWindow, log, false)
   const template = [
     {
@@ -23,6 +23,32 @@ module.exports = function (mainWindow, env, log) {
         label,
         click () { shell.openExternal(link) }
       }))
+    },
+    {
+      label: 'Window',
+      submenu: [
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click () {
+            mainWindow && mainWindow.reload()
+          }
+        },
+        {
+          label: 'Open Window',
+          accelerator: 'CmdOrCtrl+N',
+          click () {
+            focusOrCreateWindow()
+          }
+        },
+        {
+          label: 'Close Window',
+          accelerator: 'CmdOrCtrl+W',
+          click () {
+            if (mainWindow) mainWindow.close()
+          }
+        }
+      ]
     }
   ]
 
@@ -69,10 +95,6 @@ module.exports = function (mainWindow, env, log) {
         label: 'Toggle Developer Tools',
         accelerator: 'Alt+Command+I',
         click () { mainWindow.toggleDevTools() }
-      }, {
-        label: 'Reload',
-        accelerator: 'Command+R',
-        click () { mainWindow.reload() }
       }]
     })
   }
