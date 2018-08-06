@@ -33,13 +33,6 @@ const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 function createWindow () {
   log.info('starting stethoscope')
 
-  if (isFirstLaunch) {
-    const { AppUpdater } = require('electron-updater')
-    const appUpdater = new AppUpdater()
-    appUpdater.checkForUpdatesAndNotify()
-    isFirstLaunch = false
-  }
-
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -88,6 +81,13 @@ function createWindow () {
   }
 
   mainWindow = new BrowserWindow(windowPrefs)
+
+  updater = require('./updater')(env, mainWindow, log)
+
+  if (isFirstLaunch) {
+    updater.checkForUpdates()
+    isFirstLaunch = false
+  }
 
   if (tray) tray.destroy()
 
@@ -216,8 +216,6 @@ function createWindow () {
 app.on('ready', () => setTimeout(() => {
   createWindow()
   initProtocols(mainWindow)
-
-  updater = require('./updater')(env, mainWindow, log)
 
   // override internal request origin to give express CORS policy something to check
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
