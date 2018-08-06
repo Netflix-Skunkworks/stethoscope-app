@@ -156,6 +156,15 @@ function createWindow () {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
+  } else {
+    mainWindow.loadURL(
+      process.env.ELECTRON_START_URL ||
+      url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      })
+    )
   }
 
   // adjust window height when download begins and ends
@@ -275,6 +284,7 @@ process.on('uncaughtException', (err) => {
   if (server && server.listening) {
     server.close()
   }
-  console.error('exiting', err)
+  OSQuery.stop()
+  log.error('exiting on uncaught exception', err)
   process.exit(1)
 })
