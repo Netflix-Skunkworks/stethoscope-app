@@ -9,6 +9,7 @@ const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery_thrift')
+const IS_DEV = env === 'development'
 
 let mainWindow
 let tray
