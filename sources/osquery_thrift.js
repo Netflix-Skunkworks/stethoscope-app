@@ -9,14 +9,19 @@ const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
 
 const osqueryPlatforms = {
-  darwin: '../bin/osqueryd_darwin',
-  win32: '../bin/osqueryd.exe',
-  linux: '../bin/osqueryi_linux'
+  darwin: 'osqueryd_darwin',
+  win32: 'osqueryd.exe',
+  linux: 'osqueryi_linux'
 }
 
 const socketPath = {
   darwin: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
+}
+
+const pidPath = {
+  darwin: '/tmp/osqueryd.pidfile',
+  win32: 'osqueryd.pidfile'
 }
 
 const defaultOptions = {
@@ -41,10 +46,12 @@ class OSQuery {
   }
 
   static start() {
+    this.stop()
+    
     const socket = socketPath[platform]
-    const binary = osqueryPlatforms[platform]
+    const binary = `../bin/${osqueryPlatforms[platform]}`
     const prefix = IS_DEV ? '' : '..' + path.sep
-    log.info(__dirname, process.resourcesPath, binary)
+    const pid = pidPath[platform]
     const osqueryPath = path.resolve(
       __dirname,
       prefix + binary
@@ -58,6 +65,8 @@ class OSQuery {
       '--force',
       '--config_path=null',
       '--allow_unsafe',
+      `--pidfile=${pid}`,
+      '--force=true',
       '--verbose', // required to detect when thrift socket is ready
     ]
 
@@ -106,7 +115,7 @@ class OSQuery {
         if (process.platform === 'darwin') {
           if (data.includes('Extension manager service starting')) {
             IS_DEV && log.info('osquery:Thrift socket ready')
-            resolve()
+            resolve(osqueryd)
           }
         } else if (process.platform === 'win32') {
           /*
@@ -157,9 +166,21 @@ class OSQuery {
   }
 
   static stop() {
-    if (this.osqueryd) {
-      this.osqueryd.kill('SIGKILL')
+    const { platform } = process
+    const target = osqueryPlatforms[platform]
+
+    switch (platform) {
+      case 'darwin':
+        exec(`killall ${target}`)
+        break
+      case 'win32':
+        exec(`taskkill /F /IM ${target}`)
+        break
+      default:
+        break
     }
+
+    return Promise.resolve(true)
   }
 
   static flushCache () {
