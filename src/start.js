@@ -131,6 +131,7 @@ function createWindow () {
       }
     }
     starting = true
+    // kill any remaining osquery processes
     OSQuery.start().then(() => {
       log.info('osquery started')
       // start GraphQL server
