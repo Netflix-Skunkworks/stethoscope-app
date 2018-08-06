@@ -239,6 +239,8 @@ app.on('ready', () => setTimeout(() => {
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
+  IS_DEV && log.info('stopping osquery')
+  OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
     server.close()

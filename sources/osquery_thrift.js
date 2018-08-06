@@ -1,12 +1,15 @@
 const util = require('util')
 const { app } = require('electron')
 const { spawn, exec } = require('child_process')
+const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const log = require('../src/lib/logger')
 const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
+
+const OSQUERY_PID_PATH = './osquery.pid'
 
 const osqueryPlatforms = {
   darwin: 'osqueryd_darwin',
@@ -17,11 +20,6 @@ const osqueryPlatforms = {
 const socketPath = {
   darwin: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
-}
-
-const pidPath = {
-  darwin: '/tmp/osqueryd.pidfile',
-  win32: 'osqueryd.pidfile'
 }
 
 const defaultOptions = {
@@ -50,7 +48,6 @@ class OSQuery {
       const socket = socketPath[platform]
       const binary = `../bin/${osqueryPlatforms[platform]}`
       const prefix = IS_DEV ? '' : '..' + path.sep
-      const pid = pidPath[platform]
       const osqueryPath = path.resolve(
         __dirname,
         prefix + binary
@@ -64,8 +61,6 @@ class OSQuery {
         '--force',
         '--config_path=null',
         '--allow_unsafe',
-        `--pidfile=${pid}`,
-        '--force=true',
         '--verbose', // required to detect when thrift socket is ready
       ]
 
@@ -82,10 +77,13 @@ class OSQuery {
       const MAX_ATTEMPTS = 20
       const launchCommand = `"${osqueryPath}"`
 
-      log.info(`osquery:initialize: ${launchCommand}`)
+      IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
 
       return new Promise((resolve, reject) => {
         const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
+
+        IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
+        fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
 
         osqueryd.on('error', (err) => {
           if (this.connection) {
@@ -167,18 +165,23 @@ class OSQuery {
 
   static stop() {
     return new Promise((resolve, reject) => {
-      const { platform } = process
-      const target = osqueryPlatforms[platform]
-
-      switch (platform) {
-        case 'darwin':
-          exec(`killall ${target}`, () => resolve())
-          break
-        case 'win32':
-          exec(`taskkill /F /IM ${target}`, () => resolve())
-          break
-        default:
-          break
+      try {
+        const pid = fs.readFileSync(OSQUERY_PID_PATH)
+        if (pid) {
+          log.warn('found old osquery pid', pid+'')
+          try {
+            process.kill(parseInt(pid+'', 10))
+          } catch (e) {
+            log.error('Unable to kill process', pid+'')
+          }
+          fs.unlink(OSQUERY_PID_PATH, err => {
+            if (err) log.error('cannot unlink pidfile', err)
+            resolve()
+          })
+        }
+      } catch (e) {
+        log.warn('expected error reading pidfile', e.message)
+        resolve()
       }
     })
   }
