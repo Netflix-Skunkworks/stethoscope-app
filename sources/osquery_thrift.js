@@ -9,7 +9,7 @@ const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-const OSQUERY_PID_PATH = `${app.getPath('appData')}/.osquery.pid`
+const OSQUERY_PID_PATH = `${app.getPath('temp')}.osquery.pid`
 
 const osqueryPlatforms = {
   darwin: 'osqueryd_darwin',
@@ -44,146 +44,145 @@ class OSQuery {
   }
 
   static start() {
-    return this.stop().then(() => {
-      const socket = socketPath[platform]
-      const binary = `../bin/${osqueryPlatforms[platform]}`
-      const prefix = IS_DEV ? '' : '..' + path.sep
-      const osqueryPath = path.resolve(
-        __dirname,
-        prefix + binary
-      )
+    this.stop()
 
-      const osquerydArgs = [
-        '--ephemeral',
-        '--disable_database',
-        '--disable_events=true',
-        '--disable_logging',
-        '--force',
-        '--config_path=null',
-        '--allow_unsafe',
-        '--verbose', // required to detect when thrift socket is ready
-      ]
+    const socket = socketPath[platform]
+    const binary = `../bin/${osqueryPlatforms[platform]}`
+    const prefix = IS_DEV ? '' : '..' + path.sep
+    const osqueryPath = path.resolve(
+      __dirname,
+      prefix + binary
+    )
 
-      if (platform === 'darwin') {
-        osquerydArgs.push(`--extensions_socket=${socket}`)
-      }
+    const osquerydArgs = [
+      '--ephemeral',
+      '--disable_database',
+      '--disable_events=true',
+      '--disable_logging',
+      '--force',
+      '--config_path=null',
+      '--allow_unsafe',
+      '--verbose', // required to detect when thrift socket is ready
+    ]
 
-      const spawnArgs = {
-        shell: true,
-        windowsHide: true
-      }
+    if (platform === 'darwin') {
+      osquerydArgs.push(`--extensions_socket=${socket}`)
+    }
 
-      let startAttempts = 0
-      const MAX_ATTEMPTS = 20
-      const launchCommand = `"${osqueryPath}"`
+    const spawnArgs = {
+      shell: true,
+      windowsHide: true
+    }
 
-      IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
+    let startAttempts = 0
+    const MAX_ATTEMPTS = 20
+    const launchCommand = `"${osqueryPath}"`
 
-      return new Promise((resolve, reject) => {
-        const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
+    IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
 
-        IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
-        fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
+    return new Promise((resolve, reject) => {
+      const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
 
-        osqueryd.on('error', (err) => {
-          if (this.connection) {
-            this.connection.end()
-          }
-          log.error(`osquery:execution error: ${err}`)
-          reject(new Error(`Unable to spawn osqueryd: ${err}`))
-        })
+      IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
+      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
 
-        IS_DEV && osqueryd.on('disconnect', () => log.info('osqueryd disconnected'))
-
-        osqueryd.on('close', code => {
-          IS_DEV && log.info('osqueryd closed')
-          if (this.connection) {
-            this.connection.end()
-          }
-        })
-
-        osqueryd.stderr.on('data', function(data) {
-          IS_DEV && log.info('osquery:stderr', data+'')
-          /*
-           TODO - flagged for future improvement
-           unfortunately this seems to be the only way to determine that the socket
-           server is ready to accept connections
-          */
-          if (process.platform === 'darwin') {
-            if (data.includes('Extension manager service starting')) {
-              IS_DEV && log.info('osquery:Thrift socket ready')
-              resolve(osqueryd)
-            }
-          } else if (process.platform === 'win32') {
-            /*
-            Let it be noted that I'm super unhappy with this magic number approach.
-            I've spent way too much time trying to get the Mac solution working on
-            Windows and have determined that it all comes down to timing. It works
-            sometimes but is extremely unpredictable and boils down to whether or
-            not the "Extension manager" messages comes in on the very first stderr
-            write because for a reason I seem to be unable to determine, the output
-            is disconnected after the first read. I've tried many things, piping to stdout,
-            draining, forcing another write, looking at encoding issues, spawning
-            the process in just about every configuration imaginable and am going
-            to shelve it for now because it never takes osquery more than one
-            second to load and this solution is reliable enough for the time being.
-            */
-            setTimeout(() => resolve(), 200)
-          }
-        })
-
-        this.osqueryd = osqueryd
-
-        // thrift retry logic - keep attempting to connect to extension manager
-        const tryReconnect = err => {
-          startAttempts++
-          IS_DEV && log.error(`osquery:thrift unable to connect to socket ${err} | attempt: ${startAttempts}`)
-
-          if (startAttempts >= MAX_ATTEMPTS) {
-            log.error('TOO MANY ATTEMPTS to connect to osquery')
-            reject(new Error(err))
-          } else {
-            setTimeout(() => {
-              this.connection.connect()
-              this.connection.on('error', tryReconnect)
-            }, 100)
-          }
+      osqueryd.on('error', (err) => {
+        if (this.connection) {
+          this.connection.end()
         }
+        log.error(`osquery:execution error: ${err}`)
+        reject(new Error(`Unable to spawn osqueryd: ${err}`))
+      })
 
-        this.connection = ThriftClient.getInstance({ path: socket })
-        this.connection.connect()
-        this.connection.on('error', tryReconnect)
+      IS_DEV && osqueryd.on('disconnect', () => log.info('osqueryd disconnected'))
 
-        if (IS_DEV) {
-          ['message', 'data', 'exit'].map(evt =>
-            osqueryd.on(evt, data => log.info(`osquery:${evt}`, data + ''))
-          )
+      osqueryd.on('close', code => {
+        IS_DEV && log.info('osqueryd closed')
+        if (this.connection) {
+          this.connection.end()
         }
       })
+
+      osqueryd.stderr.on('data', function(data) {
+        IS_DEV && log.info('osquery:stderr', data+'')
+        /*
+         TODO - flagged for future improvement
+         unfortunately this seems to be the only way to determine that the socket
+         server is ready to accept connections
+        */
+        if (process.platform === 'darwin') {
+          if (data.includes('Extension manager service starting')) {
+            IS_DEV && log.info('osquery:Thrift socket ready')
+            resolve(osqueryd)
+          }
+        } else if (process.platform === 'win32') {
+          /*
+          Let it be noted that I'm super unhappy with this magic number approach.
+          I've spent way too much time trying to get the Mac solution working on
+          Windows and have determined that it all comes down to timing. It works
+          sometimes but is extremely unpredictable and boils down to whether or
+          not the "Extension manager" messages comes in on the very first stderr
+          write because for a reason I seem to be unable to determine, the output
+          is disconnected after the first read. I've tried many things, piping to stdout,
+          draining, forcing another write, looking at encoding issues, spawning
+          the process in just about every configuration imaginable and am going
+          to shelve it for now because it never takes osquery more than one
+          second to load and this solution is reliable enough for the time being.
+          */
+          setTimeout(() => resolve(), 200)
+        }
+      })
+
+      this.osqueryd = osqueryd
+
+      // thrift retry logic - keep attempting to connect to extension manager
+      const tryReconnect = err => {
+        startAttempts++
+        IS_DEV && log.error(`osquery:thrift unable to connect to socket ${err} | attempt: ${startAttempts}`)
+
+        if (startAttempts >= MAX_ATTEMPTS) {
+          log.error('TOO MANY ATTEMPTS to connect to osquery')
+          reject(new Error(err))
+        } else {
+          setTimeout(() => {
+            this.connection.connect()
+            this.connection.on('error', tryReconnect)
+          }, 100)
+        }
+      }
+
+      this.connection = ThriftClient.getInstance({ path: socket })
+      this.connection.connect()
+      this.connection.on('error', tryReconnect)
+
+      if (IS_DEV) {
+        ['message', 'data', 'exit'].map(evt =>
+          osqueryd.on(evt, data => log.info(`osquery:${evt}`, data + ''))
+        )
+      }
     })
   }
 
   static stop() {
-    return new Promise((resolve, reject) => {
-      try {
-        const pid = fs.readFileSync(OSQUERY_PID_PATH)
-        if (pid) {
-          log.warn('found old osquery pid', pid+'')
-          try {
-            process.kill(parseInt(pid+'', 10))
-          } catch (e) {
-            log.error('Unable to kill process', pid+'')
-          }
-          fs.unlink(OSQUERY_PID_PATH, err => {
-            if (err) log.error('cannot unlink pidfile', err)
-            resolve()
-          })
+    try {
+      const pid = fs.readFileSync(OSQUERY_PID_PATH)
+      if (pid) {
+        log.warn('found old osquery pid', pid+'')
+        try {
+          process.kill(parseInt(pid+'', 10))
+        } catch (e) {
+          log.error('Unable to kill process', pid+'')
         }
-      } catch (e) {
-        log.warn('expected error reading pidfile', e.message)
-        resolve()
+
+        try {
+          fs.unlinkSync(OSQUERY_PID_PATH)
+        } catch (err) {
+          log.error('cannot unlink pidfile', err)
+        }
       }
-    })
+    } catch (e) {
+      log.warn('expected error reading pidfile', e.message)
+    }
   }
 
   static flushCache () {
