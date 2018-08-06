@@ -176,8 +176,8 @@ function createWindow () {
     }
   })
 
-  ipcMain.on('download:complete', (event, { resize }) => {
-    if (resize) {
+  ipcMain.on('download:complete', (event, arg) => {
+    if (arg && arg.resize) {
       mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
     }
   })
