@@ -14,9 +14,9 @@ const semver = require('semver')
 const { graphql } = require('graphql')
 const { makeExecutableSchema } = require('graphql-tools')
 const Resolvers = require('./resolvers/')
-const OSQuery = require('./sources/osquery')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
+const powershell = require('./src/lib/powershell')
 const defaultPolicyServer = HOST
 
 const app = express()
@@ -27,7 +27,7 @@ const io = require('socket.io')(http, { wsEngine: 'ws' })
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = function startServer (env, log, appActions) {
+module.exports = function startServer (env, log, appActions, OSQuery) {
   const find = filePath => env === 'development' ? filePath : path.join(__dirname, filePath)
 
   const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
@@ -81,10 +81,11 @@ module.exports = function startServer (env, log, appActions) {
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
 
-  // TODO remove raw query for validation and device info??
   app.use(['/scan', '/graphql'], cors(corsOptions), (req, res) => {
+    req.setTimeout(60000)
     // flush any cached queries from the previous request
     OSQuery.flushCache()
+    powershell.flushCache()
 
     const context = {
       platform: os.platform() || process.platform,
@@ -138,6 +139,13 @@ module.exports = function startServer (env, log, appActions) {
 
       if (!result.extensions) result.extensions = {}
       result.extensions.timing = OSQuery.getTimingInfo()
+
+      if (os.platform() === 'win32') {
+        const { total, queries } = powershell.getTimingInfo()
+        log.info(total, queries)
+        result.extensions.timing.total += total
+        result.extensions.timing.queries.push(...queries)
+      }
 
       res.json(result)
     }).catch(err => {

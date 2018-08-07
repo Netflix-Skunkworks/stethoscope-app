@@ -8,6 +8,8 @@ const env = process.env.NODE_ENV || 'production'
 const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
+const OSQuery = require('../sources/osquery_thrift')
+const IS_DEV = env === 'development'
 
 let mainWindow
 let tray
@@ -17,6 +19,7 @@ let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
 let isFirstLaunch = true
+let starting = false
 
 // icons that are displayed in the Menu bar
 const statusImages = {
@@ -30,13 +33,6 @@ const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
 function createWindow () {
   log.info('starting stethoscope')
-
-  if (isFirstLaunch) {
-    const { AppUpdater } = require('electron-updater')
-    const appUpdater = new AppUpdater()
-    appUpdater.checkForUpdatesAndNotify()
-    isFirstLaunch = false
-  }
 
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
@@ -73,13 +69,16 @@ function createWindow () {
     webPreferences: {
       webSecurity: false,
       sandbox: false
-    },
-    skipTaskbar: true,
-    autoHideMenuBar: true
+    }
   }
 
-  if (process.platform === 'darwin') {
-    app.dock.hide()
+  if (settings.get('showInDock') !== true) {
+    windowPrefs.autoHideMenuBar = true
+    windowPrefs.skipTaskbar = true
+
+    if (process.platform === 'darwin') {
+      app.dock.hide()
+    }
   }
 
   if (process.platform === 'win32') {
@@ -93,10 +92,16 @@ function createWindow () {
 
   mainWindow = new BrowserWindow(windowPrefs)
 
+  updater = require('./updater')(env, mainWindow, log)
+
+  if (isFirstLaunch) {
+    updater.checkForUpdates({}, {}, {}, true)
+    isFirstLaunch = false
+  }
+
   if (tray) tray.destroy()
 
-  tray = new Tray(statusImages.PASS)
-  tray.on('click', () => {
+  const focusOrCreateWindow = () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore()
@@ -114,26 +119,67 @@ function createWindow () {
         })
       )
     }
-  })
+  }
+
+  tray = new Tray(statusImages.PASS)
+  tray.on('click', focusOrCreateWindow)
 
   if (enableDebugger) {
     mainWindow.webContents.openDevTools()
   }
 
-  let appMenu = initMenu(mainWindow, env, log)
+  let appMenu = initMenu(mainWindow, focusOrCreateWindow, env, log)
 
   tray.on('right-click', () => {
     tray.popUpContextMenu(appMenu)
   })
 
-  mainWindow.loadURL(
-    process.env.ELECTRON_START_URL ||
-    url.format({
-      pathname: path.join(__dirname, '/../build/index.html'),
-      protocol: 'file:',
-      slashes: true
+  if (!starting) {
+    log.info('Starting osquery')
+    const appHooksForServer = {
+      setScanStatus (status = 'PASS') {
+        tray.setImage(statusImages[status])
+      },
+      requestUpdate () {
+        updater.checkForUpdates()
+      }
+    }
+    starting = true
+    // kill any remaining osquery processes
+    OSQuery.start().then(() => {
+      log.info('osquery started')
+      // start GraphQL server
+      server = startGraphQLServer(env, log, appHooksForServer, OSQuery)
+      server.on('error', (err) => {
+        if (err.message.includes('EADDRINUSE')) {
+          dialog.showMessageBox({
+            message: 'Stethoscope is already running'
+          })
+          app.quit()
+        }
+      })
+      mainWindow.loadURL(
+        process.env.ELECTRON_START_URL ||
+        url.format({
+          pathname: path.join(__dirname, '/../build/index.html'),
+          protocol: 'file:',
+          slashes: true
+        })
+      )
+    }).catch(err => {
+      log.info('startup error')
+      log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
-  )
+  } else {
+    mainWindow.loadURL(
+      process.env.ELECTRON_START_URL ||
+      url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      })
+    )
+  }
 
   // adjust window height when download begins and ends
   ipcMain.on('download:start', (event, arg) => {
@@ -154,8 +200,8 @@ function createWindow () {
     }
   })
 
-  ipcMain.on('download:complete', (event, { resize }) => {
-    if (resize) {
+  ipcMain.on('download:complete', (event, arg) => {
+    if (arg && arg.resize) {
       mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
     }
   })
@@ -163,11 +209,13 @@ function createWindow () {
   ipcMain.on('app:loaded', () => {
     if (String(deeplinkingUrl).indexOf('update') > -1) {
       updater.checkForUpdates(env, mainWindow).then(err => {
-        if (err) { log.error(err) }
+        if (err) {
+          log.error(`start:loaded:deeplink error checking for update${err}`)
+        }
         deeplinkingUrl = ''
       }).catch(err => {
         deeplinkingUrl = ''
-        log.error(err)
+        log.error(`start:exception on check for update ${err}`)
       })
     }
   })
@@ -183,8 +231,6 @@ app.on('ready', () => setTimeout(() => {
   createWindow()
   initProtocols(mainWindow)
 
-  updater = require('./updater')(env, mainWindow, log)
-
   // override internal request origin to give express CORS policy something to check
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
@@ -199,33 +245,16 @@ app.on('ready', () => setTimeout(() => {
 
   if (launchIntoUpdater) {
     log.info(`Launching into updater: ${launchIntoUpdater}`)
-    updater.checkForUpdates(env, mainWindow).catch(err => log.error(err))
+    updater.checkForUpdates(env, mainWindow).catch(err =>
+      log.error(`start:launch:check for updates exception${err}`)
+    )
   }
-
-  const appHooksForServer = {
-    setScanStatus (status = 'PASS') {
-      tray.setImage(statusImages[status])
-    },
-    requestUpdate () {
-      updater.checkForUpdates()
-    }
-  }
-
-  // start GraphQL server
-  server = startGraphQLServer(env, log, appHooksForServer)
-
-  server.on('error', (err) => {
-    if (err.message.includes('EADDRINUSE')) {
-      dialog.showMessageBox({
-        message: 'Stethoscope is already running'
-      })
-      app.quit()
-    }
-  })
 }, 0))
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
+  IS_DEV && log.info('stopping osquery')
+  OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
     server.close()
@@ -253,7 +282,7 @@ app.on('open-url', function (event, url) {
 
     if (launchIntoUpdater) {
       updater.checkForUpdates(env, mainWindow).catch(err => {
-        log.error(err)
+        log.error(`start:check for updates error: ${err}`)
       })
     }
   }
@@ -269,6 +298,7 @@ process.on('uncaughtException', (err) => {
   if (server && server.listening) {
     server.close()
   }
-  console.error('exiting', err)
+  OSQuery.stop()
+  log.error('exiting on uncaught exception', err)
   process.exit(1)
 })

@@ -1,4 +1,4 @@
-const OSQuery = require('../../sources/osquery')
+const OSQuery = require('../../sources/osquery_thrift')
 const macFriendlyName = require('../../sources/macmodels')
 
 const MacDevice = {

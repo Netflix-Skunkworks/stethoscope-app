@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV || 'production'
 // let changelog
 let about
 
-module.exports = function (mainWindow, env, log) {
+module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
   const { checkForUpdates } = require('./updater')(env, mainWindow, log, false)
   const template = [
     // { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
@@ -21,8 +21,7 @@ module.exports = function (mainWindow, env, log) {
     { role: 'separator' },
   ].concat(
     config.menu.help.map(({label, link}) => ({ label, click () { shell.openExternal(link) }})),
-    { role: 'separator' },
-    { role: 'quit' }
+    { role: 'separator' }
   )
 
   if (process.platform === 'darwin') {
@@ -47,6 +46,8 @@ module.exports = function (mainWindow, env, log) {
       click () { mainWindow.reload() }
     })
   }
+
+  template.push({ role: 'quit' })
 
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
