@@ -83,10 +83,10 @@ function createWindow () {
 
   mainWindow = new BrowserWindow(windowPrefs)
 
-  updater = require('./updater')(env, mainWindow, log, isFirstLaunch)
+  updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
-    updater.checkForUpdates()
+    updater.checkForUpdates({}, {}, {}, true)
     isFirstLaunch = false
   }
 
