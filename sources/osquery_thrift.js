@@ -1,6 +1,7 @@
 const util = require('util')
 const { app } = require('electron')
 const { spawn, exec } = require('child_process')
+const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const log = require('../src/lib/logger')
@@ -8,10 +9,12 @@ const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
 
+const OSQUERY_PID_PATH = `${app.getPath('temp')}.osquery.pid`
+
 const osqueryPlatforms = {
-  darwin: '../bin/osqueryd_darwin',
-  win32: '../bin/osqueryd.exe',
-  linux: '../bin/osqueryi_linux'
+  darwin: 'osqueryd_darwin',
+  win32: 'osqueryd.exe',
+  linux: 'osqueryi_linux'
 }
 
 const socketPath = {
@@ -41,10 +44,11 @@ class OSQuery {
   }
 
   static start() {
+    this.stop()
+
     const socket = socketPath[platform]
-    const binary = osqueryPlatforms[platform]
+    const binary = `../bin/${osqueryPlatforms[platform]}`
     const prefix = IS_DEV ? '' : '..' + path.sep
-    log.info(__dirname, process.resourcesPath, binary)
     const osqueryPath = path.resolve(
       __dirname,
       prefix + binary
@@ -74,10 +78,13 @@ class OSQuery {
     const MAX_ATTEMPTS = 20
     const launchCommand = `"${osqueryPath}"`
 
-    log.info(`osquery:initialize: ${launchCommand}`)
+    IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
 
     return new Promise((resolve, reject) => {
       const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
+
+      IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
+      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
 
       osqueryd.on('error', (err) => {
         if (this.connection) {
@@ -106,7 +113,7 @@ class OSQuery {
         if (process.platform === 'darwin') {
           if (data.includes('Extension manager service starting')) {
             IS_DEV && log.info('osquery:Thrift socket ready')
-            resolve()
+            resolve(osqueryd)
           }
         } else if (process.platform === 'win32') {
           /*
@@ -157,8 +164,24 @@ class OSQuery {
   }
 
   static stop() {
-    if (this.osqueryd) {
-      this.osqueryd.kill('SIGKILL')
+    try {
+      const pid = fs.readFileSync(OSQUERY_PID_PATH)
+      if (pid) {
+        log.warn('found old osquery pid', pid+'')
+        try {
+          process.kill(parseInt(pid+'', 10))
+        } catch (e) {
+          log.error('Unable to kill process', pid+'')
+        }
+
+        try {
+          fs.unlinkSync(OSQUERY_PID_PATH)
+        } catch (err) {
+          log.error('cannot unlink pidfile', err)
+        }
+      }
+    } catch (e) {
+      log.warn('expected error reading pidfile', e.message)
     }
   }
 

@@ -9,6 +9,7 @@ const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery_thrift')
+const IS_DEV = env === 'development'
 
 let mainWindow
 let tray
@@ -32,13 +33,6 @@ const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
 function createWindow () {
   log.info('starting stethoscope')
-
-  if (isFirstLaunch) {
-    const { AppUpdater } = require('electron-updater')
-    const appUpdater = new AppUpdater()
-    appUpdater.checkForUpdatesAndNotify()
-    isFirstLaunch = false
-  }
 
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
@@ -89,6 +83,13 @@ function createWindow () {
 
   mainWindow = new BrowserWindow(windowPrefs)
 
+  updater = require('./updater')(env, mainWindow, log)
+
+  if (isFirstLaunch) {
+    updater.checkForUpdates({}, {}, {}, true)
+    isFirstLaunch = false
+  }
+
   if (tray) tray.destroy()
 
   const focusOrCreateWindow = () => {
@@ -131,6 +132,7 @@ function createWindow () {
       }
     }
     starting = true
+    // kill any remaining osquery processes
     OSQuery.start().then(() => {
       log.info('osquery started')
       // start GraphQL server
@@ -155,6 +157,15 @@ function createWindow () {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
+  } else {
+    mainWindow.loadURL(
+      process.env.ELECTRON_START_URL ||
+      url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      })
+    )
   }
 
   // adjust window height when download begins and ends
@@ -176,8 +187,8 @@ function createWindow () {
     }
   })
 
-  ipcMain.on('download:complete', (event, { resize }) => {
-    if (resize) {
+  ipcMain.on('download:complete', (event, arg) => {
+    if (arg && arg.resize) {
       mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
     }
   })
@@ -207,8 +218,6 @@ app.on('ready', () => setTimeout(() => {
   createWindow()
   initProtocols(mainWindow)
 
-  updater = require('./updater')(env, mainWindow, log)
-
   // override internal request origin to give express CORS policy something to check
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
@@ -231,6 +240,8 @@ app.on('ready', () => setTimeout(() => {
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
+  IS_DEV && log.info('stopping osquery')
+  OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
     server.close()
@@ -274,6 +285,7 @@ process.on('uncaughtException', (err) => {
   if (server && server.listening) {
     server.close()
   }
-  console.error('exiting', err)
+  OSQuery.stop()
+  log.error('exiting on uncaught exception', err)
   process.exit(1)
 })

@@ -3,12 +3,13 @@ const electronUpdater = require('electron-updater')
 
 let updater
 let attemptingUpdate = false
+let isFirstLaunch
 const eventRegistration = {}
 
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function (env, mainWindow, log = console, isFirstLaunch = false) {
+module.exports = function (env, mainWindow, log = console) {
   const { autoUpdater } = electronUpdater
   autoUpdater.autoDownload = false
 
@@ -90,7 +91,7 @@ module.exports = function (env, mainWindow, log = console, isFirstLaunch = false
   }
 
   return {
-    checkForUpdates (menuItem, focusedWindow, event) {
+    checkForUpdates (menuItem, focusedWindow, event, isLaunch = false) {
       // don't allow multiple concurrent attempts
       attemptingUpdate = true
 
@@ -99,8 +100,11 @@ module.exports = function (env, mainWindow, log = console, isFirstLaunch = false
         if (updater) updater.enabled = false
       }
 
+      isFirstLaunch = isLaunch
+
       return autoUpdater.checkForUpdates().catch(err => {
         log.error('Error updating', err)
+        isFirstLaunch = false
       })
     }
   }
