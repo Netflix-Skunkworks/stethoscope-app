@@ -158,6 +158,7 @@ function createWindow () {
           app.quit()
         }
       })
+      mainWindow = mainWindow || new BrowserWindow(windowPrefs)
       mainWindow.loadURL(
         process.env.ELECTRON_START_URL ||
         url.format({

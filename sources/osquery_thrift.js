@@ -9,7 +9,7 @@ const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-const OSQUERY_PID_PATH = `${app.getPath('temp')}.osquery.pid`
+const OSQUERY_PID_PATH = `${app.getPath('home')}${path.sep}.osquery.pid`
 
 const osqueryPlatforms = {
   darwin: 'osqueryd_darwin',
@@ -78,13 +78,15 @@ class OSQuery {
     const MAX_ATTEMPTS = 20
     const launchCommand = `"${osqueryPath}"`
 
-    IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
+    IS_DEV && log.info(`osquery:initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
 
     return new Promise((resolve, reject) => {
       const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
 
       IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
-      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
+      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid, (err) => {
+        if (err) log.error('Unable to write osquery pidfile')
+      })
 
       osqueryd.on('error', (err) => {
         if (this.connection) {
@@ -103,6 +105,8 @@ class OSQuery {
         }
       })
 
+      let thriftConnectTimeout
+
       osqueryd.stderr.on('data', function(data) {
         IS_DEV && log.info('osquery:stderr', data+'')
         /*
@@ -113,6 +117,7 @@ class OSQuery {
         if (process.platform === 'darwin') {
           if (data.includes('Extension manager service starting')) {
             IS_DEV && log.info('osquery:Thrift socket ready')
+            clearTimeout(thriftConnectTimeout)
             resolve(osqueryd)
           }
         } else if (process.platform === 'win32') {
@@ -129,6 +134,7 @@ class OSQuery {
           to shelve it for now because it never takes osquery more than one
           second to load and this solution is reliable enough for the time being.
           */
+          clearTimeout(thriftConnectTimeout)
           setTimeout(() => resolve(), 200)
         }
       })
@@ -144,10 +150,11 @@ class OSQuery {
           log.error('TOO MANY ATTEMPTS to connect to osquery')
           reject(new Error(err))
         } else {
-          setTimeout(() => {
+          thriftConnectTimeout = setTimeout(() => {
             this.connection.connect()
+            this.connection.off('error', tryReconnect)
             this.connection.on('error', tryReconnect)
-          }, 100)
+          }, 100 * startAttempts)
         }
       }
 

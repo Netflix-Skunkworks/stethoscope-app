@@ -102,6 +102,8 @@
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js"
   },
   "dependencies": {
+    "@babel/core": "^7.0.0-rc.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
     "applescript": "^1.0.0",
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
