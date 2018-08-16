@@ -78,15 +78,15 @@ class OSQuery {
     const MAX_ATTEMPTS = 20
     const launchCommand = `"${osqueryPath}"`
 
-    console.log(osqueryPath, osquerydArgs.join(' '))
-
-    IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
+    IS_DEV && log.info(`osquery:initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
 
     return new Promise((resolve, reject) => {
       const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
 
       IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
-      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
+      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid, (err) => {
+        if (err) log.error('Unable to write osquery pidfile')
+      })
 
       osqueryd.on('error', (err) => {
         if (this.connection) {
