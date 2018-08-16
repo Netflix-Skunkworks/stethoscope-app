@@ -3,6 +3,7 @@ const path = require('path')
 const url = require('url')
 const log = require('./lib/logger')
 const initMenu = require('./Menu')
+const settings = require('electron-settings')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const pkg = require('../package.json')
