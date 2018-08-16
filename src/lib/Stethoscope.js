@@ -1,4 +1,5 @@
 /* global fetch */
+const fetch = require('node-fetch')
 const { HOST } = require('../constants')
 
 const handleValidate = (result, partitions, device, practices, platform) => {

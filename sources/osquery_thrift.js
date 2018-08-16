@@ -9,7 +9,7 @@ const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-const OSQUERY_PID_PATH = `${app.getPath('temp')}.osquery.pid`
+const OSQUERY_PID_PATH = `${app.getPath('home')}${path.sep}.osquery.pid`
 
 const osqueryPlatforms = {
   darwin: 'osqueryd_darwin',

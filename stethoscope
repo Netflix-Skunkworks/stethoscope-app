@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+require('babel-register')
+const yaml = require('js-yaml')
+const fs = require('fs')
+const fetch = require('node-fetch')
+const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
+const Stethoscope = require('./src/lib/Stethoscope').default
+const action = process.argv[2]
+const policyArg = process.argv[3]
+
+if (!policyArg) {
+  console.error('policy argument is required')
+  process.exit(1)
+}
+
+switch (action) {
+  case 'report':
+    let policy = {}
+
+    const policyArg = process.argv[3]
+    if (policyArg.includes('.yaml') || policyArg.includes('.yml')) {
+      const policyFile = fs.readFileSync(policyArg, 'utf8')
+      policy = spacesToCamelCase(yaml.safeLoad(policyFile))
+    } else if (policyArg.includes('.json')) {
+      policy = require(policyArg)
+    } else {
+      try {
+        policy = JSON.parse(policyArg)
+      } catch (e) {
+        console.error('Invalid argument passed to validate')
+        process.exit(1)
+      }
+    }
+
+    Stethoscope.validate(policy).then(({ device, result }) => {
+      const lastScanTime = Date.now()
+      let output = {}
+      if (process.argv.includes('--device-details')) {
+        Object.assign(output, { device })
+      }
+      if (process.argv.includes('--scan-result-details')) {
+        Object.assign(output, { result, lastScanTime })
+      }
+      if (process.argv.includes('--silent') === false) {
+        console.log(JSON.stringify(output))
+      }
+      process.exit(result.status === 'PASS' ? 0 : 1)
+    }).catch(err => {
+      console.error(err)
+      process.exit(1)
+    })
+
+  case 'update':
+    // TODO force app update check
+
+  default:
+    break
+}
