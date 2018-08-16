@@ -83,6 +83,7 @@ practices:
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         1. Click "Automatically check for updates"
         1. Make sure the following are checked:
+            - [automaticUpdates] Automatically check for updates
             - [automaticDownloadUpdates] Download newly available updates in the background
             - [automaticAppUpdates] Install app updates
             - [automaticOsUpdates] Install macOS updates
@@ -131,6 +132,8 @@ practices:
         1. Open the [App Store](app://App%20Store) app.
         1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
         1. Install any outstanding updates.
+
+        If you don't see any available updates, you may need the next major version of MacOS. New releases are featured on the [App Store](app://App%20Store) home screen.
       win32: |
         1. Open [Windows Update](ms-settings:windowsupdate) in the Settings.
         1. Click "Restart now"

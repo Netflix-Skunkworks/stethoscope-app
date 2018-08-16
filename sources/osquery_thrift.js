@@ -78,6 +78,8 @@ class OSQuery {
     const MAX_ATTEMPTS = 20
     const launchCommand = `"${osqueryPath}"`
 
+    console.log(osqueryPath, osquerydArgs.join(' '))
+
     IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
 
     return new Promise((resolve, reject) => {
@@ -103,6 +105,8 @@ class OSQuery {
         }
       })
 
+      let thriftConnectTimeout
+
       osqueryd.stderr.on('data', function(data) {
         IS_DEV && log.info('osquery:stderr', data+'')
         /*
@@ -113,6 +117,7 @@ class OSQuery {
         if (process.platform === 'darwin') {
           if (data.includes('Extension manager service starting')) {
             IS_DEV && log.info('osquery:Thrift socket ready')
+            clearTimeout(thriftConnectTimeout)
             resolve(osqueryd)
           }
         } else if (process.platform === 'win32') {
@@ -129,6 +134,7 @@ class OSQuery {
           to shelve it for now because it never takes osquery more than one
           second to load and this solution is reliable enough for the time being.
           */
+          clearTimeout(thriftConnectTimeout)
           setTimeout(() => resolve(), 200)
         }
       })
@@ -144,10 +150,11 @@ class OSQuery {
           log.error('TOO MANY ATTEMPTS to connect to osquery')
           reject(new Error(err))
         } else {
-          setTimeout(() => {
+          thriftConnectTimeout = setTimeout(() => {
             this.connection.connect()
+            this.connection.off('error', tryReconnect)
             this.connection.on('error', tryReconnect)
-          }, 100)
+          }, 100 * startAttempts)
         }
       }
 
