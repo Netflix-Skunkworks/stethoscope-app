@@ -24,8 +24,12 @@ class ThriftClient {
     this._connection.on(event, callback)
   }
 
-  query (sql, cb) {
-    this._client.query(sql, cb)
+  off(event, callback) {
+    this._connection.removeListener(event, callback)
+  }
+
+  query (msg, cb) {
+    this._client.query(msg, cb)
   }
 
   end() {

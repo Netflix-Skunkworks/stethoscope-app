@@ -152,6 +152,7 @@ class OSQuery {
         } else {
           thriftConnectTimeout = setTimeout(() => {
             this.connection.connect()
+            this.connection.off('error', tryReconnect)
             this.connection.on('error', tryReconnect)
           }, 100 * startAttempts)
         }
