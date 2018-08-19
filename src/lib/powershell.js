@@ -1,4 +1,4 @@
-const { UNSUPPORTED, UNKNOWN } = require('../constants')
+const { UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
 const log = require('./logger')
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -25,7 +25,7 @@ const execPowershell = (cmd, logError = true) => {
         IS_DEV && log.info('powershell:output', output)
         resolve(output)
         ps.dispose()
-      }).catch (e => {
+      }).catch(e => {
         ps.dispose()
         // ps._cmds = []
         if (logError !== false) log.error(`powershell error: ${e} | cmd: ${cmd}`)
@@ -47,7 +47,7 @@ function getTimingInfo () {
   }
 }
 
-function flushCache() {
+function flushCache () {
   cache.clear()
 }
 
@@ -148,7 +148,7 @@ const getDisableLockWorkStation = async () => {
   ]
 
   try {
-    const output = await execPowershell(commands.join('; '), false)
+    await execPowershell(commands.join('; '), false)
     return true
   } catch (e) {
     return false

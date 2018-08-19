@@ -13,13 +13,13 @@ export default class ErrorMessage extends Component {
   }
 
   render () {
-    const { config } = this.props;
+    const { config } = this.props
 
     return (
       <div className='error'>
         <h1>Oh no!</h1>
         <p>Something went wrong. Here's what we know:</p>
-        <pre>{this.props.message+''}</pre>
+        <pre>{this.props.message + ''}</pre>
         {this.props.showStack ? <pre>{this.props.stack}</pre> : null}
         <button onClick={this.copyToClipboard}>Copy Error to Clipboard</button>
         <div id='helpBubble'>

@@ -167,7 +167,7 @@ class App extends Component {
   }
 
   handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    log.error('App:response error',err)
+    log.error('App:response error', err)
     this.setState({ error: err, loading: false })
   }
 
@@ -212,9 +212,9 @@ class App extends Component {
       }).catch(err => {
         console.log(err)
         log.error(err)
-        let message = new Error('Request timeout');
+        let message = new Error('Request timeout')
         if (err.errors) {
-          message = new Error(JSON.stringify(err.errors));
+          message = new Error(JSON.stringify(err.errors))
         }
         this.handleResponseError({ message })
       })

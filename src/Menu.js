@@ -1,4 +1,4 @@
-const { app, Menu, shell, BrowserWindow } = require('electron')
+const { Menu, shell, BrowserWindow } = require('electron')
 const path = require('path')
 const url = require('url')
 const config = require('./config.json')
@@ -10,17 +10,30 @@ let about
 module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
   const { checkForUpdates } = require('./updater')(env, mainWindow, log, false)
   const template = [
-    // { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
-    // { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+    { role: 'copy' },
+    { role: 'reload' },
+    { role: 'close', accelerator: 'CmdOrCtrl+W' },
+    {
+      label: 'Open Window',
+      accelerator: 'CmdOrCtrl+N',
+      click () {
+        focusOrCreateWindow()
+      }
+    },
     {
       label: 'Check for Update',
       click (event) {
         checkForUpdates(this, mainWindow, event)
       }
     },
-    { role: 'separator' },
+    { role: 'separator' }
   ].concat(
-    config.menu.help.map(({label, link}) => ({ label, click () { shell.openExternal(link) }})),
+    config.menu.help.map(({ label, link }) => ({
+      label,
+      click () {
+        shell.openExternal(link)
+      }
+    })),
     { role: 'separator' }
   )
 
@@ -38,12 +51,8 @@ module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
   if (process.env.NODE_ENV === 'development') {
     template.push({
       label: 'Toggle Developer Tools',
-      accelerator: 'Alt+Command+I',
+      accelerator: 'Alt+CmdOrCtrl+I',
       click () { mainWindow.toggleDevTools() }
-    }, {
-      label: 'Reload',
-      accelerator: 'Command+R',
-      click () { mainWindow.reload() }
     })
   }
 

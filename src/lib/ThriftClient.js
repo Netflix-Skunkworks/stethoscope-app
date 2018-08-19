@@ -1,6 +1,5 @@
 const thrift = require('thrift')
 const ExtensionManager = require('./thrift/ExtensionManager.js')
-const Types = require('./thrift/osquery_types.js')
 
 class ThriftClient {
   static getInstance(opts) {
@@ -18,14 +17,17 @@ class ThriftClient {
   connect() {
     this._connection = thrift.createConnection(this.port, this.path)
     this._client = thrift.createClient(ExtensionManager, this._connection)
+    return this
   }
 
   on(event, callback) {
     this._connection.on(event, callback)
+    return this
   }
 
   off(event, callback) {
     this._connection.removeListener(event, callback)
+    return this
   }
 
   query (msg, cb) {

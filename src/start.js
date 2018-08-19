@@ -1,4 +1,4 @@
-const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
+const { app, ipcMain, globalShortcut, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
 const log = require('./lib/logger')
@@ -6,7 +6,6 @@ const initMenu = require('./Menu')
 const settings = require('electron-settings')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
-const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery_thrift')
@@ -29,8 +28,41 @@ const statusImages = {
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn2@2x.png'))
 }
 
+const windowPrefs = {
+  width: 480,
+  height: 670,
+  fullscreenable: false,
+  maximizable: false,
+  // uncomment the line before to keep window controls but hide title bar
+  // titleBarStyle: 'hidden',
+  webPreferences: {
+    webSecurity: false,
+    sandbox: false
+  }
+}
+
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
+
+const focusOrCreateWindow = () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore()
+    }
+    mainWindow.focus()
+  } else {
+    mainWindow = new BrowserWindow(windowPrefs)
+    initMenu(mainWindow, env, log)
+    mainWindow.loadURL(
+      process.env.ELECTRON_START_URL ||
+      url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      })
+    )
+  }
+}
 
 function createWindow () {
   log.info('starting stethoscope')
@@ -58,19 +90,6 @@ function createWindow () {
   if (shouldQuit) {
     app.quit()
     return
-  }
-
-  const windowPrefs = {
-    width: 480,
-    height: 670,
-    fullscreenable: false,
-    maximizable: false,
-    // uncomment the line before to keep window controls but hide title bar
-    // titleBarStyle: 'hidden',
-    webPreferences: {
-      webSecurity: false,
-      sandbox: false
-    }
   }
 
   if (settings.get('showInDock') !== true) {
@@ -101,26 +120,6 @@ function createWindow () {
   }
 
   if (tray) tray.destroy()
-
-  const focusOrCreateWindow = () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-      }
-      mainWindow.focus()
-    } else {
-      mainWindow = new BrowserWindow(windowPrefs)
-      initMenu(mainWindow, env, log)
-      mainWindow.loadURL(
-        process.env.ELECTRON_START_URL ||
-        url.format({
-          pathname: path.join(__dirname, '/../build/index.html'),
-          protocol: 'file:',
-          slashes: true
-        })
-      )
-    }
-  }
 
   tray = new Tray(statusImages.PASS)
   tray.on('click', focusOrCreateWindow)
@@ -231,6 +230,18 @@ function createWindow () {
 // issues on Windows
 app.on('ready', () => setTimeout(() => {
   createWindow()
+
+  const keyMap = {
+    'CommandOrControl+Shift+U': () => focusOrCreateWindow(),
+    // 'CommandOrControl+Q': () => mainWindow && mainWindow.close(),
+    // 'CommandOrControl+W': () => mainWindow && mainWindow.close(),
+    // 'Alt+CommandOrControl+I': () => mainWindow.webContents.toggleDevTools()
+  }
+
+  // for (const accelerator in keyMap) {
+  //   globalShortcut.register(accelerator, keyMap[accelerator])
+  // }
+
   initProtocols(mainWindow)
 
   // override internal request origin to give express CORS policy something to check
