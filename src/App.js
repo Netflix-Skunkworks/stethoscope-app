@@ -57,6 +57,8 @@ class App extends Component {
     this.loadPractices()
     // flag ensures the download:start event isn't sent multiple times
     this.downloadStartSent = false
+    // handle context menu
+    window.addEventListener('contextmenu', () => ipcRenderer.send('contextmenu'))
     // handle App update download progress
     ipcRenderer.on('download:progress', this.onDownloadProgress)
     // handles any errors that occur when updating (restores window size, etc.)
@@ -170,7 +172,10 @@ class App extends Component {
     log.error('App:response error', err)
     this.setState({ error: err, loading: false })
   }
-
+  /**
+   * loads config, policy, and instructions and initializes a scan
+   * using them
+   */
   loadPractices = () => {
     this.setState({ loading: true }, () => {
       const files = ['config', 'policy', 'instructions']
@@ -187,14 +192,18 @@ class App extends Component {
       }).catch(this.handleResponseError)
     })
   }
-
+  /**
+   * Opens a link in the native default browser
+   */
   openExternal = event => {
     event.preventDefault()
     if (event.target.getAttribute('href')) {
       shell.openExternal(event.target.getAttribute('href'))
     }
   }
-
+  /**
+   * Performs a scan by passing the current policy to the graphql server
+   */
   scan = () => {
     this.setState({ loading: true, scanIsRunning: true }, () => {
       Stethoscope.validate(this.state.policy).then(({ device, result }) => {
@@ -287,7 +296,8 @@ class App extends Component {
                 className={classNames('btn btn-default', {
                   'btn-primary': highlightRescan && result.status !== 'PASS'
                 })}
-                onClick={this.scan}>
+                onClick={this.scan}
+              >
                 <span className='icon icon-arrows-ccw' />rescan
               </button>
               {appConfig.stethoscopeWebURI && (

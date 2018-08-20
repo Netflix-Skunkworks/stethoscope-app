@@ -41,6 +41,12 @@ const windowPrefs = {
   }
 }
 
+const BASE_URL = process.env.ELECTRON_START_URL || url.format({
+  pathname: path.join(__dirname, '/../build/index.html'),
+  protocol: 'file:',
+  slashes: true
+})
+
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
@@ -53,14 +59,7 @@ const focusOrCreateWindow = () => {
   } else {
     mainWindow = new BrowserWindow(windowPrefs)
     initMenu(mainWindow, env, log)
-    mainWindow.loadURL(
-      process.env.ELECTRON_START_URL ||
-      url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
-    )
+    mainWindow.loadURL(BASE_URL)
   }
 }
 
@@ -159,35 +158,25 @@ function createWindow () {
         }
       })
       mainWindow = mainWindow || new BrowserWindow(windowPrefs)
-      mainWindow.loadURL(
-        process.env.ELECTRON_START_URL ||
-        url.format({
-          pathname: path.join(__dirname, '/../build/index.html'),
-          protocol: 'file:',
-          slashes: true
-        })
-      )
+      mainWindow.loadURL(BASE_URL)
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
   } else {
-    mainWindow.loadURL(
-      process.env.ELECTRON_START_URL ||
-      url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
-    )
+    mainWindow.loadURL(BASE_URL)
   }
+
+  ipcMain.on('contextmenu', event => {
+    appMenu.popup({ window: mainWindow })
+  })
 
   // adjust window height when download begins and ends
   ipcMain.on('download:start', (event, arg) => {
     mainWindow.setSize(windowPrefs.width, 110, true)
   })
 
-  ipcMain.on('scan:init', (event) => {
+  ipcMain.on('scan:init', event => {
     app.setBadgeCount(0)
     mainWindow.setOverlayIcon(null, 'No policy violations')
   })
@@ -232,7 +221,7 @@ app.on('ready', () => setTimeout(() => {
   createWindow()
 
   const keyMap = {
-    'CommandOrControl+Shift+U': () => focusOrCreateWindow(),
+    'CommandOrControl+Shift+U': () => focusOrCreateWindow()
     // 'CommandOrControl+Q': () => mainWindow && mainWindow.close(),
     // 'CommandOrControl+W': () => mainWindow && mainWindow.close(),
     // 'Alt+CommandOrControl+I': () => mainWindow.webContents.toggleDevTools()
@@ -280,7 +269,7 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('open-url', function (event, url) {
+app.on('open-url', (event, url) => {
   event.preventDefault()
 
   if (url.includes('update')) {
@@ -307,7 +296,7 @@ app.on('activate', () => {
   }
 })
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   if (server && server.listening) {
     server.close()
   }

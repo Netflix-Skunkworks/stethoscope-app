@@ -2,30 +2,30 @@ const thrift = require('thrift')
 const ExtensionManager = require('./thrift/ExtensionManager.js')
 
 class ThriftClient {
-  static getInstance(opts) {
+  static getInstance (opts) {
     if (!this.instance) {
       this.instance = new ThriftClient(opts)
     }
     return this.instance
   }
 
-  constructor(opts = { path: '' }) {
+  constructor (opts = { path: '' }) {
     this.path = opts.path
     this.port = 0
   }
 
-  connect() {
+  connect () {
     this._connection = thrift.createConnection(this.port, this.path)
     this._client = thrift.createClient(ExtensionManager, this._connection)
     return this
   }
 
-  on(event, callback) {
+  on (event, callback) {
     this._connection.on(event, callback)
     return this
   }
 
-  off(event, callback) {
+  off (event, callback) {
     this._connection.removeListener(event, callback)
     return this
   }
@@ -34,7 +34,7 @@ class ThriftClient {
     this._client.query(msg, cb)
   }
 
-  end() {
+  end () {
     this._connection.end()
     this._connection.destroy()
   }

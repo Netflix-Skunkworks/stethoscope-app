@@ -28,7 +28,9 @@ export default class ErrorMessage extends Component {
             <a key={link} className='helpLink' href={link}>{label}</a>
           ))}
         </div>
-        <div id='giraffe'><img alt='Stethoscope Giraffe' src='./favicon.png' /></div>
+        <div id='giraffe'>
+          <img alt='Stethoscope Giraffe' src='./favicon.png' />
+        </div>
       </div>
     )
   }

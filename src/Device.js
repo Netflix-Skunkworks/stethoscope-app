@@ -36,19 +36,21 @@ class Device extends Component {
     const status = type === 'done' ? 'PASS' : 'FAIL'
 
     return actions.map((action) => {
+      const actionProps = {
+        action,
+        device,
+        status,
+        type,
+        key: action.title[status],
+        onExpandPolicyViolation: this.props.onExpandPolicyViolation,
+        platform: this.props.platform,
+        policy: this.props.policy,
+        security: this.props.security
+      }
+
       if (action.results) {
         return (
-          <Action
-            key={action.title[status]}
-            type={type}
-            status={status}
-            device={device}
-            security={this.props.security}
-            action={action}
-            policy={this.props.policy}
-            platform={this.props.platform}
-            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
-          >
+          <Action {...actionProps}>
             <ul className='result-list'>
               {action.results.map(({ name }) => <li key={name}>{name}</li>)}
             </ul>
@@ -56,17 +58,7 @@ class Device extends Component {
         )
       } else {
         return (
-          <Action
-            key={action.title[status]}
-            status={status}
-            security={this.props.security}
-            device={device}
-            type={type}
-            action={action}
-            policy={this.props.policy}
-            platform={this.props.platform}
-            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
-          />
+          <Action {...actionProps} />
         )
       }
     })

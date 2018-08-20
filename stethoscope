@@ -16,7 +16,6 @@ if (!policyArg) {
 switch (action) {
   case 'report':
     let policy = {}
-
     const policyArg = process.argv[3]
     if (policyArg.includes('.yaml') || policyArg.includes('.yml')) {
       const policyFile = fs.readFileSync(policyArg, 'utf8')

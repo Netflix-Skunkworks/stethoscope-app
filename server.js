@@ -104,7 +104,9 @@ module.exports = function startServer (env, log, appActions, OSQuery) {
     if (remote) {
       try {
         remoteLabel = hostLabels
-          .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+          .find(({ pattern }) =>
+            (new RegExp(pattern)).test(req.get('origin'))
+          ).name
       } catch (e) {
         remoteLabel = 'Unknown App'
       }
