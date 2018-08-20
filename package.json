@@ -110,7 +110,6 @@
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",
     "electron-settings": "^3.1.4",
-    "electron-sudo": "^4.0.12",
     "electron-updater": "^3.0.3",
     "es6-promisify": "^6.0.0",
     "express": "^4.16.2",

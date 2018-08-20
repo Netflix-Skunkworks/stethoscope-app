@@ -6,7 +6,6 @@ const path = require('path')
 const log = require('../src/lib/logger')
 const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
-const Sudoer = require('electron-sudo').default
 const IS_DEV = process.env.NODE_ENV === 'development'
 const OSQUERY_PID_PATH = `${app.getPath('userData')}${path.sep}.osquery.pid`
 
