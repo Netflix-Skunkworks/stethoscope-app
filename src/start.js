@@ -92,9 +92,11 @@ function createWindow () {
   }
 
   if (settings.get('showInDock') !== true) {
-    windowPrefs.autoHideMenuBar = true
-    windowPrefs.skipTaskbar = true
-
+    if (['linux', 'ubuntu'].includes(process.platform) === false) {
+      windowPrefs.autoHideMenuBar = true
+      windowPrefs.skipTaskbar = true
+    }
+  
     if (process.platform === 'darwin') {
       app.dock.hide()
     }

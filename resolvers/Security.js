@@ -90,7 +90,7 @@ const Security = {
   },
 
   async osVersion (root, args, context) {
-    const { ok, nudge } = args.osVersion[context.platform]
+    const { ok, nudge } = Object(args.osVersion[context.platform])
     let { version } = await context.osVersion
 
     if (semver.satisfies(semver.coerce(version), ok)) {
