@@ -15,26 +15,29 @@ try {
 } catch (e) {}
 
 if (!global.log) {
-  // setup winston logging
-  const transport = new (winston.transports.DailyRotateFile)({
-    filename: `${envPrefix}application-%DATE%.log`,
-    datePattern: 'YYYY-MM-DD',
-    dirname: path.resolve(userDataPath),
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles
+  const appendAppVersion = winston.format(info => {
+    info.version = pkg.version
+    return info
   })
-  const consoleTransport = new winston.transports.Console()
-  log = new winston.Logger({
-    rewriters: [(level, msg, meta) => {
-      meta.version = pkg.version
-      return meta
-    }],
+
+  log = winston.createLogger({
+    format: winston.format.combine(
+      appendAppVersion(),
+      IS_DEV ? winston.format.simple() : winston.format.json()
+    ),
     transports: [
-      transport,
-      consoleTransport
+      new (winston.transports.DailyRotateFile)({
+        filename: `${envPrefix}application-%DATE%.log`,
+        datePattern: 'YYYY-MM-DD',
+        dirname: path.resolve(userDataPath),
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles
+      }),
+      new winston.transports.Console()
     ]
   })
+
   global.log = log
 }
 

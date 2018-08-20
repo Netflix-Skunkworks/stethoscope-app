@@ -113,6 +113,7 @@
     "electron-updater": "^3.0.3",
     "es6-promisify": "^6.0.0",
     "express": "^4.16.2",
+    "file-stream-rotator": "git://github.com/andrefarzat/file-stream-rotator.git#b769f580b7c1efc7f494638e728755064042ce81",
     "graphql": "^0.13.2",
     "graphql-server-express": "^1.2.0",
     "graphql-tools": "^2.12.0",
@@ -128,8 +129,8 @@
     "socket.io": "^2.0.4",
     "thrift": "^0.11.0",
     "url-parse": "^1.4.3",
-    "winston": "^2.4.2",
-    "winston-daily-rotate-file": "^3.1.3"
+    "winston": "^3.0.0",
+    "winston-daily-rotate-file": "^3.3.0"
   },
   "devDependencies": {
     "@heroku/foreman": "^2.0.2",
