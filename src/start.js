@@ -64,8 +64,6 @@ const focusOrCreateWindow = () => {
 }
 
 function createWindow () {
-  log.info('starting stethoscope')
-
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -129,11 +127,8 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  let appMenu = initMenu(mainWindow, app, focusOrCreateWindow, env, log)
-
-  tray.on('right-click', () => {
-    tray.popUpContextMenu(appMenu)
-  })
+  let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, env, log)
+  tray.on('right-click', () => tray.popUpContextMenu(contextMenu))
 
   if (!starting) {
     log.info('Starting osquery')
@@ -170,14 +165,10 @@ function createWindow () {
     mainWindow.loadURL(BASE_URL)
   }
 
-  ipcMain.on('contextmenu', event => {
-    appMenu.popup({ window: mainWindow })
-  })
+  ipcMain.on('contextmenu', event => appMenu.popup({ window: mainWindow }))
 
   // adjust window height when download begins and ends
-  ipcMain.on('download:start', (event, arg) => {
-    mainWindow.setSize(windowPrefs.width, 110, true)
-  })
+  ipcMain.on('download:start', (event, arg) => mainWindow.setSize(windowPrefs.width, 110, true))
 
   ipcMain.on('scan:init', event => {
     app.setBadgeCount(0)
@@ -213,27 +204,13 @@ function createWindow () {
     }
   })
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  mainWindow.on('closed', () => mainWindow = null)
 }
 
 // wrap ready callback in 0-delay setTimeout to reduce serious jank
 // issues on Windows
 app.on('ready', () => setTimeout(() => {
   createWindow()
-
-  const keyMap = {
-    'CommandOrControl+Shift+U': () => focusOrCreateWindow()
-    // 'CommandOrControl+Q': () => mainWindow && mainWindow.close(),
-    // 'CommandOrControl+W': () => mainWindow && mainWindow.close(),
-    // 'Alt+CommandOrControl+I': () => mainWindow.webContents.toggleDevTools()
-  }
-
-  // for (const accelerator in keyMap) {
-  //   globalShortcut.register(accelerator, keyMap[accelerator])
-  // }
-
   initProtocols(mainWindow)
 
   // override internal request origin to give express CORS policy something to check
