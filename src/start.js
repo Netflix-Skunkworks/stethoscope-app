@@ -89,16 +89,16 @@ function createWindow () {
     return
   }
 
-  if (settings.get('showInDock') !== true) {
-    if (['linux', 'ubuntu'].includes(process.platform) === false) {
-      windowPrefs.autoHideMenuBar = true
-      windowPrefs.skipTaskbar = true
-    }
-
-    if (process.platform === 'darwin') {
-      app.dock.hide()
-    }
-  }
+  // if (settings.get('showInDock') !== true) {
+  //   if (['linux', 'ubuntu'].includes(process.platform) === false) {
+  //     windowPrefs.autoHideMenuBar = true
+  //     windowPrefs.skipTaskbar = true
+  //   }
+  //
+  //   if (process.platform === 'darwin') {
+  //     app.dock.hide()
+  //   }
+  // }
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
@@ -114,7 +114,7 @@ function createWindow () {
   updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
-    // updater.checkForUpdates({}, {}, {}, true)
+    updater.checkForUpdates({}, {}, {}, true)
     isFirstLaunch = false
   }
 
@@ -144,7 +144,7 @@ function createWindow () {
     // kill any remaining osquery processes
     OSQuery.start().then(() => {
       log.info('osquery started')
-      const [language] = app.getLocale().split('-')
+      const [ language ] = app.getLocale().split('-')
       // start GraphQL server
       server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
       server.on('error', (err) => {
@@ -165,10 +165,14 @@ function createWindow () {
     mainWindow.loadURL(BASE_URL)
   }
 
-  ipcMain.on('contextmenu', event => appMenu.popup({ window: mainWindow }))
+  ipcMain.on('contextmenu', event =>
+    appMenu.popup({ window: mainWindow })
+  )
 
   // adjust window height when download begins and ends
-  ipcMain.on('download:start', (event, arg) => mainWindow.setSize(windowPrefs.width, 110, true))
+  ipcMain.on('download:start', (event, arg) =>
+    mainWindow.setSize(windowPrefs.width, 110, true)
+  )
 
   ipcMain.on('scan:init', event => {
     app.setBadgeCount(0)
