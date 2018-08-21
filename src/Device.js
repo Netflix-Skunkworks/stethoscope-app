@@ -5,22 +5,28 @@ import ActionIcon from './ActionIcon'
 import './Device.css'
 
 const deviceMessages = {
-  ok: <span>
-    <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
-    <span>This device is properly configured.</span>
-  </span>,
-  warning: <span>
-    <span>
-      The security settings on this device could be improved.
-      Click the arrow next to each recommendation for instructions.
-    </span>
-  </span>,
-  critical: <span>
-    <span>
-      The security settings on this device should be improved.
-      Click the arrow next to each recommendation for instructions.
-    </span>
-  </span>
+  ok(msg) {
+    return (
+      <span>
+        <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
+        <span>{msg}</span>
+      </span>
+    )
+  },
+  warning(msg) {
+    return (
+      <span>
+        <span>{msg}</span>
+      </span>
+    )
+  },
+  critical(msg) {
+    return (
+      <span>
+        <span>{msg}</span>
+      </span>
+    )
+  }
 }
 
 class Device extends Component {
@@ -124,10 +130,10 @@ class Device extends Component {
           {deviceInfo}
 
           <div className={`panel device-summary ${deviceClass}`}>
-            {deviceMessages[deviceClass]}
+            {deviceMessages[deviceClass](this.props.strings[deviceClass])}
           </div>
 
-          <h4>{org} baseline policy</h4>
+          <h4>{org} {this.props.strings.policyDescription}</h4>
 
           <div className='action-list'>
             <ul>
@@ -138,7 +144,7 @@ class Device extends Component {
           </div>
 
           <div className='last-updated'>
-            Last scan {this.props.lastScanTime} by {this.props.scannedBy}
+            {this.props.strings.lastScan} {this.props.scannedBy} {this.props.lastScanTime} 
           </div>
 
         </div>
@@ -152,6 +158,7 @@ Device.defaultProps = {
   ipAddresses: [],
   critical: [],
   suggested: [],
+  messages: {},
   done: []
 }
 

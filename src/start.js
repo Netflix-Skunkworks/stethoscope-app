@@ -96,7 +96,7 @@ function createWindow () {
       windowPrefs.autoHideMenuBar = true
       windowPrefs.skipTaskbar = true
     }
-  
+
     if (process.platform === 'darwin') {
       app.dock.hide()
     }
@@ -149,8 +149,9 @@ function createWindow () {
     // kill any remaining osquery processes
     OSQuery.start().then(() => {
       log.info('osquery started')
+      const [language] = app.getLocale().split('-')
       // start GraphQL server
-      server = startGraphQLServer(env, log, appHooksForServer, OSQuery)
+      server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
       server.on('error', (err) => {
         if (err.message.includes('EADDRINUSE')) {
           dialog.showMessageBox({

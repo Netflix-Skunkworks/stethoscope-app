@@ -285,6 +285,7 @@ class App extends Component {
           <Device {...decoratedDevice}
             org={instructions.organization}
             scanResult={result}
+            strings={instructions.strings}
             policy={policy}
             lastScanTime={lastScanFriendly}
             scannedBy={scannedBy}
@@ -298,7 +299,8 @@ class App extends Component {
                 })}
                 onClick={this.scan}
               >
-                <span className='icon icon-arrows-ccw' />rescan
+                <span className='icon icon-arrows-ccw' />
+                {instructions.strings.rescanButton}
               </button>
               {appConfig.stethoscopeWebURI && (
                 <button
