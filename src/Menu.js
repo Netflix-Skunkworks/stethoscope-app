@@ -1,24 +1,62 @@
 const { Menu, shell, BrowserWindow } = require('electron')
 const path = require('path')
 const url = require('url')
+const pkg = require('../package.json')
 const config = require('./config.json')
+const settings = require('electron-settings')
 const env = process.env.NODE_ENV || 'production'
 
 // let changelog
 let about
 
-module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
+module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
   const { checkForUpdates } = require('./updater')(env, mainWindow, log, false)
-  const template = [
-    { role: 'copy' },
-    { role: 'reload' },
-    { role: 'close', accelerator: 'CmdOrCtrl+W' },
+  const contextMenu = [
+    { role: 'copy', accelerator: 'CmdOrCtrl+C' },
     {
-      label: 'Open Window',
-      accelerator: 'CmdOrCtrl+N',
-      click () {
-        focusOrCreateWindow()
-      }
+      label: 'Preferences',
+      submenu: [{
+        label: 'Keep in Dock',
+        id: 'keep-in-dock',
+        type: 'checkbox',
+        checked: !!settings.get('showInDock') === false,
+        click () {
+          settings.set('showInDock', true)
+          app.dock.show()
+          mainWindow.setSkipTaskbar(false)
+          mainWindow.setAutoHideMenuBar(false)
+          applicationMenu.getMenuItemById('keep-in-dock').checked = true
+          applicationMenu.getMenuItemById('tray-only-app').checked = false
+        }
+      },
+      {
+        label: 'Tray Only',
+        id: 'tray-only-app',
+        type: 'checkbox',
+        checked: !!settings.get('showInDock') === true,
+        click () {
+          settings.set('showInDock', false)
+          app.dock.hide()
+          mainWindow.setSkipTaskbar(true)
+          mainWindow.setAutoHideMenuBar(true)
+          applicationMenu.getMenuItemById('keep-in-dock').checked = false
+          applicationMenu.getMenuItemById('tray-only-app').checked = true
+        }
+      }]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'reload' },
+        { role: 'close', accelerator: 'CmdOrCtrl+W' },
+        {
+          label: 'Open Window',
+          accelerator: 'CmdOrCtrl+N',
+          click () {
+            focusOrCreateWindow()
+          }
+        }
+      ]
     },
     {
       label: 'Check for Update',
@@ -26,62 +64,49 @@ module.exports = function (mainWindow, focusOrCreateWindow, env, log) {
         checkForUpdates(this, mainWindow, event)
       }
     },
-    { role: 'separator' }
-  ].concat(
-    config.menu.help.map(({ label, link }) => ({
-      label,
-      click () {
-        shell.openExternal(link)
-      }
-    })),
-    { role: 'separator' }
+    { role: 'separator', enabled: false }
+  ].concat({
+      label: 'Help',
+      submenu: config.menu.help.map(({ label, link }) => ({
+        label,
+        click () {
+          shell.openExternal(link)
+        }
+      })).concat({
+        label: `Stethoscope version ${pkg.version}`,
+        enabled: false
+      })
+    },
+    { role: 'separator', enabled: false }
   )
 
-  if (process.platform === 'darwin') {
-    template.unshift({ role: 'about' })
-  } else if (process.platform === 'win32') {
-    template.unshift({
-      label: 'About',
-      click (event) {
-        showAbout()
-      }
-    })
-  }
+  // easy clone of template
+  const appMenu = JSON.parse(JSON.stringify(contextMenu))
+  appMenu.unshift({
+    label: app.getName(),
+    submenu: [{
+        label: `Stethoscope version ${pkg.version}`,
+        enabled: false
+      },
+      {
+        label: 'Check for Update',
+        click (event) {
+          checkForUpdates(this, mainWindow, event)
+        }
+      },
+      { role: 'copy', accelerator: 'CmdOrCtrl+C' },
+      { role: 'quit', accelerator: 'CmdOrCtrl+Q' },
+    ]
+  })
 
   if (process.env.NODE_ENV === 'development') {
-    template.push({
-      label: 'Toggle Developer Tools',
-      accelerator: 'Alt+CmdOrCtrl+I',
-      click () { mainWindow.toggleDevTools() }
-    })
+    contextMenu.push({ role: 'toggleDevTools', accelerator: 'Alt+CmdOrCtrl+I' })
   }
 
-  template.push({ role: 'quit' })
+  contextMenu.push({ role: 'quit', accelerator: 'CmdOrCtrl+Q' })
 
-  const menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
+  const applicationMenu = Menu.buildFromTemplate(appMenu)
+  Menu.setApplicationMenu(applicationMenu)
 
-  return menu
-}
-
-const showAbout = () => {
-  if (!about) {
-    about = new BrowserWindow({
-      width: 375,
-      height: 285,
-      resizable: false,
-      titleBarStyle: 'hidden',
-      maximizable: false,
-      fullscreenable: false
-    })
-    const dir = env === 'production' ? 'build' : 'public'
-    about.loadURL(url.format({
-      pathname: path.join(__dirname, `/../${dir}/about.html`),
-      protocol: 'file:',
-      slashes: true
-    }))
-    about.on('closed', () => {
-      about = null
-    })
-  }
+  return Menu.buildFromTemplate(contextMenu)
 }

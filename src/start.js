@@ -58,7 +58,7 @@ const focusOrCreateWindow = () => {
     mainWindow.focus()
   } else {
     mainWindow = new BrowserWindow(windowPrefs)
-    initMenu(mainWindow, env, log)
+    initMenu(mainWindow, app, focusOrCreateWindow, env, log)
     mainWindow.loadURL(BASE_URL)
   }
 }
@@ -129,7 +129,7 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  let appMenu = initMenu(mainWindow, focusOrCreateWindow, env, log)
+  let appMenu = initMenu(mainWindow, app, focusOrCreateWindow, env, log)
 
   tray.on('right-click', () => {
     tray.popUpContextMenu(appMenu)
@@ -304,6 +304,7 @@ process.on('uncaughtException', err => {
     server.close()
   }
   OSQuery.stop()
-  log.error('exiting on uncaught exception', err)
+  log.error('exiting on uncaught exception')
+  log.error(err)
   process.exit(1)
 })

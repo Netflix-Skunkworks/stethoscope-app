@@ -21,10 +21,7 @@ if (!global.log) {
   })
 
   log = winston.createLogger({
-    format: winston.format.combine(
-      appendAppVersion(),
-      IS_DEV ? winston.format.simple() : winston.format.json()
-    ),
+    format: winston.format.simple(),
     transports: [
       new (winston.transports.DailyRotateFile)({
         filename: `${envPrefix}application-%DATE%.log`,
