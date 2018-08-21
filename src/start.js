@@ -114,7 +114,7 @@ function createWindow () {
   updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
-    updater.checkForUpdates({}, {}, {}, true)
+    // updater.checkForUpdates({}, {}, {}, true)
     isFirstLaunch = false
   }
 
