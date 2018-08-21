@@ -35,7 +35,12 @@ if (!global.log) {
     ]
   })
 
+  const oldInfo = log.info
+  log.info = function(...args) {
+    if (IS_DEV) oldInfo(...args)
+  }
   global.log = log
+
 }
 
 // make the winston logger available to the renderer
