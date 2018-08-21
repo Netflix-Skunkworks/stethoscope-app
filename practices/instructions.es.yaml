@@ -1,0 +1,152 @@
+organization: Stethoscope
+version: 1.0
+policyFormat: 1.0
+
+strings:
+  ok: Este dispositivo está configurado correctamente
+  warning: >
+    La configuración de seguridad en este dispositivo podría mejorarse.
+    Haga clic en la flecha al lado de cada recomendación para obtener instrucciones.
+  critical: >
+    La configuración de seguridad en este dispositivo debería mejorarse.
+    Haga clic en la flecha al lado de cada recomendación para obtener instrucciones.
+  policyDescription: política de referencia
+  rescanButton: escanear
+  lastScan: Recientemente escaneado por
+
+practices:
+  firewall:
+    title:
+      PASS: Tu Firewall está habilitado
+      FAIL: Tu Firewall debe estar habilitado
+    description: >
+      Los cortafuegos controlan el tráfico de red hacia y desde un sistema. La habilitación del firewall en su dispositivo puede evitar ataques basados ​​en la red en su sistema, y ​​es especialmente importante si utiliza redes inalámbricas inseguras (como en cafeterías y aeropuertos).
+    directions:
+      darwin: |
+        1. Elija Preferencias del sistema en el menú Apple.
+        1. Haga clic en [Seguridad o seguridad y privacidad](x-apple.systempreferences:com.apple.preference.security).
+        1. Haga clic en la pestaña [Firewall] (x-apple.systempreferences: com.apple.preference.security? Firewall).
+        1. Desbloquee el panel haciendo clic en el candado en la esquina inferior izquierda e ingrese el nombre de usuario y la contraseña del administrador.
+        1. Haga clic en "Activar firewall" o "Inicio" para habilitar el firewall.
+        1. Haga clic en Avanzado para personalizar la configuración del firewall.
+      win32: |
+        1. Abra [Configuración del Firewall de Windows] (ps: //wf.msc)
+        1. Haga clic en "Propiedades de Windows Defender Firewall" en el panel central
+        1. Asegúrese de que el "estado del cortafuegos" esté configurado en "Activado (recomendado)" en las pestañas Dominio, Público y Perfil privado.
+        1. Haga clic en Aceptar
+          - [privateFirewall] Estado de firewall privado
+          - [publicFirewall] Estado de Firewall público
+          - [domainFirewall] Estado de Firewall de dominio
+
+  stethoscopeVersion:
+    title:
+      PASS: Stethoscope está actualizado
+      FAIL: Stethoscope necesita ser actualizado
+    description: >
+      Keeping the Stethoscope app up-to-date gives you access to the latest features, security patches, and performance improvements.
+    directions:
+      darwin: |
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
+      win32: |
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
+
+  remoteLogin:
+    title:
+      PASS: El inicio de sesión remoto está desactivado
+      FAIL: El inicio de sesión remoto debe estar deshabilitado
+    description: >
+      The 'Remote Login' setting on your device controls whether users can login remotely to the system. If you don't know what this is or why you would want it, you should disable 'Remote Login'.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [Sharing](x-apple.systempreferences:com.apple.preferences.sharing?Services_RemoteLogin).
+        1. Uncheck "Remote Login" on the left.
+      win32: |
+        1. Open [Advanced System Preferences](ps://SystemPropertiesRemote)
+        1. Under "Remote Desktop" heading, select "Don't allow remote connections to this computer"
+        1. Click Apply
+        1. Click OK
+
+  diskEncryption:
+    title:
+      PASS: El cifrado de disco está habilitado
+      FAIL: El cifrado de disco debe estar habilitado
+    description: >
+      Full-disk encryption protects data at rest from being accessed by a party who does not know the password or decryption key. Systems containing internal data should be encrypted. It is every employee's responsibility to keep internal data safe.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
+        1. Click the [FileVault](x-apple.systempreferences:com.apple.preference.security?FDE) tab.
+        1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
+        1. Click "Turn On FileVault" to start the process.
+      win32: |
+        1. Open [BitLocker Drive Encryption](prefs://BitLocker)
+        1. Click "Turn on BitLocker"
+
+  automaticUpdates:
+    title:
+      PASS: Las actualizaciones automáticas están habilitadas
+      FAIL: Las actualizaciones automáticas deberían estar habilitadas
+    description: >
+      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures. Enabling automatic updating helps ensure your machine is up-to-date without having to manually install updates.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu.
+        1. Click [App Store](prefs://com.apple.preferences.appstore).
+        1. Click "Automatically check for updates"
+        1. Make sure the following are checked:
+            - [automaticUpdates] Automatically check for updates
+            - [automaticDownloadUpdates] Download newly available updates in the background
+            - [automaticAppUpdates] Install app updates
+            - [automaticOsUpdates] Install macOS updates
+            - [automaticSecurityUpdates] Install system data files and security updates
+            - [automaticConfigDataInstall] Install system data files and security updates
+      win32: |
+        1. Open [Services](ps://services.msc) (Start > Run > services.msc)
+        1. Scroll down to find "Windows Update" and double-click the name
+        1. Change "Startup Type" from "DISABLED" to "MANUAL" or "AUTOMATIC"
+        1. Click "Apply"
+        1. Click "OK"
+
+  screenLock:
+    title:
+      PASS: El bloqueo de pantalla está habilitado
+      FAIL: El bloqueo de pantalla debe estar habilitado
+    description: >
+      Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode. Setting the timeout, i.e., the length of idle time before the screen saver takes effect, to 10 minutes or less is also recommended.
+    directions:
+      darwin: |
+        1. Choose System Preferences from the Apple menu
+        1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
+        1. Select the [General](x-apple.systempreferences:com.apple.preference.security?General) tab
+        1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
+        1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins
+      win32: |
+        Standard settings:
+        1. Open [Lock screen settings](ms-settings:lockscreen)
+        1. Scroll down and click on "Screen timeout settings"
+        1. Ensure that Screen settings for "On battery power" and "When plugged in" are less than or equal to 10 minutes
+
+        If fixing the standard settings doesn't resolve the issue:
+        1. Open [User Account Settings](ps://netplwiz)
+        1. Ensure that "Users must enter a user name and password to use this computer" is checked
+        1. Click "Apply"
+        1. Click "OK"
+
+  osVersion:
+    title:
+      PASS: El sistema está actualizado
+      FAIL: El sistema necesita ser actualizado
+    description: >
+      One of the most important things you can do to secure your device(s) is to keep your operating system and software up to date. New vulnerabilities and weaknesses are found every day, so frequent updates are essential to ensuring your device(s) include the latest fixes and preventative measures.
+    directions:
+      darwin: |
+        1. Open the [App Store](app://App%20Store) app.
+        1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
+        1. Install any outstanding updates.
+
+        If you don't see any available updates, you may need the next major version of MacOS. New releases are featured on the [App Store](app://App%20Store) home screen.
+      win32: |
+        1. Open [Windows Update](ms-settings:windowsupdate) in the Settings.
+        1. Click "Restart now"
