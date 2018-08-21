@@ -11,8 +11,8 @@ module.exports = {
 
   async diskEncryption (root, args, context) {
     const disks = await OSQuery.all('disk_encryption', {
-      fields: ['*'],
-      where: 'name LIKE "%sda%" AND uuid != ""'
+      fields: ['encrypted'],
+      where: 'name = (select device from mounts where path = "/")'
     })
     return disks.every(({ encrypted }) => encrypted === "1")
   },
