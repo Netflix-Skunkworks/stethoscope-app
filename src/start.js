@@ -33,6 +33,8 @@ const windowPrefs = {
   height: 670,
   fullscreenable: false,
   maximizable: false,
+  autoHideMenuBar: false,
+  skipTaskbar: false,
   // uncomment the line before to keep window controls but hide title bar
   // titleBarStyle: 'hidden',
   webPreferences: {
@@ -58,7 +60,7 @@ const focusOrCreateWindow = () => {
     mainWindow.focus()
   } else {
     mainWindow = new BrowserWindow(windowPrefs)
-    initMenu(mainWindow, app, focusOrCreateWindow, env, log)
+    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
     mainWindow.loadURL(BASE_URL)
   }
 }
@@ -90,14 +92,18 @@ function createWindow () {
   }
 
   if (settings.get('showInDock') !== true) {
-    if (['linux', 'ubuntu'].includes(process.platform) === false) {
-      windowPrefs.autoHideMenuBar = true
-      windowPrefs.skipTaskbar = true
+    switch (process.platform) {
+      case 'darwin':
+        app.dock.hide()
+        break
+      case 'win32':
+        windowPrefs.skipTaskbar = true
+        break
+      default:
+        break
     }
-
-    if (process.platform === 'darwin') {
-      app.dock.hide()
-    }
+  } else {
+    app.dock.show()
   }
 
   if (process.platform === 'win32') {
@@ -127,12 +133,13 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, env, log)
+  let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
   tray.on('right-click', () => tray.popUpContextMenu(contextMenu))
 
   if (!starting) {
     log.info('Starting osquery')
     const appHooksForServer = {
+      // allow express to update app state
       setScanStatus (status = 'PASS') {
         tray.setImage(statusImages[status])
       },
@@ -140,6 +147,7 @@ function createWindow () {
         updater.checkForUpdates()
       }
     }
+    // ensure that this process doesn't start multiple times
     starting = true
     // kill any remaining osquery processes
     OSQuery.start().then(() => {

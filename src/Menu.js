@@ -9,8 +9,9 @@ const env = process.env.NODE_ENV || 'production'
 // let changelog
 let about
 
-module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
-  const { checkForUpdates } = require('./updater')(env, mainWindow, log, false)
+module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
+  const { checkForUpdates } = updater
+  const showInDock = !!settings.get('showInDock')
   const contextMenu = [
     { role: 'copy', accelerator: 'CmdOrCtrl+C' },
     {
@@ -19,7 +20,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
         label: 'Keep in Dock',
         id: 'keep-in-dock',
         type: 'checkbox',
-        checked: !!settings.get('showInDock') === false,
+        checked: showInDock === true,
         click () {
           settings.set('showInDock', true)
           app.dock.show()
@@ -35,7 +36,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
         label: 'Tray Only',
         id: 'tray-only-app',
         type: 'checkbox',
-        checked: !!settings.get('showInDock') === true,
+        checked: showInDock === false,
         click () {
           settings.set('showInDock', false)
           app.dock.hide()
