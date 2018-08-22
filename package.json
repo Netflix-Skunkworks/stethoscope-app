@@ -31,9 +31,6 @@
         "schema.graphql"
       ]
     },
-    "dmg": {
-      "format": "UDBZ"
-    },
     "win": {
       "target": "nsis",
       "extraResources": [

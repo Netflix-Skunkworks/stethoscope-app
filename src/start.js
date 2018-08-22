@@ -96,10 +96,8 @@ function createWindow () {
       case 'darwin':
         app.dock.hide()
         break
-      case 'win32':
-        windowPrefs.skipTaskbar = true
-        break
       default:
+        windowPrefs.skipTaskbar = true
         break
     }
   } else {
