@@ -94,7 +94,7 @@ function createWindow () {
   if (settings.get('showInDock') !== true) {
     switch (process.platform) {
       case 'darwin':
-        app.dock.hide()
+        //app.dock.hide()
         break
       default:
         windowPrefs.skipTaskbar = true
