@@ -25,6 +25,8 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
           app.dock.show()
           mainWindow.setSkipTaskbar(false)
           mainWindow.setAutoHideMenuBar(false)
+          contextMenuInstance.getMenuItemById('keep-in-dock').checked = true
+          contextMenuInstance.getMenuItemById('tray-only-app').checked = false
           applicationMenu.getMenuItemById('keep-in-dock').checked = true
           applicationMenu.getMenuItemById('tray-only-app').checked = false
         }
@@ -39,6 +41,8 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
           app.dock.hide()
           mainWindow.setSkipTaskbar(true)
           mainWindow.setAutoHideMenuBar(true)
+          contextMenuInstance.getMenuItemById('keep-in-dock').checked = false
+          contextMenuInstance.getMenuItemById('tray-only-app').checked = true
           applicationMenu.getMenuItemById('keep-in-dock').checked = false
           applicationMenu.getMenuItemById('tray-only-app').checked = true
         }
@@ -80,9 +84,13 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
     { role: 'separator', enabled: false }
   )
 
-  // easy clone of template
-  const appMenu = JSON.parse(JSON.stringify(contextMenu))
-  appMenu.unshift({
+  if (process.env.NODE_ENV === 'development') {
+    contextMenu.push({ role: 'toggleDevTools', accelerator: 'Alt+CmdOrCtrl+I' })
+  }
+
+  contextMenu.push({ role: 'quit', accelerator: 'CmdOrCtrl+Q' })
+
+  const applicationMenu = Menu.buildFromTemplate([{
     label: app.getName(),
     submenu: [{
         label: `Stethoscope version ${pkg.version}`,
@@ -97,16 +105,9 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, env, log) {
       { role: 'copy', accelerator: 'CmdOrCtrl+C' },
       { role: 'quit', accelerator: 'CmdOrCtrl+Q' },
     ]
-  })
-
-  if (process.env.NODE_ENV === 'development') {
-    contextMenu.push({ role: 'toggleDevTools', accelerator: 'Alt+CmdOrCtrl+I' })
-  }
-
-  contextMenu.push({ role: 'quit', accelerator: 'CmdOrCtrl+Q' })
-
-  const applicationMenu = Menu.buildFromTemplate(appMenu)
+  }].concat(contextMenu))
   Menu.setApplicationMenu(applicationMenu)
 
-  return Menu.buildFromTemplate(contextMenu)
+  const contextMenuInstance = Menu.buildFromTemplate(contextMenu)
+  return contextMenuInstance
 }

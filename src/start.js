@@ -89,16 +89,16 @@ function createWindow () {
     return
   }
 
-  // if (settings.get('showInDock') !== true) {
-  //   if (['linux', 'ubuntu'].includes(process.platform) === false) {
-  //     windowPrefs.autoHideMenuBar = true
-  //     windowPrefs.skipTaskbar = true
-  //   }
-  //
-  //   if (process.platform === 'darwin') {
-  //     app.dock.hide()
-  //   }
-  // }
+  if (settings.get('showInDock') !== true) {
+    if (['linux', 'ubuntu'].includes(process.platform) === false) {
+      windowPrefs.autoHideMenuBar = true
+      windowPrefs.skipTaskbar = true
+    }
+
+    if (process.platform === 'darwin') {
+      app.dock.hide()
+    }
+  }
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
@@ -145,9 +145,9 @@ function createWindow () {
     OSQuery.start().then(() => {
       log.info('osquery started')
       const [ language ] = app.getLocale().split('-')
-      // start GraphQL server
+      // start GraphQL server, close the app if 37370 is already in use
       server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
-      server.on('error', (err) => {
+      server.on('error', err => {
         if (err.message.includes('EADDRINUSE')) {
           dialog.showMessageBox({
             message: 'Stethoscope is already running'
@@ -166,7 +166,7 @@ function createWindow () {
   }
 
   ipcMain.on('contextmenu', event =>
-    appMenu.popup({ window: mainWindow })
+    contextMenu.popup({ window: mainWindow })
   )
 
   // adjust window height when download begins and ends
@@ -239,7 +239,7 @@ app.on('ready', () => setTimeout(() => {
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
-  IS_DEV && log.info('stopping osquery')
+  log.info('stopping osquery')
   OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
