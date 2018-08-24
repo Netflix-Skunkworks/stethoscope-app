@@ -2,15 +2,25 @@
 require('babel-register')
 const yaml = require('js-yaml')
 const fs = require('fs')
-const fetch = require('node-fetch')
+global.fetch = require('node-fetch')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const Stethoscope = require('./src/lib/Stethoscope').default
 const action = process.argv[2]
 const policyArg = process.argv[3]
+const originArgIndex = process.argv.indexOf('--origin')
 
 if (!policyArg) {
   console.error('policy argument is required')
   process.exit(1)
+}
+
+let origin = 'stethoscope://main'  // default allowedHost configuration
+if (originArgIndex > 0) {
+  origin = process.argv[originArgIndex + 1]
+  if (!origin) {
+    console.error('--origin requires an argument')
+    process.exit(1)
+  }
 }
 
 switch (action) {
@@ -31,7 +41,7 @@ switch (action) {
       }
     }
 
-    Stethoscope.validate(policy).then(({ device, result }) => {
+    Stethoscope.validate(policy, origin).then(({ device, result }) => {
       const lastScanTime = Date.now()
       let output = {}
       if (process.argv.includes('--device-details')) {

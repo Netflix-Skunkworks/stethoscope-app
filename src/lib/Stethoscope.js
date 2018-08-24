@@ -53,7 +53,7 @@ export default class Stethoscope {
   }
 
   // privately retry request until a response is given
-  static __repeatRequest (policy, resolve, reject) {
+  static __repeatRequest (policy, origin = null, resolve, reject) {
     // TODO create and use fragments here
     const query = `query ValidateDevice($policy: DevicePolicy!) {
       policy {
@@ -121,9 +121,14 @@ export default class Stethoscope {
       }
     }`
 
+    const headers = { 'Content-Type': 'application/json' }
+    if (origin) {
+      headers.Origin = origin
+    }
+
     const options = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({ query, variables: { policy } })
     }
 
@@ -157,9 +162,9 @@ export default class Stethoscope {
   }
 
   // public API
-  static validate (policy) {
+  static validate (policy, origin = null) {
     return new Promise((resolve, reject) => {
-      this.__repeatRequest(policy, resolve, reject)
+      this.__repeatRequest(policy, origin, resolve, reject)
     })
   }
 }
