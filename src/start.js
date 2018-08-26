@@ -3,6 +3,8 @@ const path = require('path')
 const url = require('url')
 const log = require('./lib/logger')
 const initMenu = require('./Menu')
+const config = require('./config.json')
+const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
 const settings = require('electron-settings')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
@@ -10,6 +12,8 @@ const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery_thrift')
 const IS_DEV = env === 'development'
+
+const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
 let tray
@@ -34,7 +38,7 @@ const windowPrefs = {
   fullscreenable: false,
   maximizable: false,
   autoHideMenuBar: false,
-  skipTaskbar: false,
+  skipTaskbar: true,
   // uncomment the line before to keep window controls but hide title bar
   // titleBarStyle: 'hidden',
   webPreferences: {
@@ -91,18 +95,20 @@ function createWindow () {
     return
   }
 
-  if (settings.get('showInDock') !== true) {
-    switch (process.platform) {
-      case 'darwin':
-        //app.dock.hide()
-        break
-      default:
-        windowPrefs.skipTaskbar = true
-        break
-    }
-  } else {
-    app.dock.show()
-  }
+  // if (settings.get('showInDock') !== true) {
+  //   switch (process.platform) {
+  //     case 'darwin':
+  //       app.dock.hide()
+  //       break
+  //     default:
+  //       windowPrefs.skipTaskbar = true
+  //       break
+  //   }
+  // } else {
+  //   app.dock.show()
+  // }
+
+  app.dock.hide()
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
@@ -114,7 +120,6 @@ function createWindow () {
   }
 
   mainWindow = new BrowserWindow(windowPrefs)
-
   updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
@@ -180,9 +185,22 @@ function createWindow () {
     mainWindow.setSize(windowPrefs.width, 110, true)
   )
 
+  let rescanTimeout
+  const { rescanIntervalSeconds = MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = config
+  // used to schedule rescan, minimum delay is 5 minutes
+  const rescanDelay = rescanIntervalSeconds * 1000
+
   ipcMain.on('scan:init', event => {
     app.setBadgeCount(0)
     mainWindow.setOverlayIcon(null, 'No policy violations')
+
+    if (!disableAutomaticScanning) {
+      // schedule next automatic scan
+      clearTimeout(rescanTimeout)
+      rescanTimeout = setTimeout(() => {
+        event.sender.send('scan:start', { notificationOnViolation: true })
+      }, rescanDelay)
+    }
   })
 
   ipcMain.on('scan:violation', (event, badgeURI, violationCount) => {

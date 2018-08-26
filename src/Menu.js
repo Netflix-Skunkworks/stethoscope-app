@@ -14,41 +14,41 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
   const showInDock = !!settings.get('showInDock')
   const contextMenu = [
     { role: 'copy', accelerator: 'CmdOrCtrl+C' },
-    {
-      label: 'Preferences',
-      submenu: [{
-        label: 'Keep in Dock',
-        id: 'keep-in-dock',
-        type: 'checkbox',
-        checked: showInDock === true,
-        click () {
-          settings.set('showInDock', true)
-          app.dock.show()
-          mainWindow.setSkipTaskbar(false)
-          mainWindow.setAutoHideMenuBar(false)
-          contextMenuInstance.getMenuItemById('keep-in-dock').checked = true
-          contextMenuInstance.getMenuItemById('tray-only-app').checked = false
-          applicationMenu.getMenuItemById('keep-in-dock').checked = true
-          applicationMenu.getMenuItemById('tray-only-app').checked = false
-        }
-      },
-      {
-        label: 'Tray Only',
-        id: 'tray-only-app',
-        type: 'checkbox',
-        checked: showInDock === false,
-        click () {
-          settings.set('showInDock', false)
-          app.dock.hide()
-          mainWindow.setSkipTaskbar(true)
-          mainWindow.setAutoHideMenuBar(true)
-          contextMenuInstance.getMenuItemById('keep-in-dock').checked = false
-          contextMenuInstance.getMenuItemById('tray-only-app').checked = true
-          applicationMenu.getMenuItemById('keep-in-dock').checked = false
-          applicationMenu.getMenuItemById('tray-only-app').checked = true
-        }
-      }]
-    },
+    // {
+    //   label: 'Preferences',
+    //   submenu: [{
+    //     label: 'Keep in Dock',
+    //     id: 'keep-in-dock',
+    //     type: 'checkbox',
+    //     checked: showInDock === true,
+    //     click () {
+    //       settings.set('showInDock', true)
+    //       app.dock.show()
+    //       mainWindow.setSkipTaskbar(false)
+    //       mainWindow.setAutoHideMenuBar(false)
+    //       contextMenuInstance.getMenuItemById('keep-in-dock').checked = true
+    //       contextMenuInstance.getMenuItemById('tray-only-app').checked = false
+    //       applicationMenu.getMenuItemById('keep-in-dock').checked = true
+    //       applicationMenu.getMenuItemById('tray-only-app').checked = false
+    //     }
+    //   },
+    //   {
+    //     label: 'Tray Only',
+    //     id: 'tray-only-app',
+    //     type: 'checkbox',
+    //     checked: showInDock === false,
+    //     click () {
+    //       settings.set('showInDock', false)
+    //       app.dock.hide()
+    //       mainWindow.setSkipTaskbar(true)
+    //       mainWindow.setAutoHideMenuBar(true)
+    //       contextMenuInstance.getMenuItemById('keep-in-dock').checked = false
+    //       contextMenuInstance.getMenuItemById('tray-only-app').checked = true
+    //       applicationMenu.getMenuItemById('keep-in-dock').checked = false
+    //       applicationMenu.getMenuItemById('tray-only-app').checked = true
+    //     }
+    //   }]
+    // },
     {
       label: 'Window',
       submenu: [

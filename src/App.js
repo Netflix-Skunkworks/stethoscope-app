@@ -53,6 +53,7 @@ class App extends Component {
   }
 
   componentWillMount () {
+    ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
     this.loadPractices()
     // flag ensures the download:start event isn't sent multiple times
@@ -63,6 +64,11 @@ class App extends Component {
     ipcRenderer.on('download:progress', this.onDownloadProgress)
     // handles any errors that occur when updating (restores window size, etc.)
     ipcRenderer.on('download:error', this.onDownloadError)
+    // trigger scan from main process
+    ipcRenderer.on('scan:start', ({ notificationOnViolation = false }) => {
+      ipcRenderer.send('scan:init')
+      this.scan()
+    })
     // the server emits this event when a remote scan begins
     socket.on('scan:init', this.onScanInit)
     // setup a socket io listener to refresh the app when a scan is performed
