@@ -142,6 +142,7 @@ function createWindow () {
     const appHooksForServer = {
       // allow express to update app state
       setScanStatus (status = 'PASS') {
+        log.info('setting status', status)
         tray.setImage(statusImages[status])
       },
       requestUpdate () {
