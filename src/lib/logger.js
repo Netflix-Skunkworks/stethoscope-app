@@ -44,7 +44,11 @@ if (!global.log) {
     }
   }
   log.error = function(...args) {
-    oldError(JSON.stringify(args))
+    if (args[0] instanceof Error) {
+      oldError(args[0].message, args[0].stack)
+    } else {
+      oldError(...args)
+    }
   }
   global.log = log
 
