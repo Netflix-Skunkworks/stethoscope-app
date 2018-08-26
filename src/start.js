@@ -47,12 +47,6 @@ const windowPrefs = {
   }
 }
 
-const BASE_URL = process.env.ELECTRON_START_URL || url.format({
-  pathname: path.join(__dirname, '/../build/index.html'),
-  protocol: 'file:',
-  slashes: true
-})
-
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
@@ -65,7 +59,11 @@ const focusOrCreateWindow = () => {
   } else {
     mainWindow = new BrowserWindow(windowPrefs)
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-    mainWindow.loadURL(BASE_URL)
+    mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
+      pathname: path.join(__dirname, '/../build/index.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
   }
 }
 
@@ -166,15 +164,18 @@ function createWindow () {
           app.quit()
         }
       })
+      mainWindow ? log.info('Window exists') : log.info('No window found??')
       mainWindow = mainWindow || new BrowserWindow(windowPrefs)
-      mainWindow.loadURL(BASE_URL)
+      mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
       mainWindow.focus()
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
-  } else {
-    mainWindow.loadURL(BASE_URL)
   }
 
   ipcMain.on('contextmenu', event =>
