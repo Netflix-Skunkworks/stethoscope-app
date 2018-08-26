@@ -36,8 +36,15 @@ if (!global.log) {
   })
 
   const oldInfo = log.info
+  const oldError = log.error
+
   log.info = function(...args) {
-    if (IS_DEV) oldInfo(...args)
+    if (IS_DEV || process.env.STETHOSCOPE_DEBUG) {
+      oldInfo(...args)
+    }
+  }
+  log.error = function(...args) {
+    oldError(...args)
   }
   global.log = log
 
