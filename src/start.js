@@ -164,7 +164,7 @@ function createWindow () {
           app.quit()
         }
       })
-      mainWindow ? log.info('Window exists') : log.info('No window found??')
+
       mainWindow = mainWindow || new BrowserWindow(windowPrefs)
       mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
         pathname: path.join(__dirname, '/../build/index.html'),

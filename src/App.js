@@ -66,8 +66,10 @@ class App extends Component {
     ipcRenderer.on('download:error', this.onDownloadError)
     // trigger scan from main process
     ipcRenderer.on('scan:start', ({ notificationOnViolation = false }) => {
-      ipcRenderer.send('scan:init')
-      this.scan()
+      if (!this.state.scanIsRunning) {
+        ipcRenderer.send('scan:init')
+        this.scan()
+      }
     })
     // the server emits this event when a remote scan begins
     socket.on('scan:init', this.onScanInit)
