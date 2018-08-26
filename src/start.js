@@ -47,6 +47,12 @@ const windowPrefs = {
   }
 }
 
+const BASE_URL = process.env.ELECTRON_START_URL || url.format({
+  pathname: path.join(__dirname, '/../build/index.html'),
+  protocol: 'file:',
+  slashes: true
+})
+
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
@@ -59,11 +65,7 @@ const focusOrCreateWindow = () => {
   } else {
     mainWindow = new BrowserWindow(windowPrefs)
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-    mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
-      pathname: path.join(__dirname, '/../build/index.html'),
-      protocol: 'file:',
-      slashes: true
-    }))
+    mainWindow.loadURL(BASE_URL)
   }
 }
 
@@ -89,8 +91,7 @@ function createWindow () {
   })
 
   if (shouldQuit) {
-    app.quit()
-    return
+    return app.quit()
   }
 
   // if (settings.get('showInDock') !== true) {
@@ -142,9 +143,9 @@ function createWindow () {
     const appHooksForServer = {
       // allow express to update app state
       setScanStatus (status = 'PASS') {
-        log.info('setting status', status)
-        let next = statusImages[status]
-        if (!next) {
+        if (status in statusImages) {
+          next = statusImages[status]
+        } else {
           next = statusImages.PASS
         }
         tray.setImage(next)
@@ -170,17 +171,17 @@ function createWindow () {
         }
       })
 
-      mainWindow = mainWindow || new BrowserWindow(windowPrefs)
-      mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-      }))
+      if (!mainWindow) {
+        mainWindow = new BrowserWindow(windowPrefs)
+      }
+      mainWindow.loadURL(BASE_URL)
       mainWindow.focus()
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
+  } else {
+    log.info('app is not starting')
   }
 
   ipcMain.on('contextmenu', event =>
