@@ -143,7 +143,11 @@ function createWindow () {
       // allow express to update app state
       setScanStatus (status = 'PASS') {
         log.info('setting status', status)
-        tray.setImage(statusImages[status])
+        let next = statusImages[status]
+        if (!next) {
+          next = statusImages.PASS
+        }
+        tray.setImage(next)
       },
       requestUpdate () {
         updater.checkForUpdates()
