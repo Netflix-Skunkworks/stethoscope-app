@@ -44,7 +44,7 @@ if (!global.log) {
     }
   }
   log.error = function(...args) {
-    oldError(...args)
+    oldError(JSON.stringify(args))
   }
   global.log = log
 
