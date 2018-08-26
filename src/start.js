@@ -168,6 +168,7 @@ function createWindow () {
       })
       mainWindow = mainWindow || new BrowserWindow(windowPrefs)
       mainWindow.loadURL(BASE_URL)
+      mainWindow.focus()
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
@@ -192,7 +193,7 @@ function createWindow () {
 
   ipcMain.on('scan:init', event => {
     app.setBadgeCount(0)
-    mainWindow.setOverlayIcon(null, 'No policy violations')
+    mainWindow && mainWindow.setOverlayIcon(null, 'No policy violations')
 
     if (!disableAutomaticScanning) {
       // schedule next automatic scan
