@@ -28,9 +28,7 @@ const defaultOptions = {
   where: '1 = 1'
 }
 
-const debug = (...args) => {
-  IS_DEV && log.info(`oquery: ${args.join(' ')}`)
-}
+const debug = (...args) => log.info(`oquery: ${args.join(' ')}`)
 
 const cache = new Map()
 const timers = new Map()
@@ -63,6 +61,7 @@ class OSQuery {
    * @return {Promise} resolve when connected, reject if unable
    */
   static start () {
+    log.info('Stopping previously running osquery instances')
     this.stop()
 
     const socket = socketPaths[platform]
