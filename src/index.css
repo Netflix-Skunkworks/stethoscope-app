@@ -267,3 +267,5 @@ button[disabled],
 a.nf-button:hover {
   text-decoration: none
 }
+
+::-webkit-scrollbar { display: none; }

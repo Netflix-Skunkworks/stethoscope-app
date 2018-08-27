@@ -1,4 +1,4 @@
-const OSQuery = require('../../sources/osquery_thrift')
+const OSQuery = require('../../sources/osquery')
 const powershell = require('../../src/lib/powershell')
 
 const WindowsDevice = {

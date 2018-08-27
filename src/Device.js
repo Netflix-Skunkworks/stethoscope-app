@@ -5,22 +5,28 @@ import ActionIcon from './ActionIcon'
 import './Device.css'
 
 const deviceMessages = {
-  ok: <span>
-    <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
-    <span>This device is properly configured.</span>
-  </span>,
-  warning: <span>
-    <span>
-      The security settings on this device could be improved.
-      Click the arrow next to each recommendation for instructions.
-    </span>
-  </span>,
-  critical: <span>
-    <span>
-      The security settings on this device should be improved.
-      Click the arrow next to each recommendation for instructions.
-    </span>
-  </span>
+  ok(msg) {
+    return (
+      <span>
+        <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
+        <span>{msg}</span>
+      </span>
+    )
+  },
+  warning(msg) {
+    return (
+      <span>
+        <span>{msg}</span>
+      </span>
+    )
+  },
+  critical(msg) {
+    return (
+      <span>
+        <span>{msg}</span>
+      </span>
+    )
+  }
 }
 
 class Device extends Component {
@@ -36,37 +42,71 @@ class Device extends Component {
     const status = type === 'done' ? 'PASS' : 'FAIL'
 
     return actions.map((action) => {
-      if (action.results) {
+      const actionProps = {
+        action,
+        device,
+        status,
+        type,
+        key: action.title[status],
+        onExpandPolicyViolation: this.props.onExpandPolicyViolation,
+        platform: this.props.platform,
+        policy: this.props.policy,
+        security: this.props.security
+      }
+
+      const hasResults = Array.isArray(action.results)
+      let results = action.results
+
+      if (hasResults && action.name.endsWith('Applications')) {
+        results = results.map(result => {
+          if (action.name in this.props.policy && Array.isArray(this.props.policy[action.name])) {
+            const target = this.props.policy[action.name].find(app => app.name === result.name)
+            if (target) {
+              return Object.assign({}, result, target)
+            }
+            return result
+          }
+        })
+      }
+
+      if (hasResults) {
         return (
-          <Action
-            key={action.title[status]}
-            type={type}
-            status={status}
-            device={device}
-            security={this.props.security}
-            action={action}
-            policy={this.props.policy}
-            platform={this.props.platform}
-            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
-          >
+          <Action {...actionProps}>
             <ul className='result-list'>
-              {action.results.map(({ name }) => <li key={name}>{name}</li>)}
+              {results.map(({ name, url, status, description }) => {
+                const iconProps = status === 'PASS'
+                  ? { name: 'checkmark', color: '#bbd8ca' }
+                  : { name: 'blocked', color: '#a94442' }
+                return (
+                  <li
+                    className='result-list-item'
+                    key={name}
+                  >
+                    <div className="result-heading">
+                      <strong>
+                        <ActionIcon
+                          className='action-icon'
+                          width='15px'
+                          height='15px'
+                        {...iconProps}
+                        /> {name}
+                      </strong>{' '}
+                      {status !== 'PASS' && url ? (
+                        <a href={`link://${url}`}>Download Application</a>
+                      ) : null}
+                    </div>
+                    <div>
+                      {description ? <p>{description}<hr /></p> : null}
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           </Action>
         )
       } else {
         return (
-          <Action
-            key={action.title[status]}
-            status={status}
-            security={this.props.security}
-            device={device}
-            type={type}
-            action={action}
-            policy={this.props.policy}
-            platform={this.props.platform}
-            onExpandPolicyViolation={this.props.onExpandPolicyViolation}
-          />
+          <Action {...actionProps} />
         )
       }
     })
@@ -132,10 +172,10 @@ class Device extends Component {
           {deviceInfo}
 
           <div className={`panel device-summary ${deviceClass}`}>
-            {deviceMessages[deviceClass]}
+            {deviceMessages[deviceClass](this.props.strings[deviceClass])}
           </div>
 
-          <h4>{org} baseline policy</h4>
+          <h4>{org} {this.props.strings.policyDescription}</h4>
 
           <div className='action-list'>
             <ul>
@@ -146,7 +186,7 @@ class Device extends Component {
           </div>
 
           <div className='last-updated'>
-            Last scan {this.props.lastScanTime} by {this.props.scannedBy}
+            {this.props.strings.lastScan} {this.props.scannedBy} {this.props.lastScanTime}
           </div>
 
         </div>
@@ -160,6 +200,7 @@ Device.defaultProps = {
   ipAddresses: [],
   critical: [],
   suggested: [],
+  messages: {},
   done: []
 }
 

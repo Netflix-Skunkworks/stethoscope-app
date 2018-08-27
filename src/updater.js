@@ -75,10 +75,11 @@ module.exports = function (env, mainWindow, log = console) {
         }
       })
     },
+    // TODO move this to ipc, remove mainWindow dependency
     'download-progress': (progressObj) => {
       mainWindow.webContents.send('download:progress', progressObj)
       // NOTE: uncomment to have download update progress displayed over app icon
-      // mainWindow.setProgressBar(progressObj.percent / 100)
+      mainWindow.setProgressBar(progressObj.percent / 100)
     }
   }
 

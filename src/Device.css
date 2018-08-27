@@ -20,6 +20,7 @@
   font-size: 12px;
   color: #aaa;
   margin-top: 15px;
+  margin-bottom: 15px;
 }
 ul.mac-addresses {
   padding: 0;
@@ -217,4 +218,29 @@ a.btn:hover {
 }
 .panel.device-summary.warning span {
   color: #5d4a19;
+}
+
+.result-list {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+.result-list-item hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #efefef;
+  margin: 1em 0;
+  padding: 0;
+}
+.result-heading {
+  display: flex;
+  align-items: baseline;
+  width: 90%;
+  justify-content: space-between;
+}
+.result-list-item {
+  display: flex;
+  align-items: baseline;
+  flex-direction: column;
+  justify-content: space-between;
 }

@@ -9,9 +9,12 @@ os version:
     ok: ">=10.0.16299"
     # Version 1703 - Redstone 2 Creators Update
     nudge: ">=10.0.15063"
+  ubuntu:
+    ok: ">=18.4.0"
+    nudge: ">=18.0.2"
   linux:
-    ok: ">=4.3.3"
-    nudge: ">=4.2.0"
+    ok: ">=18.4.0"
+    nudge: ">=18.0.2"
 firewall: ALWAYS
 disk encryption: ALWAYS
 automatic updates: ALWAYS
