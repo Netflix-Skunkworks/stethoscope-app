@@ -1,6 +1,5 @@
-const util = require('util')
 const { app } = require('electron')
-const { spawn, exec } = require('child_process')
+const { spawn } = require('child_process')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
@@ -8,17 +7,19 @@ const log = require('../src/lib/logger')
 const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const IS_DEV = process.env.NODE_ENV === 'development'
+const OSQUERY_PID_PATH = `${app.getPath('userData')}${path.sep}.osquery.pid`
 
-const OSQUERY_PID_PATH = `${app.getPath('temp')}.osquery.pid`
-
-const osqueryPlatforms = {
+const osqueryBinaries = {
   darwin: 'osqueryd_darwin',
   win32: 'osqueryd.exe',
-  linux: 'osqueryi_linux'
+  linux: 'osqueryd_linux',
+  ubuntu: 'osqueryd_linux'
 }
 
-const socketPath = {
+const socketPaths = {
   darwin: `/tmp/osquery.em`,
+  ubuntu: `/tmp/osquery.em`,
+  linux: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
 }
 
@@ -27,10 +28,22 @@ const defaultOptions = {
   where: '1 = 1'
 }
 
+const debug = (...args) => log.info(`oquery: ${args.join(' ')}`)
+
 const cache = new Map()
 const timers = new Map()
 
 class OSQuery {
+  static __endThriftConnection () {
+    debug('osqueryd closed')
+    if (this.connection) {
+      this.connection.end()
+    }
+  }
+  /**
+   * Returns timing info about executed queries
+   * @return {Object} total time (in ms), array of individual queries with time
+   */
   static getTimingInfo () {
     let timerValues = [...timers.values()]
     let queries = [...timers.entries()]
@@ -43,16 +56,19 @@ class OSQuery {
     }
   }
 
-  static start() {
+  /**
+   * Start osqueryd process, create thrift connection
+   * @return {Promise} resolve when connected, reject if unable
+   */
+  static start () {
+    log.info('Stopping previously running osquery instances')
     this.stop()
 
-    const socket = socketPath[platform]
-    const binary = `../bin/${osqueryPlatforms[platform]}`
+    const socket = socketPaths[platform]
+    // resolve path differences between dev and production
+    const binary = `../bin/${osqueryBinaries[platform]}`
     const prefix = IS_DEV ? '' : '..' + path.sep
-    const osqueryPath = path.resolve(
-      __dirname,
-      prefix + binary
-    )
+    const osqueryPath = path.resolve(__dirname, prefix + binary)
 
     const osquerydArgs = [
       '--ephemeral',
@@ -61,11 +77,11 @@ class OSQuery {
       '--disable_logging',
       '--force',
       '--config_path=null',
-      '--allow_unsafe',
-      '--verbose', // required to detect when thrift socket is ready
+      '--allow_unsafe'
     ]
 
-    if (platform === 'darwin') {
+    // *nix based OS seem less opposed to custom socket paths
+    if (platform !== 'win32') {
       osquerydArgs.push(`--extensions_socket=${socket}`)
     }
 
@@ -74,104 +90,79 @@ class OSQuery {
       windowsHide: true
     }
 
-    let startAttempts = 0
-    const MAX_ATTEMPTS = 20
     const launchCommand = `"${osqueryPath}"`
 
-    IS_DEV && log.info(`osquery:initialize: ${launchCommand}`)
+    debug(`initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
 
     return new Promise((resolve, reject) => {
-      const osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
+      this.osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
 
-      IS_DEV && log.info(`writing pid ${osqueryd.pid} to ${OSQUERY_PID_PATH}`)
-      fs.writeFile(OSQUERY_PID_PATH, osqueryd.pid)
+      fs.writeFile(OSQUERY_PID_PATH, this.osqueryd.pid, (err) => {
+        if (err) log.error(`Unable to write osquery pidfile: ${OSQUERY_PID_PATH}`)
+      })
 
-      osqueryd.on('error', (err) => {
-        if (this.connection) {
-          this.connection.end()
-        }
+      this.osqueryd.on('error', (err) => {
+        if (this.connection) this.__endThriftConnection()
         log.error(`osquery:execution error: ${err}`)
         reject(new Error(`Unable to spawn osqueryd: ${err}`))
       })
 
-      IS_DEV && osqueryd.on('disconnect', () => log.info('osqueryd disconnected'))
+      this.osqueryd.on('close', this.__endThriftConnection)
 
-      osqueryd.on('close', code => {
-        IS_DEV && log.info('osqueryd closed')
-        if (this.connection) {
-          this.connection.end()
-        }
-      })
+      let startAttempts = 0
+      let thriftConnectTimeout
+      const MAX_ATTEMPTS = 20
 
-      osqueryd.stderr.on('data', function(data) {
-        IS_DEV && log.info('osquery:stderr', data+'')
-        /*
-         TODO - flagged for future improvement
-         unfortunately this seems to be the only way to determine that the socket
-         server is ready to accept connections
-        */
-        if (process.platform === 'darwin') {
-          if (data.includes('Extension manager service starting')) {
-            IS_DEV && log.info('osquery:Thrift socket ready')
-            resolve(osqueryd)
-          }
-        } else if (process.platform === 'win32') {
-          /*
-          Let it be noted that I'm super unhappy with this magic number approach.
-          I've spent way too much time trying to get the Mac solution working on
-          Windows and have determined that it all comes down to timing. It works
-          sometimes but is extremely unpredictable and boils down to whether or
-          not the "Extension manager" messages comes in on the very first stderr
-          write because for a reason I seem to be unable to determine, the output
-          is disconnected after the first read. I've tried many things, piping to stdout,
-          draining, forcing another write, looking at encoding issues, spawning
-          the process in just about every configuration imaginable and am going
-          to shelve it for now because it never takes osquery more than one
-          second to load and this solution is reliable enough for the time being.
-          */
-          setTimeout(() => resolve(), 200)
-        }
-      })
-
-      this.osqueryd = osqueryd
-
-      // thrift retry logic - keep attempting to connect to extension manager
-      const tryReconnect = err => {
+      const resolveOnThriftConnect = () => {
+        clearTimeout(thriftConnectTimeout)
+        resolve()
+      }
+      /**
+      * Internal method that attempts to connect to thrift socket and
+      * incrementally backoff
+      */
+      const tryThriftReconnect = err => {
         startAttempts++
-        IS_DEV && log.error(`osquery:thrift unable to connect to socket ${err} | attempt: ${startAttempts}`)
+
+        debug(`thrift unable to connect to socket ${err} | attempt: ${startAttempts}`)
 
         if (startAttempts >= MAX_ATTEMPTS) {
-          log.error('TOO MANY ATTEMPTS to connect to osquery')
+          log.error('THRIFT unable to connect to osquery')
           reject(new Error(err))
         } else {
-          setTimeout(() => {
-            this.connection.connect()
-            this.connection.on('error', tryReconnect)
-          }, 100)
+          const incrementalBackoff = 100 * startAttempts
+          thriftConnectTimeout = setTimeout(() => {
+            // remove old event listeners and add new
+            this.connection
+              .connect()
+              .off('connect', resolveOnThriftConnect)
+              .off('error', tryThriftReconnect)
+              .on('connect', resolveOnThriftConnect)
+              .on('error', tryThriftReconnect)
+          }, incrementalBackoff)
         }
       }
 
+      // attempt to connect thrift client
       this.connection = ThriftClient.getInstance({ path: socket })
-      this.connection.connect()
-      this.connection.on('error', tryReconnect)
-
-      if (IS_DEV) {
-        ['message', 'data', 'exit'].map(evt =>
-          osqueryd.on(evt, data => log.info(`osquery:${evt}`, data + ''))
-        )
-      }
+        .connect()
+        .on('connect', resolveOnThriftConnect)
+        .on('error', tryThriftReconnect)
     })
   }
 
-  static stop() {
+  /**
+   * Kill the process identified by pidfile written at launch
+   */
+  static stop () {
     try {
       const pid = fs.readFileSync(OSQUERY_PID_PATH)
       if (pid) {
-        log.warn('found old osquery pid', pid+'')
+        debug(`found old osquery pid ${pid}`)
         try {
-          process.kill(parseInt(pid+'', 10))
+          process.kill(parseInt(pid + '', 10))
         } catch (e) {
-          log.error('Unable to kill process', pid+'')
+          log.error('Unable to kill process', pid + '')
         }
 
         try {
@@ -181,16 +172,33 @@ class OSQuery {
         }
       }
     } catch (e) {
-      log.warn('expected error reading pidfile', e.message)
+      debug(`expected error reading pidfile ${e.message}`)
     }
   }
 
+  /**
+   * Clear in-memory cache of query results, currently run by express server
+   * before new scans
+   */
   static flushCache () {
     cache.clear()
   }
 
+  /**
+   * Clear in-memory query time data, currently run by express server
+   * before new scans
+   */
   static clearTimers () {
     timers.clear()
+  }
+
+  /**
+   * [rawQuery description]
+   * @param  {String} query osquery SQL
+   * @return {Object|Array} osquery response as Array or Object
+   */
+  static rawQuery (query) {
+    return this.exec(query)
   }
   /**
    * Fetch first result from a schema
@@ -226,21 +234,24 @@ class OSQuery {
         return resolve(cache.get(query))
       }
 
-      IS_DEV && log.info('osquery:query', query)
-
       let start = process.hrtime()
 
       this.connection.query(query, (error, { response: result }) => {
         if (error) return reject(error)
+        // in-memory cache of query => result
         cache.set(query, result)
         // timing data
         const [s, n] = process.hrtime(start)
         const nanoseconds = (s * 1e9 + n)
         const milliseconds = nanoseconds * 1e-6
-        const end = Math.floor(milliseconds * 100) / 100
-        timers.set(query, end)
+        const queryTime = Math.floor(milliseconds * 100) / 100
+        timers.set(query, queryTime)
 
-        IS_DEV && log.info('osquery:result', result)
+        debug('query', JSON.stringify({
+          query,
+          result,
+          time: queryTime + 'ms'
+        }, null, 3))
 
         resolve(result)
       })

@@ -1,15 +1,19 @@
-const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
+const { app, ipcMain, globalShortcut, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
 const log = require('./lib/logger')
 const initMenu = require('./Menu')
+const config = require('./config.json')
+const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
+const settings = require('electron-settings')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
-const pkg = require('../package.json')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery_thrift')
 const IS_DEV = env === 'development'
+
+const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
 let tray
@@ -28,12 +32,44 @@ const statusImages = {
   FAIL: nativeImage.createFromPath(findIcon('scope-icon-warn2@2x.png'))
 }
 
+const windowPrefs = {
+  width: 480,
+  height: 670,
+  fullscreenable: false,
+  maximizable: false,
+  autoHideMenuBar: false,
+  skipTaskbar: true,
+  // uncomment the line before to keep window controls but hide title bar
+  // titleBarStyle: 'hidden',
+  webPreferences: {
+    webSecurity: false,
+    sandbox: false
+  }
+}
+
+const BASE_URL = process.env.ELECTRON_START_URL || url.format({
+  pathname: path.join(__dirname, '/../build/index.html'),
+  protocol: 'file:',
+  slashes: true
+})
+
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 
-function createWindow () {
-  log.info('starting stethoscope')
+const focusOrCreateWindow = () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore()
+    }
+    mainWindow.focus()
+  } else {
+    mainWindow = new BrowserWindow(windowPrefs)
+    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+    mainWindow.loadURL(BASE_URL)
+  }
+}
 
+function createWindow () {
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -55,22 +91,23 @@ function createWindow () {
   })
 
   if (shouldQuit) {
-    app.quit()
-    return
+    return app.quit()
   }
 
-  const windowPrefs = {
-    width: 480,
-    height: 670,
-    fullscreenable: false,
-    maximizable: false,
-    // uncomment the line before to keep window controls but hide title bar
-    // titleBarStyle: 'hidden',
-    webPreferences: {
-      webSecurity: false,
-      sandbox: false
-    }
-  }
+  // if (settings.get('showInDock') !== true) {
+  //   switch (process.platform) {
+  //     case 'darwin':
+  //       app.dock.hide()
+  //       break
+  //     default:
+  //       windowPrefs.skipTaskbar = true
+  //       break
+  //   }
+  // } else {
+  //   app.dock.show()
+  // }
+
+  setTimeout(() => app.dock.hide(), 0)
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
@@ -82,7 +119,6 @@ function createWindow () {
   }
 
   mainWindow = new BrowserWindow(windowPrefs)
-
   updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
@@ -92,26 +128,6 @@ function createWindow () {
 
   if (tray) tray.destroy()
 
-  const focusOrCreateWindow = () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-      }
-      mainWindow.focus()
-    } else {
-      mainWindow = new BrowserWindow(windowPrefs)
-      initMenu(mainWindow, env, log)
-      mainWindow.loadURL(
-        process.env.ELECTRON_START_URL ||
-        url.format({
-          pathname: path.join(__dirname, '/../build/index.html'),
-          protocol: 'file:',
-          slashes: true
-        })
-      )
-    }
-  }
-
   tray = new Tray(statusImages.PASS)
   tray.on('click', focusOrCreateWindow)
 
@@ -119,25 +135,34 @@ function createWindow () {
     mainWindow.webContents.openDevTools()
   }
 
-  initMenu(mainWindow, focusOrCreateWindow, env, log)
+  let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+  tray.on('right-click', () => tray.popUpContextMenu(contextMenu))
 
   if (!starting) {
     log.info('Starting osquery')
     const appHooksForServer = {
+      // allow express to update app state
       setScanStatus (status = 'PASS') {
-        tray.setImage(statusImages[status])
+        if (status in statusImages) {
+          next = statusImages[status]
+        } else {
+          next = statusImages.PASS
+        }
+        tray.setImage(next)
       },
       requestUpdate () {
         updater.checkForUpdates()
       }
     }
+    // ensure that this process doesn't start multiple times
     starting = true
     // kill any remaining osquery processes
     OSQuery.start().then(() => {
       log.info('osquery started')
-      // start GraphQL server
-      server = startGraphQLServer(env, log, appHooksForServer, OSQuery)
-      server.on('error', (err) => {
+      const [ language ] = app.getLocale().split('-')
+      // start GraphQL server, close the app if 37370 is already in use
+      server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
+      server.on('error', err => {
         if (err.message.includes('EADDRINUSE')) {
           dialog.showMessageBox({
             message: 'Stethoscope is already running'
@@ -145,42 +170,48 @@ function createWindow () {
           app.quit()
         }
       })
-      mainWindow.loadURL(
-        process.env.ELECTRON_START_URL ||
-        url.format({
-          pathname: path.join(__dirname, '/../build/index.html'),
-          protocol: 'file:',
-          slashes: true
-        })
-      )
+
+      if (!mainWindow) {
+        mainWindow = new BrowserWindow(windowPrefs)
+      }
+      mainWindow.loadURL(BASE_URL)
+      mainWindow.focus()
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
-  } else {
-    mainWindow.loadURL(
-      process.env.ELECTRON_START_URL ||
-      url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
-    )
   }
 
-  // adjust window height when download begins and ends
-  ipcMain.on('download:start', (event, arg) => {
-    mainWindow.setSize(windowPrefs.width, 110, true)
-  })
+  ipcMain.on('contextmenu', event =>
+    contextMenu.popup({ window: mainWindow })
+  )
 
-  ipcMain.on('scan:init', (event) => {
-    app.setBadgeCount(0)
-    mainWindow.setOverlayIcon(null, 'No policy violations')
+  // adjust window height when download begins and ends
+  ipcMain.on('download:start', (event, arg) =>
+    mainWindow.setSize(windowPrefs.width, 110, true)
+  )
+
+  let rescanTimeout
+  const { rescanIntervalSeconds = MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = config
+  // used to schedule rescan, minimum delay is 5 minutes
+  const rescanDelay = rescanIntervalSeconds * 1000
+
+  ipcMain.on('scan:init', event => {
+    //app.setBadgeCount(0)
+    mainWindow && mainWindow.setOverlayIcon(null, 'No policy violations')
+
+    if (!disableAutomaticScanning) {
+      // schedule next automatic scan
+      clearTimeout(rescanTimeout)
+      rescanTimeout = setTimeout(() => {
+        event.sender.send('autoscan:start', { notificationOnViolation: true })
+      }, rescanDelay)
+    }
   })
 
   ipcMain.on('scan:violation', (event, badgeURI, violationCount) => {
     if (process.platform === 'darwin') {
-      app.setBadgeCount(violationCount)
+      //app.setBadgeCount(violationCount)
     } else {
       const img = nativeImage.createFromDataURL(badgeURI)
       mainWindow.setOverlayIcon(img, `${violationCount} policy violations`)
@@ -207,9 +238,7 @@ function createWindow () {
     }
   })
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  mainWindow.on('closed', () => mainWindow = null)
 }
 
 // wrap ready callback in 0-delay setTimeout to reduce serious jank
@@ -240,7 +269,7 @@ app.on('ready', () => setTimeout(() => {
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
-  IS_DEV && log.info('stopping osquery')
+  log.info('stopping osquery')
   OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
@@ -254,7 +283,7 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('open-url', function (event, url) {
+app.on('open-url', (event, url) => {
   event.preventDefault()
 
   if (url.includes('update')) {
@@ -281,11 +310,12 @@ app.on('activate', () => {
   }
 })
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   if (server && server.listening) {
     server.close()
   }
   OSQuery.stop()
-  log.error('exiting on uncaught exception', err)
+  log.error('exiting on uncaught exception')
+  log.error(err)
   process.exit(1)
 })

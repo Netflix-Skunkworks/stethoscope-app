@@ -27,7 +27,8 @@ const io = require('socket.io')(http, { wsEngine: 'ws' })
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = function startServer (env, log, appActions, OSQuery) {
+module.exports = function startServer (env, log, language, appActions, OSQuery) {
+  log.info('starting express server')
   const find = filePath => env === 'development' ? filePath : path.join(__dirname, filePath)
 
   const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
@@ -88,11 +89,18 @@ module.exports = function startServer (env, log, appActions, OSQuery) {
     powershell.flushCache()
 
     const context = {
-      platform: os.platform() || process.platform,
+      platform: process.platform || os.platform(),
       systemInfo: OSQuery.first('system_info'),
       platformInfo: OSQuery.first('platform_info'),
       osVersion: OSQuery.first('os_version').then(v => {
-        v.version = semver.coerce(v.version)
+        let version = [v.major, v.minor]
+        if (process.platform === 'win32') {
+          version.push(v.build)
+        } else {
+          version.push(v.patch)
+        }
+        v.version = semver.coerce(version.join('.'))
+        log.info('Version', v.version+'', 'Joined', version.join('.'), 'Coerced', semver.coerce(version.join('.'))+'')
         return v
       })
     }
@@ -104,7 +112,9 @@ module.exports = function startServer (env, log, appActions, OSQuery) {
     if (remote) {
       try {
         remoteLabel = hostLabels
-          .find(({ pattern }) => (new RegExp(pattern)).test(req.get('origin'))).name
+          .find(({ pattern }) =>
+            (new RegExp(pattern)).test(req.get('origin'))
+          ).name
       } catch (e) {
         remoteLabel = 'Unknown App'
       }
@@ -157,7 +167,8 @@ module.exports = function startServer (env, log, appActions, OSQuery) {
 
   app.get('/policy', cors(policyRequestOptions), (req, res) => {
     if (!policyServer) {
-      const initialPolicy = yaml.safeLoad(fs.readFileSync(find('./practices/policy.yaml'), 'utf8'))
+      const path = find('./practices/policy.yaml')
+      const initialPolicy = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
       const policy = spacesToCamelCase(initialPolicy)
       res.json(policy)
     } else {
@@ -171,7 +182,15 @@ module.exports = function startServer (env, log, appActions, OSQuery) {
 
   app.get('/instructions', cors(policyRequestOptions), (req, res) => {
     if (!policyServer) {
-      const instructions = yaml.safeLoad(fs.readFileSync(find('./practices/instructions.yaml'), 'utf8'))
+      let path = find(`./practices/instructions.${language}.yaml`)
+      let instructions
+      try {
+        instructions = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+      } catch (e) {
+        // default to English if system language isn't supported
+        path = find(`./practices/instructions.en.yaml`)
+        instructions = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+      }
       res.json(instructions)
     } else {
       fetch(`${policyServer}/instructions.yaml`)

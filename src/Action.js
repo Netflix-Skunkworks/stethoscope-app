@@ -76,7 +76,9 @@ class Action extends Component {
     }
 
     Handlebars.registerHelper('statusIcon', (status, altMessage) => {
-      if (status === 'ON') return
+      if (status === 'ON') {
+        return getIcon('done', altMessage)
+      }
       return getIcon('suggested', altMessage)
     })
 
@@ -114,10 +116,12 @@ class Action extends Component {
   }
 
   parseDirections () {
-    const { security, device, action: { directions } } = this.props
+    const { security, device, action: { status, directions } } = this.props
     const html = converter.makeHtml(directions)
+    const passing = status === 'PASS'
     const template = Handlebars.compile(html)
-    return template({ ...security, ...device })
+    console.log(security, device)
+    return template({ ...security, ...device, passing })
   }
 
   parseTitle() {

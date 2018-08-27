@@ -213,6 +213,7 @@ type ApplicationFeatureState {
 input PlatformStringRequirement {
   darwin: Semver
   win32: Semver
+  ubuntu: Semver
   linux: Semver
   all: Semver
 }
@@ -220,6 +221,7 @@ input PlatformStringRequirement {
 input PlatformBracketRequirement {
   darwin: VersionBracket
   win32: VersionBracket
+  ubuntu: VersionBracket
   linux: VersionBracket
   all: VersionBracket
 }
@@ -228,6 +230,7 @@ input PlatformBracketRequirement {
 input PlatformBoolRequirement {
   darwin: Boolean
   win32: Boolean
+  ubuntu: Boolean
   linux: Boolean
   all: Boolean
 }
