@@ -40,7 +40,7 @@ if (!global.log) {
 
   log.info = function(...args) {
     if (IS_DEV || process.env.STETHOSCOPE_DEBUG) {
-      oldInfo(...args)
+      oldInfo.apply(oldInfo, args)
     }
   }
   log.error = function(...args) {
