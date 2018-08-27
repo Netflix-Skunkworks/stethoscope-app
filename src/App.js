@@ -192,7 +192,9 @@ class App extends Component {
       )
 
       Promise.all(promises).then(([config, policy, instructions]) => {
+        log.info('loaded policy', JSON.stringify(policy))
         this.setState({ config, policy, instructions }, () => {
+          log.info('state policy', JSON.stringify(this.state.policy))
           if (!this.state.scanIsRunning) {
             this.scan()
           }
