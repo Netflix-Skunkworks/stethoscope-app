@@ -113,14 +113,11 @@ practices:
         1. Click "Automatically check for updates"
         {{#unless passing}}
         1. Make sure the following are checked:
-
           {{{statusIcon automaticDownloadUpdates 'Download newly available updates in the background'}}}
           {{{statusIcon automaticAppUpdates 'Install app updates'}}}
           {{{statusIcon automaticOsUpdates 'Install macOS updates'}}}
           {{{statusIcon automaticSecurityUpdates 'Install system data files and \*security updates\*'}}}
-          {{{statusIcon automaticConfigDataInstall 'Install \*system data files\* and security updates'}}}
         {{/unless}}
-
       win32: |
         1. Open [Services](ps://services.msc) (Start > Run > services.msc)
         1. Scroll down to find "Windows Update" and double-click the name
@@ -170,6 +167,8 @@ practices:
         1. Open the [App Store](app://App%20Store) app.
         1. Click [Updates](macappstore://showUpdatesPage) on the top of the app window.
         1. Install any outstanding updates.
+
+        If you don't see any available updates, you may need the next major version of MacOS. New releases are featured on the [App Store](app://App%20Store) home screen.
 
         {{requirement "osVersion" "darwin"}}
 

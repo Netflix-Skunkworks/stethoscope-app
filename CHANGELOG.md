@@ -6,6 +6,22 @@ All notable changes to this project will be documented in this file.
 
 ----
 
+## [1.2.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/1.2.0) - 2018-07-29
+
+-----
+
+### Changed
+- Updated to use thrift socket via osqueryd rather than shelling out to osqueryi
+- startup order of operations, now wait for osqueryd to spawn before bootstrapping browser window and express server
+
+### Added
+- request-level caching and timing data for powershell commands
+- `cross-env` dep to simplify env var handling
+
+### Fixed
+- issue with semver mishandling
+- vulnerability from drag and drop links
+
 ## [1.0.2](#) - 2018-04-10
 
 -----

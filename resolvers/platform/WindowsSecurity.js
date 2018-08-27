@@ -1,6 +1,6 @@
 const semver = require('semver')
 const Device = require('../Device')
-const OSQuery = require('../../sources/osquery')
+const OSQuery = require('../../sources/osquery_thrift')
 const powershell = require('../../src/lib/powershell')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
@@ -48,21 +48,20 @@ const WindowsSecurity = {
     where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
    */
   async screenLock (root, args, context) {
-    const { autoAdminLogin } = await OSQuery.first('registry', {
-      fields: ['name', 'data as autoAdminLogin'],
-      where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
-    })
-
+    // const { autoAdminLogin } = await OSQuery.first('registry', {
+    //   fields: ['name', 'data as autoAdminLogin'],
+    //   where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
+    // })
     const { windowsMaxScreenLockTimeout = 600 } = args
 
-    const screenLockIsActive = await powershell.getScreenLockActive()
-    const workstationLockIsDisabled = await powershell.getDisableLockWorkStation()
+    //const screenLockIsActive = await powershell.getScreenLockActive()
+    //const workstationLockIsDisabled = await powershell.getDisableLockWorkStation()
     const { pluggedIn, battery } = await powershell.getScreenLockTimeout()
 
     return (
-      workstationLockIsDisabled === false &&
-      screenLockIsActive === true &&
-      autoAdminLogin !== '1' &&
+      // workstationLockIsDisabled === false &&
+      // screenLockIsActive === true &&
+      // autoAdminLogin !== '1' &&
       pluggedIn <= windowsMaxScreenLockTimeout &&
       battery <= windowsMaxScreenLockTimeout
     )
