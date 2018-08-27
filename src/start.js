@@ -180,8 +180,6 @@ function createWindow () {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)
     })
-  } else {
-    log.info('app is not starting')
   }
 
   ipcMain.on('contextmenu', event =>

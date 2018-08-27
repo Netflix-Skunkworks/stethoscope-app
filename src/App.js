@@ -140,11 +140,11 @@ class App extends Component {
     }
 
     if (errors && errors.length) {
-      log.log({
+      log.error(JSON.stringify({
         level: 'error',
         message: 'Error scanning',
         policy: appPolicy
-      })
+      }))
 
       return this.setState({
         loading: false,
@@ -197,11 +197,9 @@ class App extends Component {
       )
 
       Promise.all(promises).then(([config, policy, instructions]) => {
-        log.info('loaded policy', JSON.stringify(policy))
-        console.info('loaded policy', JSON.stringify(policy))
         this.setState({ config, policy, instructions }, () => {
-          log.info('state policy', JSON.stringify(this.state.policy))
-          console.info('state policy', JSON.stringify(this.state.policy))
+          log.info(JSON.stringify(this.state.policy))
+          console.info('state policy', this.state.policy)
           if (!this.state.scanIsRunning) {
             this.scan()
           }
