@@ -54,11 +54,53 @@ class Device extends Component {
         security: this.props.security
       }
 
-      if (action.results) {
+      const hasResults = Array.isArray(action.results)
+      let results = action.results
+
+      if (hasResults && action.name.endsWith('Applications')) {
+        results = results.map(result => {
+          if (action.name in this.props.policy && Array.isArray(this.props.policy[action.name])) {
+            const target = this.props.policy[action.name].find(app => app.name === result.name)
+            if (target) {
+              return Object.assign({}, result, target)
+            }
+            return result
+          }
+        })
+      }
+
+      if (hasResults) {
         return (
           <Action {...actionProps}>
             <ul className='result-list'>
-              {action.results.map(({ name }) => <li key={name}>{name}</li>)}
+              {results.map(({ name, url, status, description }) => {
+                const iconProps = status === 'PASS'
+                  ? { name: 'checkmark', color: '#bbd8ca' }
+                  : { name: 'blocked', color: '#a94442' }
+                return (
+                  <li
+                    className='result-list-item'
+                    key={name}
+                  >
+                    <div className="result-heading">
+                      <strong>
+                        <ActionIcon
+                          className='action-icon'
+                          width='15px'
+                          height='15px'
+                        {...iconProps}
+                        /> {name}
+                      </strong>{' '}
+                      {status !== 'PASS' && url ? (
+                        <a href={`link://${url}`}>Download Application</a>
+                      ) : null}
+                    </div>
+                    <div>
+                      {description ? <p>{description}<hr /></p> : null}
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           </Action>
         )

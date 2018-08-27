@@ -141,7 +141,6 @@ class Action extends Component {
           <div className='more-info'>
             <div className='description'>
               {action.description}
-              {this.props.children}
             </div>
             { action.details &&
               <pre className='description'>{action.details}</pre>
@@ -156,6 +155,7 @@ class Action extends Component {
               dangerouslySetInnerHTML={{__html: this.parseDirections()}}
             />
           )}
+          {this.props.children}
         </div>
       )
     }

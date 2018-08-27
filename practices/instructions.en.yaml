@@ -199,3 +199,19 @@ practices:
         1. Click "Restart now"
 
         {{requirement "osVersion" "win32"}}
+
+  requiredApplications:
+    title: >
+      {{#if passing}}
+        Required applications are installed
+      {{else}}
+        Missing required applications
+      {{/if}}
+    description: >
+      Certain applications have been designated as necessary by your organization.
+    directions:
+      darwin: |
+        1. Please install the following applications:
+
+      win32: |
+        1. Please install the following applications

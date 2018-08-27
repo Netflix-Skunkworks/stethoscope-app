@@ -108,7 +108,7 @@ function createWindow () {
   //   app.dock.show()
   // }
 
-  setTimeout(() => app.dock.hide(), 0)
+  if (!IS_DEV) setTimeout(() => app.dock.hide(), 0)
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
