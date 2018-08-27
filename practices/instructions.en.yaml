@@ -41,6 +41,9 @@ practices:
           - {{{statusIcon privateFirewall 'Enable Private Firewall'}}}
           - {{{statusIcon publicFirewall 'Enable Public Firewall'}}}
           - {{{statusIcon domainFirewall 'Enable Domain Firewall'}}}
+      linux: |
+        1. Open a terminal.
+        1. Enter the command: "sudo ufw enable".
 
   stethoscopeVersion:
     title: >
@@ -54,9 +57,10 @@ practices:
     directions:
       darwin: |
         <a href='stethoscope://update' class="btn">Update Stethoscope</a>
-
       win32: |
-        <a href='stethoscope://update' class="btn">Update Stethoscope</a>
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>.
+      linux: |
+        <a href='stethoscope://update' class="btn">Update Stethoscope</a>.
 
   remoteLogin:
     title: >
@@ -74,10 +78,10 @@ practices:
         1. Uncheck "Remote Login" on the left.
 
       win32: |
-        1. Open [Advanced System Preferences](ps://SystemPropertiesRemote)
-        1. Under "Remote Desktop" heading, select "Don't allow remote connections to this computer"
-        1. Click Apply
-        1. Click OK
+        1. Open [Advanced System Preferences](ps://SystemPropertiesRemote).
+        1. Under "Remote Desktop" heading, select "Don't allow remote connections to this computer".
+        1. Click Apply.
+        1. Click OK.
 
   diskEncryption:
     title: >
@@ -107,8 +111,10 @@ practices:
         {{/each}}
 
       win32: |
-        1. Open [BitLocker Drive Encryption](prefs://BitLocker)
-        1. Click "Turn on BitLocker"
+        1. Open [BitLocker Drive Encryption](prefs://BitLocker).
+        1. Click "Turn on BitLocker".
+      linux: |
+        1. See the [CryptoRoot section of this guide](https://help.ubuntu.com/community/FullDiskEncryptionHowto).
 
   automaticUpdates:
     title: >
@@ -135,11 +141,11 @@ practices:
         {{/unless}}
 
       win32: |
-        1. Open [Services](ps://services.msc) (Start > Run > services.msc)
-        1. Scroll down to find "Windows Update" and double-click the name
-        1. Change "Startup Type" from "DISABLED" to "MANUAL" or "AUTOMATIC"
-        1. Click "Apply"
-        1. Click "OK"
+        1. Open [Services](ps://services.msc) (Start > Run > services.msc).
+        1. Scroll down to find "Windows Update" and double-click the name.
+        1. Change "Startup Type" from "DISABLED" to "MANUAL" or "AUTOMATIC".
+        1. Click "Apply".
+        1. Click "OK".
 
   screenLock:
     title:  >
@@ -152,22 +158,22 @@ practices:
       Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode. Setting the timeout, i.e., the length of idle time before the screen saver takes effect, to 10 minutes or less is also recommended.
     directions:
       darwin: |
-        1. Choose System Preferences from the Apple menu
+        1. Choose System Preferences from the Apple menu.
         1. Click [Security or Security & Privacy](x-apple.systempreferences:com.apple.preference.security).
-        1. Select the [General](x-apple.systempreferences:com.apple.preference.security?General) tab
+        1. Select the [General](x-apple.systempreferences:com.apple.preference.security?General) tab.
         1. Unlock the pane by clicking the lock in the lower-left corner and enter the administrator username and password.
-        1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins
+        1. Check the "Require password" box and set the pull down menu to to "immediately" after sleep or screen saver begins.
       win32: |
         Standard settings:
-        1. Open [Lock screen settings](ms-settings:lockscreen)
-        1. Scroll down and click on "Screen timeout settings"
-        1. Ensure that Screen settings for "On battery power" and "When plugged in" are less than or equal to 10 minutes
+        1. Open [Lock screen settings](ms-settings:lockscreen).
+        1. Scroll down and click on "Screen timeout settings".
+        1. Ensure that Screen settings for "On battery power" and "When plugged in" are less than or equal to 10 minutes.
 
         If fixing the standard settings doesn't resolve the issue:
-        1. Open [User Account Settings](ps://netplwiz)
-        1. Ensure that "Users must enter a user name and password to use this computer" is checked
-        1. Click "Apply"
-        1. Click "OK"
+        1. Open [User Account Settings](ps://netplwiz).
+        1. Ensure that "Users must enter a user name and password to use this computer" is checked.
+        1. Click "Apply".
+        1. Click "OK".
 
   osVersion:
     title: >

@@ -5,8 +5,11 @@ module.exports = {
     /*
       select * form iptables
      */
-    const rules = await OSQuery.all('iptables')
-    return Array.isArray(rules) && rules.length > 0
+    const ufwRules = await OSQuery.all('iptables', {
+      fields: ['chain'],
+      where: 'chain like "%ufw%" and target in ("DROP", "REJECT")'
+    })
+    return Array.isArray(ufwRules) && ufwRules.length > 0
   },
 
   async diskEncryption (root, args, context) {
