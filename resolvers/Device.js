@@ -1,5 +1,5 @@
 const pkg = require('../package.json')
-const OSQuery = require('../sources/osquery_thrift')
+const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const Security = require('./Security')
 const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE } = require('../src/constants')

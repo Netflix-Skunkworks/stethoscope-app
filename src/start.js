@@ -10,7 +10,7 @@ const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
-const OSQuery = require('../sources/osquery_thrift')
+const OSQuery = require('../sources/osquery')
 const IS_DEV = env === 'development'
 
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')

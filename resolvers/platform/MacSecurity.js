@@ -1,6 +1,6 @@
 const semver = require('semver')
 const Device = require('../Device')
-const OSQuery = require('../../sources/osquery_thrift')
+const OSQuery = require('../../sources/osquery')
 const { getScreenLock } = require('../../src/lib/applescript')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
