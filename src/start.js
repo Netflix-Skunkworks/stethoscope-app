@@ -107,7 +107,7 @@ function createWindow () {
   //   app.dock.show()
   // }
 
-  // app.dock.hide()
+  setTimeout(() => app.dock.hide(), 0)
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)
@@ -199,21 +199,21 @@ function createWindow () {
   const rescanDelay = rescanIntervalSeconds * 1000
 
   ipcMain.on('scan:init', event => {
-    app.setBadgeCount(0)
+    //app.setBadgeCount(0)
     mainWindow && mainWindow.setOverlayIcon(null, 'No policy violations')
 
     if (!disableAutomaticScanning) {
       // schedule next automatic scan
       clearTimeout(rescanTimeout)
       rescanTimeout = setTimeout(() => {
-        event.sender.send('scan:start', { notificationOnViolation: true })
+        event.sender.send('autoscan:start', { notificationOnViolation: true })
       }, rescanDelay)
     }
   })
 
   ipcMain.on('scan:violation', (event, badgeURI, violationCount) => {
     if (process.platform === 'darwin') {
-      app.setBadgeCount(violationCount)
+      //app.setBadgeCount(violationCount)
     } else {
       const img = nativeImage.createFromDataURL(badgeURI)
       mainWindow.setOverlayIcon(img, `${violationCount} policy violations`)

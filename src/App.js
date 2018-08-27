@@ -52,10 +52,10 @@ class App extends Component {
     highlightRescan: false
   }
 
-  componentWillMount () {
+  async componentWillMount () {
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
-    this.loadPractices()
+    await this.loadPractices()
     // flag ensures the download:start event isn't sent multiple times
     this.downloadStartSent = false
     // handle context menu
@@ -65,7 +65,7 @@ class App extends Component {
     // handles any errors that occur when updating (restores window size, etc.)
     ipcRenderer.on('download:error', this.onDownloadError)
     // trigger scan from main process
-    ipcRenderer.on('scan:start', ({ notificationOnViolation = false }) => {
+    ipcRenderer.on('autoscan:start', ({ notificationOnViolation = false }) => {
       if (!this.state.scanIsRunning) {
         ipcRenderer.send('scan:init')
         this.scan()
