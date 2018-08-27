@@ -67,8 +67,13 @@ class App extends Component {
     // trigger scan from main process
     ipcRenderer.on('autoscan:start', ({ notificationOnViolation = false }) => {
       if (!this.state.scanIsRunning) {
+        console.log('autoscan')
         ipcRenderer.send('scan:init')
-        this.scan()
+        if (Object.keys(this.state.policy).length) {
+          this.scan()
+        } else {
+          this.loadPractices()
+        }
       }
     })
     // the server emits this event when a remote scan begins
