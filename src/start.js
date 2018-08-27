@@ -55,6 +55,7 @@ const BASE_URL = process.env.ELECTRON_START_URL || url.format({
 
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
+const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
 const focusOrCreateWindow = () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -131,7 +132,7 @@ function createWindow () {
   tray = new Tray(statusImages.PASS)
   tray.on('click', focusOrCreateWindow)
 
-  if (enableDebugger) {
+  if (enableDebugger || DEBUG_MODE) {
     mainWindow.webContents.openDevTools()
   }
 
