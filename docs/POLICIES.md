@@ -39,6 +39,7 @@ input PlatformBracketRequirement {
   linux: VersionBracket
   all: VersionBracket
 }
+
 # defines the acceptable range of versions
 input VersionBracket {
   ok: Semver
@@ -62,7 +63,8 @@ The `RequirementOption` enum contains the following `ALWAYS`, `SUGGESTED`, `NEVE
 
 Scans return a JSON object with an overall status and individual practice status. Valid return values for a scan/practice are: `PASS`, `NUDGE`, and `FAIL`.
 
-e.g.
+**Example Response**
+
 ```json
 {
   "data": {
