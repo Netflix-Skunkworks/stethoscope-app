@@ -37,7 +37,7 @@ const windowPrefs = {
   height: 670,
   fullscreenable: false,
   maximizable: false,
-  autoHideMenuBar: false,
+  autoHideMenuBar: true,
   skipTaskbar: true,
   // uncomment the line before to keep window controls but hide title bar
   // titleBarStyle: 'hidden',
@@ -108,7 +108,7 @@ function createWindow () {
   //   app.dock.show()
   // }
 
-  if (!IS_DEV) setTimeout(() => app.dock.hide(), 0)
+  if (!IS_DEV) setTimeout(() => app.dock && app.dock.hide(), 0)
 
   if (process.platform === 'win32') {
     deeplinkingUrl = process.argv.slice(1)

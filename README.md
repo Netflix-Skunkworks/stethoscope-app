@@ -65,9 +65,11 @@ The app is built with a default policy, which specifies recommended OS versions 
 
 This will work as a standalone checklist, without needing to report any data to a central server. In fact, it doesn’t even require internet connectivity.
 
-You can update the policy guidelines (OS versions, required settings, etc.) in [practices/policy.yaml](practices/policy.yaml), and change the instructions in [practices/instructions.yaml](practices/instructions.yaml).
+You can update the policy guidelines (OS versions, required settings, etc.) in [practices/policy.yaml](practices/policy.yaml), and change the instructions in [practices/instructions.en.yaml](practices/instructions.en.yaml).
 
 Queries from a website provide their own policy and policy variables.
+
+[Learn more about policies.](docs/POLICIES.md)
 
 ### Data collection and reporting
 

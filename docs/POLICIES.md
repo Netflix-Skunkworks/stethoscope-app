@@ -39,6 +39,7 @@ input PlatformBracketRequirement {
   linux: VersionBracket
   all: VersionBracket
 }
+
 # defines the acceptable range of versions
 input VersionBracket {
   ok: Semver
@@ -62,7 +63,8 @@ The `RequirementOption` enum contains the following `ALWAYS`, `SUGGESTED`, `NEVE
 
 Scans return a JSON object with an overall status and individual practice status. Valid return values for a scan/practice are: `PASS`, `NUDGE`, and `FAIL`.
 
-e.g.
+**Example Response**
+
 ```json
 {
   "data": {
@@ -142,8 +144,16 @@ You can use more complex semver strings if you want to warn on a specific OS ver
 ### `firewall` (yaml) | `firewall` (json)
 
 Firewall checks the local firewall state using the default firewall provider in each platform (and `iptables` on linux). This practice uses the `RequirementOption` enum to specify the requirement.
-.
+
 Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
+
+**Example Usage:**
+
+```json
+{
+  "firewall": "ALWAYS"
+}
+```
 
 ### `disk encryption` (yaml) | `diskEncryption` (json)
 
@@ -151,11 +161,27 @@ Disk encryption enumerates mounted drives and checks their encryption status usi
 
 Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 
+**Example Usage:**
+
+```json
+{
+  "diskEncryption": "ALWAYS"
+}
+```
+
 ### `automatic updates` (yaml) | `automaticUpdates` (json)
 
 The automatic updates practice checks that the user has automatic updates enabled on their machine through `plist` values and service state (running). This practice uses the `RequirementOption` enum to specify the requirement.
 
 Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
+
+**Example Usage:**
+
+```json
+{
+  "automaticUpdates": "SUGGESTED"
+}
+```
 
 ### `screen lock` (yaml) | `screenLock` (json)
 
@@ -163,11 +189,27 @@ Does not work on El Capitan or higher as this setting was moved to the keychain 
 
 Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 
+**Example Usage:**
+
+```json
+{
+  "screenLock": "IF_SUPPORTED"
+}
+```
+
 ### `remote login` (yaml) | `remoteLogin` (json)
 
 Checks that remote login (RDP, SSH) is disabled for the device. This practice uses the `RequirementOption` enum to specify the requirement.
 
 Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
+
+**Example Usage:**
+
+```json
+{
+  "remoteLogin": "NEVER"
+}
+```
 
 ### `required applications` (yaml) | `requiredApplications` (json)
 
@@ -193,7 +235,9 @@ input AppRequirement {
 }
 ```
 
-You can specify requirements as an array of `AppRequirements`. e.g.
+`name` is the only required property. You can specify requirements as an array of `AppRequirements`.
+
+**Example Usage:**
 
 ```json
 {
