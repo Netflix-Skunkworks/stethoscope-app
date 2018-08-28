@@ -37,7 +37,7 @@ const windowPrefs = {
   height: 670,
   fullscreenable: false,
   maximizable: false,
-  autoHideMenuBar: false,
+  autoHideMenuBar: true,
   skipTaskbar: true,
   // uncomment the line before to keep window controls but hide title bar
   // titleBarStyle: 'hidden',

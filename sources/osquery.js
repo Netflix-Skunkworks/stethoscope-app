@@ -1,5 +1,5 @@
 const { app } = require('electron')
-const { spawn } = require('child_process')
+const { spawn, exec } = require('child_process')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
@@ -60,9 +60,9 @@ class OSQuery {
    * Start osqueryd process, create thrift connection
    * @return {Promise} resolve when connected, reject if unable
    */
-  static start () {
+  static async start () {
     log.info('Stopping previously running osquery instances')
-    this.stop()
+    await this.stop()
 
     const socket = socketPaths[platform]
     // resolve path differences between dev and production
@@ -155,25 +155,47 @@ class OSQuery {
    * Kill the process identified by pidfile written at launch
    */
   static stop () {
-    try {
-      const pid = fs.readFileSync(OSQUERY_PID_PATH)
-      if (pid) {
-        debug(`found old osquery pid ${pid}`)
-        try {
-          process.kill(parseInt(pid + '', 10))
-        } catch (e) {
-          log.error('Unable to kill process', pid + '')
-        }
+    return new Promise(resolve => {
+      try {
+        let pid = fs.readFileSync(OSQUERY_PID_PATH)
+        if (pid) {
+          debug(`found old osquery pid ${pid}`)
 
-        try {
-          fs.unlinkSync(OSQUERY_PID_PATH)
-        } catch (err) {
-          log.error('cannot unlink pidfile', err)
+          pid = parseInt(pid, 10)
+
+          if (process.platform !== 'win32') {
+            try {
+              process.kill(parseInt(pid + '', 10))
+            } catch (e) {
+              log.error('Unable to kill process', pid + '')
+            }
+
+            try {
+              fs.unlinkSync(OSQUERY_PID_PATH)
+            } catch (err) {
+              log.error('cannot unlink pidfile', err)
+            }
+            resolve()
+          } else {
+            exec(`taskkill /PID ${pid} /T /F`, (err, sout, serr) => {
+              if (!err) {
+                try {
+                  fs.unlinkSync(OSQUERY_PID_PATH)
+                } catch (err) {
+                  log.error('cannot unlink pidfile', err)
+                }
+              }
+              resolve()
+            })
+          }
+        } else {
+          resolve()
         }
+      } catch (e) {
+        debug(`expected error reading pidfile ${e.message}`)
+        resolve()
       }
-    } catch (e) {
-      debug(`expected error reading pidfile ${e.message}`)
-    }
+    })
   }
 
   /**
