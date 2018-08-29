@@ -3,6 +3,7 @@ const os = require('os')
 const log = require('./logger')
 const applescript = require('./applescript')
 const { shell } = require('electron')
+const { MAC, WIN } = require('./platform')
 const env = process.env.NODE_ENV || 'production'
 
 module.exports = function initProtocols (mainWindow) {
@@ -16,10 +17,10 @@ module.exports = function initProtocols (mainWindow) {
   protocol.registerHttpProtocol('prefs', (request, cb) => {
     const pref = decodeURIComponent(request.url.replace('prefs://', ''))
     switch (os.platform()) {
-      case 'darwin':
+      case MAC:
         applescript.openPreferences(pref)
         break
-      case 'win32':
+      case WIN:
         powershell.openPreferences(pref)
         break
       default:

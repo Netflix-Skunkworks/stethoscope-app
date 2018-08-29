@@ -1,4 +1,4 @@
-os version:
+osVersion:
   darwin:
     # High Sierra
     ok: ">=10.13.6"
@@ -16,7 +16,7 @@ os version:
     ok: ">=18.4.0"
     nudge: ">=18.0.2"
 firewall: ALWAYS
-disk encryption: ALWAYS
-automatic updates: ALWAYS
-screen lock: IF_SUPPORTED
-remote login: NEVER
+diskEncryption: ALWAYS
+automaticUpdates: ALWAYS
+screenLock: IF_SUPPORTED
+remoteLogin: NEVER
