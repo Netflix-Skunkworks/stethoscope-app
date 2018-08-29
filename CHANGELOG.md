@@ -6,6 +6,29 @@ All notable changes to this project will be documented in this file.
 
 ----
 
+## [2.0.3](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/2.0.3) - 2018-08-29
+
+-----
+
+### Changed
+- Stethoscope is now a tray/menubar only application!
+- Normalized practice names to camelCase between `yaml` and `json`
+- Closing window collapses app to menubar/tray instead of quitting
+- Improved logging
+
+### Added
+- Automatic scanning (weekly scan by default) - controlled by `rescanIntervalSeconds` in [src/config.json](src/config.json)
+- Basic support for internationalization (practices.{LANGUAGE_CODE}.yaml)
+- Documentation around policies
+- New Mac device versions
+- Instructions now display dynamic content via handlebars preprocessing
+- Production debugging capabilities
+- Basic linux support (requires `root`)
+
+### Fixed
+- Improved thrift connection stability and removed magic numbers/timing
+- Windows not properly terminating osqueryd on close
+
 ## [1.2.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/1.2.0) - 2018-07-29
 
 -----
