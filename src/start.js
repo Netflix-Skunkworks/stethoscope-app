@@ -106,8 +106,8 @@ function createWindow () {
 
   // open developer console if env vars or args request
   if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
-  
-  updater = require('./updater')(env, mainWindow, log)
+
+  updater = require('./updater')(env, mainWindow, log, OSQuery)
 
   if (isFirstLaunch) {
     updater.checkForUpdates({}, {}, {}, true)
