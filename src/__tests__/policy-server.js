@@ -1,6 +1,7 @@
 /* global it, expect, describe */
 import chai from 'chai'
 import chaiHttp from 'chai-http'
+import { MAC, WIN } from '../lib/platform'
 import startGraphQLServer from '../../server'
 
 process.env.NODE_ENV = 'test'
@@ -143,11 +144,11 @@ describe('GraphQL', () => {
       'policy': {
         'stethoscopeVersion': '>=1.0.4',
         'osVersion': {
-          'darwin': {
+          [MAC]: {
             'ok': '>=10.13.4',
             'nudge': '>=10.12.6'
           },
-          'win32': {
+          [WIN]: {
             'ok': '>=10.0.16299',
             'nudge': '>=10.0.15063'
           }

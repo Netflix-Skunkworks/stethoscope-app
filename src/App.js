@@ -7,15 +7,15 @@ import openSocket from 'socket.io-client'
 import moment from 'moment'
 import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
-import getBadge from './lib/getBadge'
 import { HOST } from './constants'
+import { MAC, WIN } from './lib/platform'
 import appConfig from './config.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
 
 const socket = openSocket(HOST)
 
-let platform = 'darwin'
+let platform = MAC
 let shell, ipcRenderer, log, remote
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
@@ -163,11 +163,7 @@ class App extends Component {
     }
 
     if (policy.validate.status !== 'PASS') {
-      const violations = Object.keys(newState.result).filter(k => newState.result[k] === 'FAIL')
-      const violationCount = violations.length > 1 ? violations.length - 1 : 1
-      ipcRenderer.send('scan:violation', getBadge(violationCount), violationCount)
-    } else {
-      ipcRenderer.send('scan:violation', getBadge(0), 0)
+      // perform action on scan violation
     }
 
     this.setState(newState, () => {
