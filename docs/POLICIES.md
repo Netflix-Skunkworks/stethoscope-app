@@ -94,7 +94,7 @@ Scans return a JSON object with an overall status and individual practice status
 
 ## Supported Practices
 
-### `os version` (yaml) | `osVersion` (json)
+### `osVersion`
 
 OS Version allows you to specify what operation system version the user is running, based on the platform the app is running on.
 
@@ -103,7 +103,7 @@ The requirement is specified to each platform and uses `semver` strings to speci
 **Example os version policy (yaml)**
 
 ```yaml
-os version:
+osVersion:
   darwin:
     # High Sierra
     ok: ">=10.13.6"
@@ -141,7 +141,7 @@ os version:
 
 You can use more complex semver strings if you want to warn on a specific OS version.
 
-### `firewall` (yaml) | `firewall` (json)
+### `firewall`
 
 Firewall checks the local firewall state using the default firewall provider in each platform (and `iptables` on linux). This practice uses the `RequirementOption` enum to specify the requirement.
 
@@ -155,7 +155,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `disk encryption` (yaml) | `diskEncryption` (json)
+### `diskEncryption`
 
 Disk encryption enumerates mounted drives and checks their encryption status using FileVault (mac), BitLocker (windows), and LUKS (linux). This practice uses the `RequirementOption` enum to specify the requirement.
 
@@ -169,7 +169,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `automatic updates` (yaml) | `automaticUpdates` (json)
+### `automaticUpdates`
 
 The automatic updates practice checks that the user has automatic updates enabled on their machine through `plist` values and service state (running). This practice uses the `RequirementOption` enum to specify the requirement.
 
@@ -183,7 +183,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `screen lock` (yaml) | `screenLock` (json)
+### `screenLock`
 
 Does not work on El Capitan or higher as this setting was moved to the keychain and is not accessible. This practice uses the `RequirementOption` enum to specify the requirement.
 
@@ -197,7 +197,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `remote login` (yaml) | `remoteLogin` (json)
+### `remoteLogin`
 
 Checks that remote login (RDP, SSH) is disabled for the device. This practice uses the `RequirementOption` enum to specify the requirement.
 
@@ -211,7 +211,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `required applications` (yaml) | `requiredApplications` (json)
+### `requiredApplications`
 
 Application requirements have their own GraphQL schema:
 
