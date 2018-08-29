@@ -101,10 +101,12 @@ function createWindow () {
   if (IS_WIN) deeplinkingUrl = process.argv.slice(1)
   // only allow resize if debugging production build
   if (!IS_DEV && !enableDebugger) windowPrefs.resizable = false
-  // open developer console if env vars or args request
-  if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
 
   mainWindow = new BrowserWindow(windowPrefs)
+
+  // open developer console if env vars or args request
+  if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
+  
   updater = require('./updater')(env, mainWindow, log)
 
   if (isFirstLaunch) {
