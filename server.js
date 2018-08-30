@@ -100,7 +100,7 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
           version.push(v.patch)
         }
         v.version = semver.coerce(version.join('.'))
-        log.info('Version', v.version+'', 'Joined', version.join('.'), 'Coerced', semver.coerce(version.join('.'))+'')
+        log.info('Version', v.version + '', 'Joined', version.join('.'), 'Coerced', semver.coerce(version.join('.')) + '')
         return v
       })
     }

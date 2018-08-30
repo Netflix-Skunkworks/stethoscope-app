@@ -54,7 +54,6 @@ export default class Stethoscope {
 
   // privately retry request until a response is given
   static __repeatRequest (policy, resolve, reject) {
-    // TODO create and use fragments here
     const query = `query ValidateDevice($policy: DevicePolicy!) {
       policy {
         validate(policy: $policy) {

@@ -2,7 +2,6 @@ const { app } = require('electron')
 const winston = require('winston')
 const path = require('path')
 require('winston-daily-rotate-file')
-const pkg = require('../../package.json')
 const IS_DEV = process.env.NODE_ENV === 'development'
 
 let log
@@ -15,11 +14,6 @@ try {
 } catch (e) {}
 
 if (!global.log) {
-  const appendAppVersion = winston.format(info => {
-    info.version = pkg.version
-    return info
-  })
-
   log = winston.createLogger({
     format: winston.format.simple(),
     transports: [
@@ -38,12 +32,12 @@ if (!global.log) {
   const oldInfo = log.info
   const oldError = log.error
 
-  log.info = function(...args) {
+  log.info = function (...args) {
     if (IS_DEV || process.env.STETHOSCOPE_DEBUG) {
       oldInfo.apply(oldInfo, args)
     }
   }
-  log.error = function(...args) {
+  log.error = function (...args) {
     if (args[0] instanceof Error) {
       oldError(args[0].message, args[0].stack)
     } else {
@@ -51,7 +45,6 @@ if (!global.log) {
     }
   }
   global.log = log
-
 }
 
 // make the winston logger available to the renderer

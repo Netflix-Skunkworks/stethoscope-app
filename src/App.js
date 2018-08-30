@@ -8,7 +8,7 @@ import moment from 'moment'
 import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
 import { HOST } from './constants'
-import { MAC, WIN } from './lib/platform'
+import { MAC } from './lib/platform'
 import appConfig from './config.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
@@ -50,6 +50,10 @@ class App extends Component {
     downloadProgress: null,
     // whether rescan button should be highlighted
     highlightRescan: false
+  }
+
+  componentWillUnmount () {
+    this.setState({ scanIsRunning: false })
   }
 
   async componentWillMount () {
@@ -195,7 +199,6 @@ class App extends Component {
       Promise.all(promises).then(([config, policy, instructions]) => {
         this.setState({ config, policy, instructions }, () => {
           log.info(JSON.stringify(this.state.policy))
-          console.info('state policy', this.state.policy)
           if (!this.state.scanIsRunning) {
             this.scan()
           }

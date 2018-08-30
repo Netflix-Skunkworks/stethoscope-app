@@ -69,7 +69,7 @@ class Action extends Component {
               width='18px'
               height='18px'
             />
-            <strong style={{ color: this.iconColor(status)}}>{msg}</strong>
+            <strong style={{color: this.iconColor(status)}}>{msg}</strong>
           </div>
         )
       )
@@ -99,13 +99,13 @@ class Action extends Component {
               <tr>
                 <td>Suggested version:</td>
                 <td>
-                  <span className="suggested-value">{String(version)}</span>
+                  <span className='suggested-value'>{String(version)}</span>
                 </td>
               </tr>
               <tr>
                 <td>Your version:</td>
                 <td>
-                  <span className="suggested-value">{String(device[key])}</span>
+                  <span className='suggested-value'>{String(device[key])}</span>
                 </td>
               </tr>
             </tbody>
@@ -124,8 +124,8 @@ class Action extends Component {
     return template({ ...security, ...device, passing })
   }
 
-  parseTitle() {
-    const { action: { status, title }} = this.props
+  parseTitle () {
+    const { action: { status, title } } = this.props
     const template = Handlebars.compile(title)
     const passing = status === 'PASS'
     return template({ passing })

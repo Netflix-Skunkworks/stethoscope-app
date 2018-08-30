@@ -1,4 +1,4 @@
-const { app, ipcMain, globalShortcut, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
+const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
 const log = require('./lib/logger')
@@ -12,7 +12,7 @@ const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery')
 const IS_DEV = env === 'development'
-const { IS_MAC, IS_WIN, IS_LINUX } = require('./lib/platform')
+const { IS_MAC, IS_WIN } = require('./lib/platform')
 
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
@@ -106,8 +106,8 @@ function createWindow () {
 
   // open developer console if env vars or args request
   if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
-  
-  updater = require('./updater')(env, mainWindow, log)
+
+  updater = require('./updater')(env, mainWindow, log, OSQuery, server)
 
   if (isFirstLaunch) {
     updater.checkForUpdates({}, {}, {}, true)
@@ -127,6 +127,7 @@ function createWindow () {
     // these methods allow express to update app state
     const appHooksForServer = {
       setScanStatus (status = 'PASS') {
+        let next
         if (status in statusImages) {
           next = statusImages[status]
         } else {
@@ -169,6 +170,16 @@ function createWindow () {
   // add right-click menu to app
   ipcMain.on('contextmenu', event => contextMenu.popup({ window: mainWindow }))
 
+  // allow web app to restart application
+  ipcMain.on('app:restart', () => {
+    OSQuery.stop()
+    if (server && server.listening) {
+      server.close()
+    }
+    app.relaunch()
+    app.quit()
+  })
+
   // adjust window height when download begins and ends
   ipcMain.on('download:start', () => mainWindow.setSize(windowPrefs.width, 110, true))
 
@@ -177,7 +188,7 @@ function createWindow () {
   const { rescanIntervalSeconds = MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = config
   // ensure minimum delay is 5 minutes
   const scanSeconds = Math.max(MINIMUM_AUTOSCAN_INTERVAL_SECONDS, rescanIntervalSeconds)
-  const rescanDelay = rescanIntervalSeconds * 1000
+  const rescanDelay = scanSeconds * 1000
 
   ipcMain.on('scan:init', event => {
     if (!disableAutomaticScanning) {
@@ -211,7 +222,9 @@ function createWindow () {
     }
   })
 
-  mainWindow.on('closed', () => mainWindow = null)
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 }
 
 // wrap ready callback in 0-delay setTimeout to reduce serious jank
