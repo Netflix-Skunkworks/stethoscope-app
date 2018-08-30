@@ -5,7 +5,7 @@ import ActionIcon from './ActionIcon'
 import './Device.css'
 
 const deviceMessages = {
-  ok(msg) {
+  ok (msg) {
     return (
       <span>
         <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
@@ -13,14 +13,14 @@ const deviceMessages = {
       </span>
     )
   },
-  warning(msg) {
+  warning (msg) {
     return (
       <span>
         <span>{msg}</span>
       </span>
     )
   },
-  critical(msg) {
+  critical (msg) {
     return (
       <span>
         <span>{msg}</span>
@@ -64,8 +64,8 @@ class Device extends Component {
             if (target) {
               return Object.assign({}, result, target)
             }
-            return result
           }
+          return result
         })
       }
 
@@ -82,13 +82,13 @@ class Device extends Component {
                     className='result-list-item'
                     key={name}
                   >
-                    <div className="result-heading">
+                    <div className='result-heading'>
                       <strong>
                         <ActionIcon
                           className='action-icon'
                           width='15px'
                           height='15px'
-                        {...iconProps}
+                          {...iconProps}
                         /> {name}
                       </strong>{' '}
                       {status !== 'PASS' && url ? (

@@ -10,4 +10,4 @@ ReactDOM.render(
   <ErrorBoundary>
     <App />
   </ErrorBoundary>
-, node)
+  , node)

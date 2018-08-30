@@ -31,7 +31,6 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
       }
     },
     'before-quit-for-update': () => {
-      let appCloseTime = Date.now()
       log.info('stopping osquery for app restart')
       OSQuery.stop()
       if (server && server.listening) {
