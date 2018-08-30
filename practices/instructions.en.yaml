@@ -128,7 +128,11 @@ practices:
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.
+        {{#if mohave}}
+        1. Click [Software Update](x-apple.systempreferences:com.apple.preferences.softwareupdate)
+        {{else}}
         1. Click [App Store](prefs://com.apple.preferences.appstore).
+        {{/if}}
         1. Click "Automatically check for updates"
         {{#unless passing}}
         1. Make sure the following are checked:

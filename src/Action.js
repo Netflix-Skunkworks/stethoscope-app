@@ -115,13 +115,21 @@ class Action extends Component {
     })
   }
 
+  getPlatformAndVersionSpecificFlags(device) {
+    return {
+      mohave: (
+        device.platform === 'darwin' && semver.satisfies(device.osVersion, '>=10.14.0')
+      )
+    }
+  }
+
   parseDirections () {
     const { security, device, action: { status, directions } } = this.props
     const html = converter.makeHtml(directions)
     const passing = status === 'PASS'
     const template = Handlebars.compile(html)
-    console.log(security, device)
-    return template({ ...security, ...device, passing })
+    const platformOverrides = this.getPlatformAndVersionSpecificFlags(device)
+    return template({ ...security, ...device, ...platformOverrides, passing })
   }
 
   parseTitle () {
