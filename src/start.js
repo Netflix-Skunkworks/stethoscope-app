@@ -177,7 +177,7 @@ function createWindow () {
       server.close()
     }
     app.relaunch()
-    app.exit(0)
+    app.quit()
   })
 
   // adjust window height when download begins and ends
