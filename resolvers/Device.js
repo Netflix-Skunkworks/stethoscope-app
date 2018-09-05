@@ -78,23 +78,36 @@ const Device = {
   },
 
   async extensions (root, args, context) {
-    const chrome = await OSQuery.all('chrome_extensions')
-    const ff = await OSQuery.all('firefox_addons')
+    const { browser = "all" } = args
+    let chrome = []
+    let firefox = []
     let safari = []
-    if (context.platform === 'darwin') {
-      safari = await OSQuery.all('safari_extensions')
+
+    if (['all', 'chrome'].includes(browser)) {
+      chrome = await OSQuery.all('chrome_extensions').then(results =>
+        results.map(({ name, version, identifier, path, author }) =>
+          ({ name, path, version, identifier, author, browser: 'chrome' })
+        )
+      )
     }
-    return [].concat(
-      chrome.map(
-        ({ name, version, identifier, path, author }) => ({ name, path, version, identifier, author, browser: 'chrome' })
-      ),
-      ff.map(
-        ({ name, version, identifier, path, creator: author }) => ({ name, path, version, identifier, author, browser: 'firefox' })
-      ),
-      safari.map(
-        ({ name, version, identifier, path, creator: author }) => ({ name, path, version, identifier, author, browser: 'safari' })
-      ),
-    )
+
+    if (['all', 'firefox'].includes(browser)) {
+      firefox = await OSQuery.all('firefox_addons').then(results =>
+        results.map(({ name, version, identifier, path, creator: author }) =>
+          ({ name, path, version, identifier, author, browser: 'firefox' })
+        )
+      )
+    }
+
+    if (['all', 'safari'].includes(browser)) {
+      safari = await OSQuery.all('safari_extensions').then(results =>
+        results.map(({ name, version, identifier, path, creator: author }) =>
+          ({ name, path, version, identifier, author, browser: 'safari' })
+        )
+      )
+    }
+
+    return chrome.concat(firefox).concat(safari)
   },
 
   async applications (root, args, context) {
