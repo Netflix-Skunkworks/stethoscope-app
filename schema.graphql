@@ -36,6 +36,8 @@ type Device {
   hardwareSerial: String
   # installed applications
   applications: [Application]
+  # browser extensions
+  extensions: [Extension]
   # current IP addresses
   ipAddresses: [IpAddress]
   # interface_details
@@ -86,6 +88,15 @@ type Application {
   version: String!
   lastOpenedTime: String
   installDate: String
+}
+
+type Extension {
+  name: String!
+  path: String!
+  version: String!
+  author: String!
+  identifier: String!
+  browser: String!
 }
 
 # A DevicePolicy is a description of the desired state of a set of pre-selected device features

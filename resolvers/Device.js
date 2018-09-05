@@ -77,6 +77,26 @@ const Device = {
     return hardwareSerial
   },
 
+  async extensions (root, args, context) {
+    const chrome = await OSQuery.all('chrome_extensions')
+    const ff = await OSQuery.all('firefox_addons')
+    let safari = []
+    if (context.platform === 'darwin') {
+      safari = await OSQuery.all('safari_extensions')
+    }
+    return [].concat(
+      chrome.map(
+        ({ name, version, identifier, path, author }) => ({ name, path, version, identifier, author, browser: 'chrome' })
+      ),
+      ff.map(
+        ({ name, version, identifier, path, creator: author }) => ({ name, path, version, identifier, author, browser: 'firefox' })
+      ),
+      safari.map(
+        ({ name, version, identifier, path, creator: author }) => ({ name, path, version, identifier, author, browser: 'safari' })
+      ),
+    )
+  },
+
   async applications (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if ('applications' in os) {
