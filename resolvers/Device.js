@@ -189,6 +189,11 @@ const Device = {
         return securityToDeviceStatus(status)
       },
 
+      async screenIdle () {
+        const status = await Security.screenIdle(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
       async remoteLogin () {
         const status = await Security.remoteLogin(root, args, context)
         return securityToDeviceStatus(status)

@@ -22,4 +22,5 @@ firewall: ALWAYS
 diskEncryption: ALWAYS
 automaticUpdates: ALWAYS
 screenLock: IF_SUPPORTED
+screenIdle: "120"
 remoteLogin: NEVER

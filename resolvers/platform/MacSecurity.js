@@ -116,7 +116,7 @@ const MacSecurity = {
     let { version } = await context.osVersion
     if (semver.satisfies(version, '<10.13')) {
       /*
-        select value as screen_lock from preferences
+        select value as screenLock from preferences
         where domain = 'com.apple.screensaver' and key = 'askForPassword'
       */
       const { screenLock } = await OSQuery.first('preferences', {
@@ -129,6 +129,19 @@ const MacSecurity = {
       // macOS High Sierra removed support screen lock querying
       return UNKNOWN
     }
+  },
+
+  async screenIdle (root, args, context) {
+    /*
+      select value as screenIdle from preferences
+      where domain = 'com.apple.screensaver' and key = 'idleTime'
+    */
+    const { screenIdle } = await OSQuery.first('preferences', {
+      fields: ['value as screenIdle'],
+      where: `domain = 'com.apple.screensaver' and key = 'idleTime'`
+    })
+
+    return screenIdle <= args.screenIdle
   },
 
   async firewall (root, args, context) {

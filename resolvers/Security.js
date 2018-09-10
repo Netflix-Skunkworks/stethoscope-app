@@ -89,6 +89,15 @@ const Security = {
     return UNSUPPORTED
   },
 
+  async screenIdle (root, args, context) {
+    const os = PlatformResolvers[context.platform]
+    if (os.screenIdle) {
+      return os.screenIdle(root, args, context)
+    }
+
+    return UNSUPPORTED
+  },
+
   async osVersion (root, args, context) {
     let plat = context.platform
     const info = await context.platformInfo

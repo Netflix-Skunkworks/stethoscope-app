@@ -90,6 +90,23 @@ class Action extends Component {
       return getIcon('critical', label)
     })
 
+    Handlebars.registerHelper('securitySetting', (key) => {
+      return new Handlebars.SafeString(
+        ReactDOMServer.renderToStaticMarkup(
+          <table style={{width: 'auto'}}>
+            <tbody>
+              <tr>
+                <td>Suggested setting:</td>
+                <td>
+                  <span className='suggested-value'>{String(policy[key])}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        )
+      )
+    })
+
     Handlebars.registerHelper('requirement', (key, platform) => {
       const version = semver.coerce(policy[key][platform].ok)
       return new Handlebars.SafeString(

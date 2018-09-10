@@ -1,0 +1,26 @@
+{
+  "osVersion": {
+    "darwin": {
+      "ok": ">=10.13.6",
+      "nudge": ">=10.13.6"
+    },
+    "win32": {
+      "ok": ">=10.0.16299",
+      "nudge": ">=10.0.15063"
+    },
+    "ubuntu": {
+      "ok": ">=18.4.0",
+      "nudge": ">=18.0.2"
+    },
+    "linux": {
+      "ok": ">=18.4.0",
+      "nudge": ">=18.0.2"
+    }
+  },
+  "firewall": "ALWAYS",
+  "diskEncryption": "ALWAYS",
+  "automaticUpdates": "ALWAYS",
+  "screenLock": "IF_SUPPORTED",
+  "screenIdle": "120",
+  "remoteLogin": "NEVER"
+}
