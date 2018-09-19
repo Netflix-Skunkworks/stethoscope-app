@@ -15,7 +15,7 @@ const UNKNOWN = 'UNKNOWN'
 const UNSUPPORTED = 'UNSUPPORTED'
 
 const PORT = 37370
-const HOST = `http://localhost:${PORT}`
+const HOST = `http://127.0.0.1:${PORT}`
 
 module.exports = {
   PASS,
