@@ -224,7 +224,7 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
   // const certificate = fs.readFileSync('./ssl/stethoscope.crt', 'utf8')
   // const creds = { key: privateKey, cert: certificate }
   // const httpsServer = https.createServer(creds, app)
-  const serverInstance = http.listen(PORT, 'localhost', () => {
+  const serverInstance = http.listen(PORT, '127.0.0.1', () => {
     console.log(`local server listening on ${PORT}`)
     serverInstance.emit('server:ready')
   })
