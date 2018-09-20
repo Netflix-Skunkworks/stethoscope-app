@@ -100,7 +100,6 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
           version.push(v.patch)
         }
         v.version = semver.coerce(version.join('.'))
-        log.info('Version', v.version + '', 'Joined', version.join('.'), 'Coerced', semver.coerce(version.join('.')) + '')
         return v
       })
     }
@@ -131,6 +130,9 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
 
     if (typeof policy === 'string') {
       policy = JSON.parse(policy)
+    }
+
+    if (Object.keys(policy).length) {
       // show the scan is happening in the UI
       io.sockets.emit('scan:init', { remote, remoteLabel })
     }
