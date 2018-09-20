@@ -10,6 +10,7 @@ import classNames from 'classnames'
 import { HOST } from './constants'
 import { MAC } from './lib/platform'
 import appConfig from './config.json'
+import pkg from '../package.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
 
@@ -57,6 +58,7 @@ class App extends Component {
   }
 
   async componentWillMount () {
+    document.querySelector('title').textContent += ` (v${pkg.version})`
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
     await this.loadPractices()
@@ -138,6 +140,8 @@ class App extends Component {
       showNotification
     } = payload
 
+    const lastScanTime = Date.now()
+
     // device only scan with no policy completed
     if (noResults) {
       return this.setState({ loading: false, scannedBy: 'Stethoscope' })
@@ -152,6 +156,7 @@ class App extends Component {
 
       return this.setState({
         loading: false,
+        lastScanTime,
         errors: errors.map(({ message }) => message)
       })
     }
@@ -162,6 +167,7 @@ class App extends Component {
     let newState = {
       result: policy.validate,
       loading: false,
+      lastScanTime,
       remoteScan,
       scannedBy
     }
@@ -198,7 +204,6 @@ class App extends Component {
 
       Promise.all(promises).then(([config, policy, instructions]) => {
         this.setState({ config, policy, instructions }, () => {
-          log.info(JSON.stringify(this.state.policy))
           if (!this.state.scanIsRunning) {
             this.scan()
           }
