@@ -14,6 +14,8 @@ const OFF = 'OFF'
 const UNKNOWN = 'UNKNOWN'
 const UNSUPPORTED = 'UNSUPPORTED'
 
+const MINIMUM_AUTOSCAN_INTERVAL_SECONDS = 60 * 5
+
 const PORT = 37370
 const HOST = `http://127.0.0.1:${PORT}`
 
@@ -27,6 +29,8 @@ module.exports = {
   SUGGESTED,
   NEVER,
   IF_SUPPORTED,
+
+  MINIMUM_AUTOSCAN_INTERVAL_SECONDS,
 
   ON,
   OFF,

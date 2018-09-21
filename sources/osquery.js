@@ -6,7 +6,8 @@ const path = require('path')
 const log = require('../src/lib/logger')
 const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
-const IS_DEV = process.env.NODE_ENV === 'development'
+const { NODE_ENV, STETHOSCOPE_DEBUG } = process.env
+const IS_DEV = NODE_ENV === 'development'
 const OSQUERY_PID_PATH = `${app.getPath('userData')}${path.sep}.osquery.pid`
 
 const osqueryBinaries = {
@@ -28,7 +29,7 @@ const defaultOptions = {
   where: '1 = 1'
 }
 
-const debug = (...args) => log.info(`oquery: ${args.join(' ')}`)
+const debug = (...args) => STETHOSCOPE_DEBUG && STETHOSCOPE_DEBUG.includes('osquery') && log.info(`oquery: ${args.join(' ')}`)
 
 const cache = new Map()
 const timers = new Map()
