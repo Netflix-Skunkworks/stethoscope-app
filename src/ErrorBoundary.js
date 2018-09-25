@@ -1,4 +1,5 @@
 import React from 'react'
+import serializeError from 'serialize-error'
 
 let log = console
 let remote
@@ -18,7 +19,7 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch (error, info) {
     this.setState({ hasError: true })
-    log.error(error)
+    log.error(JSON.stringify(serializeError(error)))
   }
 
   render () {

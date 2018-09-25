@@ -7,6 +7,7 @@ import openSocket from 'socket.io-client'
 import moment from 'moment'
 import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
+import serializeError from 'serialize-error'
 import { HOST } from './constants'
 import { MAC } from './lib/platform'
 import appConfig from './config.json'
@@ -187,8 +188,13 @@ class App extends Component {
     })
   }
 
-  handleResponseError = (err = { message: 'Error requesting policy information' }) => {
-    log.error('App:response error', err)
+  handleErrorYAML = (err = { message: 'Error requesting config information' }) => {
+    log.error('App:YAML error', err)
+    this.setState({ error: err, loading: false })
+  }
+
+  handleErrorGraphQL = (err = { message: 'Error in GraphQL request' }) => {
+    log.error(`App:GraphQL error ${JSON.stringify(serializeError(err))}`)
     this.setState({ error: err, loading: false })
   }
   /**
@@ -199,7 +205,16 @@ class App extends Component {
     this.setState({ loading: true }, () => {
       const files = ['config', 'policy', 'instructions']
       const promises = files.map(item =>
-        fetch(`${HOST}/${item}`).then(res => res.json()).catch(this.handleResponseError)
+        fetch(`${HOST}/${item}`)
+          .then(async res => {
+            if (!res.ok) {
+              const response = await res.json()
+              throw new Error(response.error || `Unable to locate ${item}`)
+            }
+            return res
+          })
+          .then(res => res.json())
+          .catch(this.handleErrorYAML)
       )
 
       Promise.all(promises).then(([config, policy, instructions]) => {
@@ -208,7 +223,7 @@ class App extends Component {
             this.scan()
           }
         })
-      }).catch(this.handleResponseError)
+      }).catch(this.handleErrorGraphQL)
     })
   }
   /**
@@ -225,7 +240,6 @@ class App extends Component {
    */
   scan = () => {
     this.setState({ loading: true, scanIsRunning: true }, () => {
-      console.log('scanning with policy', this.state.policy)
       Stethoscope.validate(this.state.policy).then(({ device, result }) => {
         const lastScanTime = Date.now()
         this.setState({
@@ -240,12 +254,10 @@ class App extends Component {
         })
       }).catch(err => {
         console.log(err)
-        log.error(err)
+        log.error(JSON.stringify(err))
         let message = new Error('Request timeout')
-        if (err.errors) {
-          message = new Error(JSON.stringify(err.errors))
-        }
-        this.handleResponseError({ message })
+        if (err.errors) message = new Error(JSON.stringify(err.errors))
+        this.handleErrorGraphQL({ message })
       })
     })
   }
@@ -278,6 +290,7 @@ class App extends Component {
     if (error) {
       content = (
         <ErrorMessage
+          version={pkg.version}
           showStack={isDev}
           message={error.message}
           stack={error.stack}

@@ -6,6 +6,7 @@ const initMenu = require('./Menu')
 const config = require('./config.json')
 const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
 const settings = require('electron-settings')
+const serializeError = require('serialize-error')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
@@ -148,19 +149,21 @@ function createWindow () {
       const [ language ] = app.getLocale().split('-')
       // start GraphQL server, close the app if 37370 is already in use
       server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
-      server.on('error', err => {
-        if (err.message.includes('EADDRINUSE')) {
+      server.on('error', error => {
+        log.info(`startup:express:error ${JSON.stringify(serializeError(error))}`)
+        if (error.message.includes('EADDRINUSE')) {
           dialog.showMessageBox({
-            message: 'Stethoscope is already running'
+            message: 'Something is already using port 37370'
           })
-          app.quit()
         }
       })
 
-      if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
+      server.on('server:ready', () => {
+        if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
+        mainWindow.loadURL(BASE_URL)
+        mainWindow.focus()
+      })
 
-      mainWindow.loadURL(BASE_URL)
-      mainWindow.focus()
     }).catch(err => {
       log.info('startup error')
       log.error(`start:osquery unable to start osquery: ${err}`, err)

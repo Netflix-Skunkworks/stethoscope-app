@@ -127,6 +127,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "semver": "^5.4.1",
+    "serialize-error": "^2.1.0",
     "showdown": "^1.8.6",
     "socket.io": "^2.0.4",
     "thrift": "^0.11.0",
@@ -135,9 +136,9 @@
     "winston-daily-rotate-file": "^3.3.0"
   },
   "devDependencies": {
-    "@heroku/foreman": "^2.0.2",
     "@babel/core": "^7.0.0-rc.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
+    "@heroku/foreman": "^2.0.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
@@ -147,6 +148,7 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "mocha": "^5.2.0",
+    "react-dev-utils": "5.0.2",
     "react-scripts": "^1.1.4",
     "standard": "^11.0.1"
   }

@@ -31,6 +31,9 @@ const defaultOptions = {
 
 const debug = (...args) => STETHOSCOPE_DEBUG && STETHOSCOPE_DEBUG.includes('osquery') && log.info(`oquery: ${args.join(' ')}`)
 
+const CACHE_TIME = 5000
+let clearCacheTimeout
+
 const cache = new Map()
 const timers = new Map()
 
@@ -136,10 +139,8 @@ class OSQuery {
             // remove old event listeners and add new
             this.connection
               .connect()
-              .off('connect', resolveOnThriftConnect)
-              .off('error', tryThriftReconnect)
-              .on('connect', resolveOnThriftConnect)
-              .on('error', tryThriftReconnect)
+              .rebind('connect', resolveOnThriftConnect)
+              .rebind('error', tryThriftReconnect)
           }, incrementalBackoff)
         }
       }
@@ -252,8 +253,11 @@ class OSQuery {
    * @return {Promise}
    */
   static exec (query) {
+    clearTimeout(clearCacheTimeout)
+
     return new Promise((resolve, reject) => {
       if (cache.has(query)) {
+        timers.set(query, 0)
         return resolve(cache.get(query))
       }
 
@@ -276,10 +280,15 @@ class OSQuery {
           time: queryTime + 'ms'
         }, null, 3))
 
+        clearCacheTimeout = setTimeout(() => {
+          this.flushCache()
+        }, CACHE_TIME)
+
         resolve(result)
       })
     }).catch((err) => {
       log.error('OSQUERY ERROR', err)
+      reject(err)
     })
   }
 }

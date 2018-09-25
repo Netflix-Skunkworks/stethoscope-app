@@ -2,6 +2,7 @@ const semver = require('semver')
 const Device = require('./MacDevice')
 const OSQuery = require('../../sources/osquery')
 const pkg = require('../../package.json')
+const { exec } = require('child_process')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
 
 const MacSecurity = {
@@ -91,30 +92,25 @@ const MacSecurity = {
     return result.remote_login === '1'
   },
 
-  // adapted from https://github.com/kolide/launcher/blob/master/osquery/best_practices.go
-  // SELECT device, path, bd.type, label, encrypted  FROM mounts m join disk_encryption de ON m.device_alias = de.name join block_devices bd ON bd.name = de.name WHERE bd.type != "Virtual Interface";
-  // TODO Change this to check other volumes?
-  // Some macOS versions have other drives that show up, like the recovery partition, so we'll like need an allowed list.
   /*
+    current check is running fdesetup isactive to determine if FileVault is on
+    OLD check:
+    -- adapted from https://github.com/kolide/launcher/blob/master/osquery/best_practices.go
     select encrypted, path from mounts m
     join disk_encryption de ON m.device_alias = de.name
     join block_devices bd ON bd.name = de.name
     where m.path = '/'
-   */
-  async diskEncryption (root, args, context) {
+  */
+  diskEncryption (root, args, context) {
+    return new Promise((resolve, reject) => {
+      exec('fdesetup isactive', (error, stdout, stderr) => {
+        if (error) {
+          return reject(`fdesetup error: ${error}`);
+        }
 
-    const userPartitions = await OSQuery.all('mounts m join disk_encryption de ON m.device_alias = de.name join block_devices bd ON bd.name = de.name', {
-      where: "m.path = '/'",
-      // where: 'bd.type != "Virtual Interface"', // this will exclude DMGs
-      fields: ['encrypted', 'path']
-    }) || []
-
-    // because array.every will return true on an empty set
-    if (userPartitions.length === 0) {
-      userPartitions.push({ encrypted: false })
-    }
-
-    return userPartitions.every(({ encrypted }) => encrypted === '1')
+        resolve(stdout.trim() === 'true')
+      });
+    })
   },
 
   async screenLock (root, args, context) {
