@@ -136,7 +136,9 @@ const Device = {
 
     const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
 
-    return addresses.filter(({ mac }) => !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac))
+    return addresses.filter(({ mac }) =>
+      !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac)
+    )
   },
 
   async osqueryVersion (root, args, context) {

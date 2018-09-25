@@ -150,7 +150,7 @@ export default class Stethoscope {
         if (err.message === 'retry') {
           return this.__repeatRequest(policy, resolve, reject)
         } else {
-          reject(err.message)
+          reject(err)
         }
       })
   }

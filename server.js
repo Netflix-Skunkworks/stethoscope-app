@@ -82,38 +82,37 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
 
+  // this doesn't change per request, capture it prior to scan
+  const context = {
+    platform: process.platform || os.platform(),
+    systemInfo: OSQuery.first('system_info'),
+    platformInfo: OSQuery.first('platform_info'),
+    osVersion: OSQuery.first('os_version').then(v => {
+      let version = [v.major, v.minor]
+      if (process.platform === 'win32') {
+        version.push(v.build)
+      } else {
+        version.push(v.patch)
+      }
+      v.version = semver.coerce(version.join('.'))
+      return v
+    })
+  }
+
   app.use(['/scan', '/graphql'], cors(corsOptions), (req, res) => {
     req.setTimeout(60000)
-    // flush any cached queries from the previous request
-    OSQuery.flushCache()
+
     powershell.flushCache()
 
-    const context = {
-      platform: process.platform || os.platform(),
-      systemInfo: OSQuery.first('system_info'),
-      platformInfo: OSQuery.first('platform_info'),
-      osVersion: OSQuery.first('os_version').then(v => {
-        let version = [v.major, v.minor]
-        if (process.platform === 'win32') {
-          version.push(v.build)
-        } else {
-          version.push(v.patch)
-        }
-        v.version = semver.coerce(version.join('.'))
-        return v
-      })
-    }
-
     const key = req.method === 'POST' ? 'body' : 'query'
-    const remote = req.get('origin') !== 'stethoscope://main'
+    const origin = req.get('origin')
+    const remote = origin !== 'stethoscope://main'
     let remoteLabel
 
     if (remote) {
       try {
-        remoteLabel = hostLabels
-          .find(({ pattern }) =>
-            (new RegExp(pattern)).test(req.get('origin'))
-          ).name
+        const matchHost = ({ pattern }) => (new RegExp(pattern)).test(origin)
+        remoteLabel = hostLabels.find(matchHost).name
       } catch (e) {
         remoteLabel = 'Unknown App'
       }

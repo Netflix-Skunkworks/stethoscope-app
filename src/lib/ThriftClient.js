@@ -20,6 +20,10 @@ class ThriftClient {
     return this
   }
 
+  rebind(event, callback) {
+    return this.off(event, callback).on(event, callback)
+  }
+
   on (event, callback) {
     this._connection.on(event, callback)
     return this
