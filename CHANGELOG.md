@@ -4,9 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased](#)
 
+## [2.0.6](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.0.6)
+
+### Fixed
+- Stop binding to 'localhost' for node server, now explicitly bound to 127.0.0.1 to prevent host override issues
+- emit `scan:init` event on server, even if policy is not a string
+- updated react-dev-tools (vuln)
+- fixed cache timing issue, now auto expire cache once it is not in use
+
+### Changed
+- **changed method of checking disk encryption on mac to using `fdestatus` instead of osquery**
+- Removed unused Applescript import from MacSecurity resolver
+- quiet down verbose debug logging in osquery
+- optimize general queries that do not change between requests (run once)
+- differentiate main app errors with specific handlers
+
+### Added
+- Added version to app title to minimize users having to hunt the info down.
+- Added minimum rescan time
+- Added version to error page
+- Added error serialization to make logs less useless
+
 ----
 
-## [2.0.3](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/2.0.3) - 2018-08-29
+## [2.0.5](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.0.5) - 2018-09-05
+
+### Fixes
+- Resolves Mojave instructions issue
+
+### Added
+- Support for querying Browser instructions documentation
+
+----
+
+## [2.0.3](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.0.3) - 2018-08-29
 
 -----
 
