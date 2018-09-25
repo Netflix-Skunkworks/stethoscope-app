@@ -31,7 +31,7 @@ const defaultOptions = {
 
 const debug = (...args) => STETHOSCOPE_DEBUG && STETHOSCOPE_DEBUG.includes('osquery') && log.info(`oquery: ${args.join(' ')}`)
 
-const CACHE_TIME = 5000
+const CACHE_TIMEOUT = 1000
 let clearCacheTimeout
 
 const cache = new Map()
@@ -282,7 +282,7 @@ class OSQuery {
 
         clearCacheTimeout = setTimeout(() => {
           this.flushCache()
-        }, CACHE_TIME)
+        }, CACHE_TIMEOUT)
 
         resolve(result)
       })

@@ -5,10 +5,10 @@ osVersion:
     # Sierra
     nudge: ">=10.12.6"
   win32:
+    # Version 1803 - April 2018 Update
+    ok: ">=10.0.17134"
     # Version 1803 - Redstone 3 Fall Creators Update
-    ok: ">=10.0.16299"
-    # Version 1703 - Redstone 2 Creators Update
-    nudge: ">=10.0.15063"
+    nudge: ">=10.0.16299"
   ubuntu:
     ok: ">=18.4.0"
     nudge: ">=18.0.2"
