@@ -39,9 +39,6 @@
       "extraResources": [
         "bin/osqueryd.exe"
       ],
-      "binaries": [
-        "bin/osqueryd.exe"
-      ],
       "files": [
         "practices/*",
         "build/**",
@@ -62,9 +59,6 @@
       "target": "AppImage",
       "category": "System",
       "extraResources": [
-        "bin/osqueryi_linux"
-      ],
-      "binaries": [
         "bin/osqueryi_linux"
       ],
       "files": [
