@@ -121,6 +121,14 @@ class OSQuery {
         clearTimeout(thriftConnectTimeout)
         resolve()
       }
+
+      const onTimeout = () => {
+        log.info('OSQUERY TIMEOUT!')
+      }
+
+      const onReconnect = ({delay, attempt}) => {
+        log.info(`RECONNECT: ${delay}, attempt: ${attempt}`)
+      }
       /**
       * Internal method that attempts to connect to thrift socket and
       * incrementally backoff
@@ -139,6 +147,8 @@ class OSQuery {
             // remove old event listeners and add new
             this.connection
               .connect()
+              .rebind('reconnect', onReconnect)
+              .rebind('timeout', onTimeout)
               .rebind('connect', resolveOnThriftConnect)
               .rebind('error', tryThriftReconnect)
           }, incrementalBackoff)
@@ -149,6 +159,8 @@ class OSQuery {
       this.connection = ThriftClient.getInstance({ path: socket })
         .connect()
         .on('connect', resolveOnThriftConnect)
+        .on('reconnect', onReconnect)
+        .on('timeout', onTimeout)
         .on('error', tryThriftReconnect)
     })
   }

@@ -123,52 +123,50 @@ function createWindow () {
   let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
   tray.on('right-click', () => tray.popUpContextMenu(contextMenu))
 
-  if (!starting) {
-    log.info('Starting osquery')
-    // these methods allow express to update app state
-    const appHooksForServer = {
-      setScanStatus (status = 'PASS') {
-        let next
-        if (status in statusImages) {
-          next = statusImages[status]
-        } else {
-          next = statusImages.PASS
-        }
-        tray.setImage(next)
-      },
-      requestUpdate () {
-        updater.checkForUpdates()
+  log.info('Starting osquery')
+  // these methods allow express to update app state
+  const appHooksForServer = {
+    setScanStatus (status = 'PASS') {
+      let next
+      if (status in statusImages) {
+        next = statusImages[status]
+      } else {
+        next = statusImages.PASS
       }
+      tray.setImage(next)
+    },
+    requestUpdate () {
+      updater.checkForUpdates()
     }
-    // ensure that this process doesn't start multiple times
-    starting = true
-
-    OSQuery.start().then(() => {
-      log.info('osquery started')
-      // used to select the appropriate instructions file
-      const [ language ] = app.getLocale().split('-')
-      // start GraphQL server, close the app if 37370 is already in use
-      server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
-      server.on('error', error => {
-        log.info(`startup:express:error ${JSON.stringify(serializeError(error))}`)
-        if (error.message.includes('EADDRINUSE')) {
-          dialog.showMessageBox({
-            message: 'Something is already using port 37370'
-          })
-        }
-      })
-
-      server.on('server:ready', () => {
-        if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
-        mainWindow.loadURL(BASE_URL)
-        mainWindow.focus()
-      })
-
-    }).catch(err => {
-      log.info('startup error')
-      log.error(`start:osquery unable to start osquery: ${err}`, err)
-    })
   }
+  // ensure that this process doesn't start multiple times
+  starting = true
+
+  OSQuery.start().then(() => {
+    log.info('osquery started')
+    // used to select the appropriate instructions file
+    const [ language ] = app.getLocale().split('-')
+    // start GraphQL server, close the app if 37370 is already in use
+    server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
+    server.on('error', error => {
+      log.info(`startup:express:error ${JSON.stringify(serializeError(error))}`)
+      if (error.message.includes('EADDRINUSE')) {
+        dialog.showMessageBox({
+          message: 'Something is already using port 37370'
+        })
+      }
+    })
+
+    server.on('server:ready', () => {
+      if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
+      mainWindow.loadURL(BASE_URL)
+      mainWindow.focus()
+    })
+
+  }).catch(err => {
+    log.info('startup error')
+    log.error(`start:osquery unable to start osquery: ${err}`, err)
+  })
 
   // add right-click menu to app
   ipcMain.on('contextmenu', event => contextMenu.popup({ window: mainWindow }))
