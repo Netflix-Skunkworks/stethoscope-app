@@ -105,6 +105,9 @@ class OSQuery {
         if (err) log.error(`Unable to write osquery pidfile: ${OSQUERY_PID_PATH}`)
       })
 
+      this.osqueryd.stderr.on('data', debug)
+      this.osqueryd.stdin.on('data', debug)
+
       this.osqueryd.on('error', (err) => {
         if (this.connection) this.__endThriftConnection()
         log.error(`osquery:execution error: ${err}`)

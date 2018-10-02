@@ -128,7 +128,7 @@ practices:
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.
-        {{#if mohave}}
+        {{#if mojave}}
         1. Click [Software Update](x-apple.systempreferences:com.apple.preferences.softwareupdate)
         {{else}}
         1. Click [App Store](prefs://com.apple.preferences.appstore).
