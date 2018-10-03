@@ -16,8 +16,6 @@ export default class ErrorMessage extends Component {
   }
 
   render () {
-    const { config } = this.props
-
     return (
       <div className='error'>
         <h1>Oh no!</h1>
@@ -29,9 +27,7 @@ export default class ErrorMessage extends Component {
         <button onClick={() => ipcRenderer.send('app:restart')}>Restart App</button>
         <div id='helpBubble'>
           <strong>Need some help?</strong>
-          {config.menu.help.map(({ label, link }) => (
-            <a key={link} className='helpLink' href={link}>{label}</a>
-          ))}
+          {this.props.children}
         </div>
         <div id='giraffe'>
           <img alt='Stethoscope Giraffe' src='./favicon.png' />

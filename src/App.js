@@ -18,12 +18,16 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = MAC
-let shell, ipcRenderer, log, remote
+let shell, ipcRenderer, readLastLines, log, remote, settings, app, logPath = ''
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
   shell = window.require('electron').shell
   remote = window.require('electron').remote
+  readLastLines = window.require('read-last-lines')
+  settings = window.require('electron-settings')
+  app = remote.getGlobal('app')
+  logPath = app.getPath('userData')
   log = remote.getGlobal('log')
   platform = os.platform()
   ipcRenderer = window.require('electron').ipcRenderer
@@ -31,6 +35,7 @@ try {
   // browser polyfill
   ipcRenderer = { on () {}, send () {} }
   log = console
+  console.error(e)
 }
 
 class App extends Component {
@@ -41,6 +46,7 @@ class App extends Component {
     instructions: {},
     scanIsRunning: false,
     loading: false,
+    recentLogs: '',
     // determines loading screen language
     remoteScan: false,
     // surface which app performed the most recent scan
@@ -59,7 +65,13 @@ class App extends Component {
   }
 
   async componentWillMount () {
+    // append app version to title
     document.querySelector('title').textContent += ` (v${pkg.version})`
+
+    this.setState({ recentHang: settings.get('recentHang', 0) > 1 })
+
+    this.getRecentLogs()
+
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
     await this.loadPractices()
@@ -235,6 +247,12 @@ class App extends Component {
       shell.openExternal(event.target.getAttribute('href'))
     }
   }
+
+  onRestartFromLoader = event => {
+    settings.set('recentHang', settings.get('recentHang', 0) + 1)
+    ipcRenderer.send('app:restart')
+  }
+
   /**
    * Performs a scan by passing the current policy to the graphql server
    */
@@ -262,6 +280,14 @@ class App extends Component {
     })
   }
 
+  getRecentLogs = () => {
+    const today = moment().format('YYYY-MM-DD')
+    const path = `${logPath}/dev-application-${today}.log`
+    readLastLines.read(path, 10).then(recentLogs =>
+      this.setState({ recentLogs })
+    ).catch(err => {})
+  }
+
   highlightRescanButton = event => this.setState({ highlightRescan: true })
 
   render () {
@@ -287,6 +313,10 @@ class App extends Component {
       )
     }
 
+    const helpOptions = appConfig.menu.help.map(({ label, link }) => (
+      <a key={link} className='helpLink' href={link}>{label}</a>
+    ))
+
     if (error) {
       content = (
         <ErrorMessage
@@ -294,17 +324,25 @@ class App extends Component {
           showStack={isDev}
           message={error.message}
           stack={error.stack}
-          config={appConfig}
-        />
+        >
+          {helpOptions}
+        </ErrorMessage>
       )
     }
 
     if (loading) {
       content = (
         <Loader
+          onRestart={this.onRestartFromLoader}
+          recentHang={this.state.recentHang}
           remoteScan={this.state.remoteScan}
           remoteLabel={this.state.scannedBy}
-        />
+          recentLogs={this.state.recentLogs}
+          platform={platform}
+          version={pkg.version}
+        >
+          {helpOptions}
+        </Loader>
       )
     }
 

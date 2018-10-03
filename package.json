@@ -129,6 +129,7 @@
     "node-powershell": "^3.3.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "read-last-lines": "^1.6.0",
     "semver": "^5.4.1",
     "serialize-error": "^2.1.0",
     "showdown": "^1.8.6",
