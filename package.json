@@ -117,12 +117,12 @@
     "electron-updater": "^3.0.3",
     "es6-promisify": "^6.0.0",
     "express": "^4.16.2",
-    "file-stream-rotator": "git://github.com/andrefarzat/file-stream-rotator.git#b769f580b7c1efc7f494638e728755064042ce81",
     "graphql": "^0.13.2",
     "graphql-server-express": "^1.2.0",
     "graphql-tools": "^2.12.0",
     "handlebars": "^4.0.11",
     "helmet": "^3.9.0",
+    "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.10.0",
     "marked": "^0.3.7",
     "moment": "^2.19.3",
@@ -135,7 +135,7 @@
     "socket.io": "^2.0.4",
     "thrift": "^0.11.0",
     "url-parse": "^1.4.3",
-    "winston": "^3.0.0",
+    "winston": "^3.1.0",
     "winston-daily-rotate-file": "^3.3.0"
   },
   "devDependencies": {
