@@ -9,7 +9,9 @@ export default class Loader extends React.Component {
   state = { startLoading: 0, slowLoad: false }
 
   componentDidMount() {
-    timeout = setTimeout(() => this.setState({ slowLoad: true }), TOO_SLOW)
+    timeout = setTimeout(() => {
+      this.setState({ slowLoad: true })
+    }, TOO_SLOW)
   }
 
   componentWillUnmount() {

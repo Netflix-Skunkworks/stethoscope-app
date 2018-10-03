@@ -259,11 +259,14 @@ app.on('ready', () => setTimeout(() => {
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
   log.info('stopping osquery')
+  const hangTime = settings.get('recentHang', false)
 
-  if (settings.get('recentHang') >= 3) {
-    settings.delete('recentHang')
-  } else {
-    settings.set('recentHang', settings.get('recentHang', 1) + 1)
+  if (hangTime) {
+    if (hangTime >= 3) {
+      settings.delete('recentHang')
+    } else {
+      settings.set('recentHang', settings.get('recentHang', 1) + 1)
+    }
   }
 
   OSQuery.stop()
