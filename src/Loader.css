@@ -10,7 +10,12 @@
   text-align: center;
   color: #aaa;
   font-weight: 300;
+  font-size: 1.2rem;
 }
+.loader-wrapper.recentHang {
+  padding-top: 0px;
+}
+
 .loader {
   font-size: 10px;
   margin: 30px auto;
@@ -73,4 +78,45 @@
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
+}
+
+.loaderAdditionalContent {
+  padding: 10px;
+  color: black;
+}
+
+.loaderAdditionalContent a {
+  display: inline-block;
+  padding: 10px;
+  color: black;
+  text-decoration: none;
+  border: 1px solid #ccc;
+  background-color: #efefef;
+  border-radius: 5px;
+  margin: 10px 10px;
+}
+
+.loadingMessage {
+  font-size: 2.5rem;
+  position: absolute;
+  top: 200px;
+  left: 220px;
+}
+
+.recentHang .loadingMessage {
+  font-size: 2.5rem;
+  position: absolute;
+  top: 60px;
+  left: 220px;
+}
+
+.loaderAdditionalContent pre {
+  color: black;
+  white-space: pre-line;
+  word-wrap: break-word;
+  word-break: break-word;
+  padding: 10px;
+  margin: 10px;
+  text-align: left;
+  border: 1px solid #efefef;
 }

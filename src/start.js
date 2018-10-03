@@ -228,6 +228,8 @@ function createWindow () {
   })
 }
 
+global.app = app
+
 // wrap ready callback in 0-delay setTimeout to reduce serious jank
 // issues on Windows
 app.on('ready', () => setTimeout(() => {
@@ -257,6 +259,16 @@ app.on('ready', () => setTimeout(() => {
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
   log.info('stopping osquery')
+  const hangTime = settings.get('recentHang', false)
+
+  if (hangTime) {
+    if (hangTime >= 3) {
+      settings.delete('recentHang')
+    } else {
+      settings.set('recentHang', settings.get('recentHang', 1) + 1)
+    }
+  }
+
   OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {

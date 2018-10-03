@@ -117,7 +117,7 @@ class Action extends Component {
 
   getPlatformAndVersionSpecificFlags(device) {
     return {
-      mohave: (
+      mojave: (
         device.platform === 'darwin' && semver.satisfies(device.osVersion, '>=10.14.0')
       )
     }
