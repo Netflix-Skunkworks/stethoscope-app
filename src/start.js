@@ -196,7 +196,9 @@ function createWindow () {
       // schedule next automatic scan
       clearTimeout(rescanTimeout)
       rescanTimeout = setTimeout(() => {
-        event.sender.send('autoscan:start', { notificationOnViolation: true })
+        if (event && event.sender) {
+          event.sender.send('autoscan:start', { notificationOnViolation: true })
+        }
       }, rescanDelay)
     }
   })
