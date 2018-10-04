@@ -105,9 +105,8 @@ const MacSecurity = {
     return new Promise((resolve, reject) => {
       exec('fdesetup isactive', (error, stdout, stderr) => {
         if (error) {
-          return reject(`fdesetup error: ${error}`);
+          return resolve(false);
         }
-
         resolve(stdout.trim() === 'true')
       });
     })
