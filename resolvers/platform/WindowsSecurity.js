@@ -41,7 +41,6 @@ const WindowsSecurity = {
    */
   async diskEncryption (root, args, context) {
     const info = await context.platformInfo
-
     if (info.version.includes('amazon')) {
       return UNKNOWN
     }
@@ -59,6 +58,10 @@ const WindowsSecurity = {
     where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
    */
   async screenLock (root, args, context) {
+    const info = await context.platformInfo
+    if (info.version.includes('amazon')) {
+      return UNKNOWN
+    }
     // const { autoAdminLogin } = await OSQuery.first('registry', {
     //   fields: ['name', 'data as autoAdminLogin'],
     //   where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
