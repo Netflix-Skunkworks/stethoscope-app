@@ -91,7 +91,7 @@ const Security = {
 
   async osVersion (root, args, context) {
     let plat = context.platform
-    const info = await context.platform_info
+    const info = await context.platformInfo
     if (info.version.includes('amazon')) {
       plat = 'awsWorkspace'
     }

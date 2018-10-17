@@ -23,7 +23,7 @@ const WindowsSecurity = {
     select data from registry where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
    */
   async remoteLogin (root, args, context) {
-    const info = await context.platform_info
+    const info = await context.platformInfo
     if (info.version.includes('amazon')) {
       return UNKNOWN
     }
@@ -40,7 +40,8 @@ const WindowsSecurity = {
     where display_name = "BitLocker Drive Encryption Service" and status = "RUNNING"
    */
   async diskEncryption (root, args, context) {
-    const info = await context.platform_info
+    const info = await context.platformInfo
+    console.log(info)
 
     if (info.version.includes('amazon')) {
       return UNKNOWN
