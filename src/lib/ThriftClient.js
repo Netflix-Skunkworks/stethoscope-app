@@ -1,5 +1,6 @@
 const thrift = require('thrift')
 const ExtensionManager = require('./thrift/ExtensionManager.js')
+const thriftPoolClient = require('./thrift/Pool')
 
 class ThriftClient {
   static getInstance (opts) {
@@ -15,32 +16,26 @@ class ThriftClient {
   }
 
   connect () {
-    this._connection = thrift.createConnection(this.port, this.path)
-    this._client = thrift.createClient(ExtensionManager, this._connection)
-    return this
-  }
+    const transport = thrift.TBufferedTransport
+    const protocol = thrift.TBinaryProtocol
+    this._client = thriftPoolClient(ExtensionManager, {
+      host: this.port,
+      port: this.path,
+      transport,
+      protocol
+    }, {
+      poolOptions: {
+        max: 5
+      }
+    })
 
-  rebind(event, callback) {
-    return this.off(event, callback).on(event, callback)
-  }
-
-  on (event, callback) {
-    this._connection.on(event, callback)
-    return this
-  }
-
-  off (event, callback) {
-    this._connection.removeListener(event, callback)
     return this
   }
 
   query (msg, cb) {
-    this._client.query(msg, cb)
-  }
-
-  end () {
-    this._connection.end()
-    this._connection.destroy()
+    this._client.query(msg)
+      .then(res => cb(null, res))
+      .catch(err => cb(err, null))
   }
 }
 
