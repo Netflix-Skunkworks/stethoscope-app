@@ -92,6 +92,7 @@ const Security = {
   async osVersion (root, args, context) {
     let plat = context.platform
     const info = await context.platformInfo
+    // aws workspaces are on a different version than Windows 10
     if (info.version.includes('amazon')) {
       plat = 'awsWorkspace'
     }

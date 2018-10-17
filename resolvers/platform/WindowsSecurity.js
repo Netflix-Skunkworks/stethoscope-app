@@ -24,8 +24,9 @@ const WindowsSecurity = {
    */
   async remoteLogin (root, args, context) {
     const info = await context.platformInfo
+    // aws workspaces require remote login
     if (info.version.includes('amazon')) {
-      return UNKNOWN
+      return false
     }
 
     const result = await OSQuery.first('registry', {
@@ -41,6 +42,7 @@ const WindowsSecurity = {
    */
   async diskEncryption (root, args, context) {
     const info = await context.platformInfo
+    // aws workspaces don't allow disk encryption
     if (info.version.includes('amazon')) {
       return UNKNOWN
     }
@@ -59,6 +61,7 @@ const WindowsSecurity = {
    */
   async screenLock (root, args, context) {
     const info = await context.platformInfo
+    // screen lock creates problems in workspaces
     if (info.version.includes('amazon')) {
       return UNKNOWN
     }
