@@ -130,15 +130,7 @@ const Device = {
 
   // can/should these be filtered down?
   async macAddresses (root, args, context) {
-    const addresses = await OSQuery.all('interface_details', {
-      fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
-    }) || []
-
-    const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
-
-    return addresses.filter(({ mac }) =>
-      !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac)
-    )
+    return context.macAddresses
   },
 
   async osqueryVersion (root, args, context) {

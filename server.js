@@ -17,6 +17,7 @@ const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const powershell = require('./src/lib/powershell')
+const NetworkInterface = require('./src/lib/NetworkInterface')
 const defaultPolicyServer = HOST
 
 const app = express()
@@ -87,6 +88,14 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
     platform: process.platform || os.platform(),
     systemInfo: OSQuery.first('system_info'),
     platformInfo: OSQuery.first('platform_info'),
+    macAddresses: OSQuery.all('interface_details', {
+      fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
+    }).then((addresses = []) => {
+      const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
+      return addresses.filter(({ mac }) =>
+        !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac)
+      )
+    }),
     osVersion: OSQuery.first('os_version').then(v => {
       let version = [v.major, v.minor]
       if (process.platform === 'win32') {
