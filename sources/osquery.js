@@ -40,7 +40,7 @@ const timers = new Map()
 class OSQuery {
   static __endThriftConnection () {
     debug('osqueryd closed')
-    if (this.connection) {
+    if (this.connection && 'end' in this.connection) {
       this.connection.end()
     }
   }
@@ -116,55 +116,9 @@ class OSQuery {
 
       this.osqueryd.on('close', this.__endThriftConnection)
 
-      let startAttempts = 0
-      let thriftConnectTimeout
-      const MAX_ATTEMPTS = 20
-
-      const resolveOnThriftConnect = () => {
-        clearTimeout(thriftConnectTimeout)
-        resolve()
-      }
-
-      const onTimeout = () => {
-        log.info('OSQUERY TIMEOUT!')
-      }
-
-      const onReconnect = ({delay, attempt}) => {
-        log.info(`RECONNECT: ${delay}, attempt: ${attempt}`)
-      }
-      /**
-      * Internal method that attempts to connect to thrift socket and
-      * incrementally backoff
-      */
-      const tryThriftReconnect = err => {
-        startAttempts++
-
-        debug(`thrift unable to connect to socket ${err} | attempt: ${startAttempts}`)
-
-        if (startAttempts >= MAX_ATTEMPTS) {
-          log.error('THRIFT unable to connect to osquery')
-          reject(new Error(err))
-        } else {
-          const incrementalBackoff = 100 * startAttempts
-          thriftConnectTimeout = setTimeout(() => {
-            // remove old event listeners and add new
-            this.connection
-              .connect()
-              .rebind('reconnect', onReconnect)
-              .rebind('timeout', onTimeout)
-              .rebind('connect', resolveOnThriftConnect)
-              .rebind('error', tryThriftReconnect)
-          }, incrementalBackoff)
-        }
-      }
-
       // attempt to connect thrift client
-      this.connection = ThriftClient.getInstance({ path: socket })
-        .connect()
-        .on('connect', resolveOnThriftConnect)
-        .on('reconnect', onReconnect)
-        .on('timeout', onTimeout)
-        .on('error', tryThriftReconnect)
+      this.connection = ThriftClient.getInstance({ path: socket }).connect()
+      resolve()
     })
   }
 

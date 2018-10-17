@@ -117,6 +117,7 @@
     "electron-updater": "^3.0.3",
     "es6-promisify": "^6.0.0",
     "express": "^4.16.2",
+    "generic-pool": "^3.4.2",
     "graphql": "^0.13.2",
     "graphql-server-express": "^1.2.0",
     "graphql-tools": "^2.12.0",
