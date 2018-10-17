@@ -9,6 +9,9 @@ osVersion:
     ok: ">=10.0.17134"
     # Version 1803 - Redstone 3 Fall Creators Update
     nudge: ">=10.0.16299"
+  awsWorkspace:
+    ok: ">=10.0.14393"
+    nudge: ">=10.0.10240"
   ubuntu:
     ok: ">=18.4.0"
     nudge: ">=18.0.2"

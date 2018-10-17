@@ -90,7 +90,14 @@ const Security = {
   },
 
   async osVersion (root, args, context) {
-    const { ok, nudge } = Object(args.osVersion[context.platform])
+    let plat = context.platform
+    const info = await context.platformInfo
+    // aws workspaces are on a different version than Windows 10
+    if (info.version.includes('amazon')) {
+      plat = 'awsWorkspace'
+    }
+
+    const { ok, nudge } = Object(args.osVersion[plat])
     let { version } = await context.osVersion
 
     if (semver.satisfies(semver.coerce(version), ok)) {

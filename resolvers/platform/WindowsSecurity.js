@@ -23,6 +23,12 @@ const WindowsSecurity = {
     select data from registry where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
    */
   async remoteLogin (root, args, context) {
+    const info = await context.platformInfo
+    // aws workspaces require remote login
+    if (info.version.includes('amazon')) {
+      return false
+    }
+
     const result = await OSQuery.first('registry', {
       fields: ['data'],
       where: `path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections'`
@@ -35,6 +41,12 @@ const WindowsSecurity = {
     where display_name = "BitLocker Drive Encryption Service" and status = "RUNNING"
    */
   async diskEncryption (root, args, context) {
+    const info = await context.platformInfo
+    // aws workspaces don't allow disk encryption
+    if (info.version.includes('amazon')) {
+      return UNKNOWN
+    }
+
     const bitlockerRunning = await OSQuery.first('services', {
       fields: ['1 as encrypted'],
       where: 'display_name = "BitLocker Drive Encryption Service" and status = "RUNNING"'
@@ -48,6 +60,11 @@ const WindowsSecurity = {
     where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
    */
   async screenLock (root, args, context) {
+    const info = await context.platformInfo
+    // screen lock creates problems in workspaces
+    if (info.version.includes('amazon')) {
+      return UNKNOWN
+    }
     // const { autoAdminLogin } = await OSQuery.first('registry', {
     //   fields: ['name', 'data as autoAdminLogin'],
     //   where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`

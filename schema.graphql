@@ -226,6 +226,7 @@ input PlatformStringRequirement {
   win32: Semver
   ubuntu: Semver
   linux: Semver
+  awsWorkspace: Semver
   all: Semver
 }
 
@@ -234,6 +235,7 @@ input PlatformBracketRequirement {
   win32: VersionBracket
   ubuntu: VersionBracket
   linux: VersionBracket
+  awsWorkspace: VersionBracket
   all: VersionBracket
 }
 
@@ -243,6 +245,7 @@ input PlatformBoolRequirement {
   win32: Boolean
   ubuntu: Boolean
   linux: Boolean
+  awsWorkspace: Boolean
   all: Boolean
 }
 
