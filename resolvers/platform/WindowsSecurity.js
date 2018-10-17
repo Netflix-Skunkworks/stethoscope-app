@@ -41,7 +41,6 @@ const WindowsSecurity = {
    */
   async diskEncryption (root, args, context) {
     const info = await context.platformInfo
-    console.log(info)
 
     if (info.version.includes('amazon')) {
       return UNKNOWN
