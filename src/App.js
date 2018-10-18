@@ -46,6 +46,7 @@ class App extends Component {
     instructions: {},
     scanIsRunning: false,
     loading: false,
+    lastScanDuration: 0,
     recentLogs: '',
     // determines loading screen language
     remoteScan: false,
@@ -258,12 +259,13 @@ class App extends Component {
    */
   scan = () => {
     this.setState({ loading: true, scanIsRunning: true }, () => {
-      Stethoscope.validate(this.state.policy).then(({ device, result }) => {
+      Stethoscope.validate(this.state.policy).then(({ device, result, timing }) => {
         const lastScanTime = Date.now()
         this.setState({
           device,
           result,
           lastScanTime,
+          lastScanDuration: timing.total / 1000,
           scanIsRunning: false,
           scannedBy: 'Stethoscope',
           loading: false
@@ -359,6 +361,7 @@ class App extends Component {
             strings={instructions.strings}
             policy={policy}
             lastScanTime={lastScanFriendly}
+            lastScanDuration={this.state.lastScanDuration}
             scannedBy={scannedBy}
             onExpandPolicyViolation={this.highlightRescanButton}
           />
