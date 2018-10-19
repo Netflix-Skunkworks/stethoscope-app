@@ -186,7 +186,7 @@ class Device extends Component {
           </div>
 
           <div className='last-updated'>
-            {this.props.strings.lastScan} {this.props.scannedBy} {this.props.lastScanTime}
+            {this.props.strings.lastScan} {this.props.scannedBy} {this.props.lastScanTime} ({Math.round(this.props.lastScanDuration * 100) / 100} seconds)
           </div>
 
         </div>

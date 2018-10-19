@@ -1,6 +1,9 @@
 allowHosts:
   - "stethoscope://main"
 hostLabels:
-  - pattern: "^http://localhost:3000"
+  - pattern: "^http://127.0.0.1:3000"
     name: Local Server
 policyServer:
+testHosts:
+  # - url: "http://foo.bar.com"
+  #   label: Display Value

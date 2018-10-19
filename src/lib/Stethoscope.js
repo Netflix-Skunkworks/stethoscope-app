@@ -137,13 +137,13 @@ export default class Stethoscope {
             return res
         }
       })
-      .then(({ errors, data = {} }) => {
+      .then(({ errors, data = {}, extensions: { timing } }) => {
         const { policy, device } = data
         if (errors) {
           reject({ errors })
         } else {
           const { validate: result } = policy
-          resolve({ result, device })
+          resolve({ result, device, timing })
         }
       })
       .catch((err) => {
