@@ -1,4 +1,4 @@
-const { dialog } = require('electron')
+const { dialog, app } = require('electron')
 const electronUpdater = require('electron-updater')
 
 let updater
@@ -28,13 +28,6 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
       if (attemptingUpdate) {
         dialog.showErrorBox('Error Updating: ', error ? err : 'unknown')
         attemptingUpdate = false
-      }
-    },
-    'before-quit-for-update': () => {
-      log.info('stopping osquery for app restart')
-      OSQuery.stop()
-      if (server && server.listening) {
-        server.close()
       }
     },
     'update-available': () => {
@@ -78,6 +71,11 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
         message: 'Updates downloaded, Stethoscope will quit and relaunch.'
       }, () => {
         if (!isDev) {
+          OSQuery.stop()
+          if (server && server.listening) {
+            server.close()
+          }
+          // app.quit()
           setImmediate(() => autoUpdater.quitAndInstall())
         }
       })
@@ -86,7 +84,7 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
     'download-progress': (progressObj) => {
       mainWindow.webContents.send('download:progress', progressObj)
       // NOTE: uncomment to have download update progress displayed over app icon
-      mainWindow.setProgressBar(progressObj.percent / 100)
+      // mainWindow.setProgressBar(progressObj.percent / 100)
     }
   }
 
