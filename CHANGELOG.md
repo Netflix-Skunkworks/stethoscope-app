@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](#)
+## [2.1.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.1.0)
+
+### Fixed
+- upstream auto update issue ([electron issue](https://github.com/electron-userland/electron-builder/issues/3269))
+
+### Added
+- Thrift connection pooling
+- Support for AWS workstations
+- Scan duration to UI
+- Automated testing for builds
+
+----
 
 ## [2.0.6](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.0.6)
 
