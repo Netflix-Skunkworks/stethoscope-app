@@ -190,9 +190,11 @@ practices:
       Screens which lock automatically when your laptop is unattended prevent unauthorized access from third-parties by requiring a password to dismiss the screen saver or wake from "sleep" mode. Your timeout setting should be equal to or less than the suggested setting below.
     directions:
       darwin: |
-        1. From Spotlight, type 'terminal' to open a Terminal prompt.
-        1. Enter the command: 'sudo defaults -currentHost write com.apple.screensaver idleTime xxx', where xxx is the number of seconds the system should be idle before locking.
-        1. Enter your login password when prompted, as this command requires elevated privileges.
+       -> Screen Saver tab, start after 
+        1. Choose [System Preferences](x-apple.systempreferences:com.apple.systempreferences) from the Apple menu.
+        1. Click Desktop & Screen Saver.
+        1. Click the Screen Saver tab.
+        1. Adjust the "Start after" dropdown to less than or equal to the number of seconds shown below.
         {{securitySetting "screenIdle"}}
 
   osVersion:
