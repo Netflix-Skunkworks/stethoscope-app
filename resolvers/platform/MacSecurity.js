@@ -141,7 +141,7 @@ const MacSecurity = {
       where: `domain = 'com.apple.screensaver' and key = 'idleTime'`
     })
 
-    return screenIdle <= args.screenIdle
+    return semver.satisfies(semver.coerce(screenIdle), args.screenIdle)
   },
 
   async firewall (root, args, context) {
