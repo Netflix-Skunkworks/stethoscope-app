@@ -190,7 +190,6 @@ practices:
       Screens which lock automatically when your laptop is unattended prevent unauthorized access from third-parties by requiring a password to dismiss the screen saver or wake from "sleep" mode. Your timeout setting should be equal to or less than the suggested setting below.
     directions:
       darwin: |
-       -> Screen Saver tab, start after 
         1. Choose [System Preferences](x-apple.systempreferences:com.apple.systempreferences) from the Apple menu.
         1. Click Desktop & Screen Saver.
         1. Click the Screen Saver tab.
