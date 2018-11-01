@@ -62,6 +62,7 @@ export default class Stethoscope {
           firewall
           diskEncryption
           screenLock
+          screenIdle
           automaticUpdates
           remoteLogin
           stethoscopeVersion
@@ -110,6 +111,7 @@ export default class Stethoscope {
           automaticUpdates
           diskEncryption
           screenLock
+          screenIdle
           remoteLogin
           automaticAppUpdates
           automaticSecurityUpdates

@@ -2,7 +2,7 @@ const pkg = require('../package.json')
 const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const Security = require('./Security')
-const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE } = require('../src/constants')
+const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } = require('../src/constants')
 const { Device: PlatformResolvers } = require('./platform')
 
 const securityToDeviceStatus = status => {
@@ -12,6 +12,14 @@ const securityToDeviceStatus = status => {
 
   if (status === NUDGE) {
     return OFF
+  }
+
+  return UNKNOWN
+}
+
+const securityToPassFailStatus = status => {
+  if (typeof status === 'boolean') {
+    return status ? PASS : FAIL
   }
 
   return UNKNOWN
@@ -187,6 +195,11 @@ const Device = {
       async screenLock () {
         const status = await Security.screenLock(root, args, context)
         return securityToDeviceStatus(status)
+      },
+
+      async screenIdle () {
+        const status = await Security.screenIdle(root, args, context)
+        return securityToPassFailStatus(status)
       },
 
       async remoteLogin () {

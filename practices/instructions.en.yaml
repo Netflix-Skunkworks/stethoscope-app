@@ -159,7 +159,7 @@ practices:
         Screen Lock should be enabled
       {{/if}}
     description: >
-      Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode. Setting the timeout, i.e., the length of idle time before the screen saver takes effect, to 10 minutes or less is also recommended.
+      Screen locks, or screen saver locks, prevent unauthorized third-parties from accessing your laptop when unattended by requiring a password to dismiss the screen saver or wake from "sleep" mode.
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.
@@ -178,6 +178,23 @@ practices:
         1. Ensure that "Users must enter a user name and password to use this computer" is checked.
         1. Click "Apply".
         1. Click "OK".
+
+  screenIdle:
+    title:  >
+      {{#if passing}}
+        Screen will lock when system is idle for too long.
+      {{else}}
+        Screen should lock when system is idle for too long.
+      {{/if}}
+    description: >
+      Screens which lock automatically when your laptop is unattended prevent unauthorized access from third-parties by requiring a password to dismiss the screen saver or wake from "sleep" mode. Your timeout setting should be equal to or less than the suggested setting below.
+    directions:
+      darwin: |
+        1. Choose [System Preferences](x-apple.systempreferences:com.apple.systempreferences) from the Apple menu.
+        1. Click Desktop & Screen Saver.
+        1. Click the [Screen Saver](open:///System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/) tab.
+        1. Adjust the "Start after" dropdown to less than or equal to the number of seconds shown below.
+        {{securitySetting "screenIdle"}}
 
   osVersion:
     title: >

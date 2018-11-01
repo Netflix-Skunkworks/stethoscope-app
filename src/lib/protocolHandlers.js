@@ -45,4 +45,8 @@ module.exports = function initProtocols (mainWindow) {
   protocol.registerHttpProtocol('ps', (request, cb) => {
     powershell.run(decodeURIComponent(request.url.replace('ps://', '')))
   })
+
+  protocol.registerHttpProtocol('open', (request, cb) => {
+    shell.openItem(request.url.replace('open://', ''))
+  })
 }

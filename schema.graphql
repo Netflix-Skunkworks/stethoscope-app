@@ -1,5 +1,6 @@
 # Semver string e.g. "<=5.0.0"
 scalar Semver
+scalar NumericRange
 
 type Query {
   device: Device
@@ -62,6 +63,7 @@ type SecurityInfo {
   diskEncryption: FeatureState
   # if screen lock is enabled
   screenLock: FeatureState
+  screenIdle: FeatureState
   # remote login setting
   remoteLogin: FeatureState
   # whether applications auto update
@@ -111,6 +113,7 @@ input DevicePolicy {
   automaticUpdates: RequirementOption
   # whether or not screen lock is required ("IF_SUPPORTED" is recommended)
   screenLock: RequirementOption
+  screenIdle: NumericRange
   # remote login status
   remoteLogin: RequirementOption
   # require applications to be installed
@@ -156,6 +159,7 @@ type PolicyResult {
   diskEncryption: FeatureState
   # if screen lock is enabled
   screenLock: FeatureState
+  screenIdle: FeatureState
   # remote login setting
   remoteLogin: FeatureState
   # whether or not all requiredApplications are installed
@@ -174,6 +178,7 @@ type Security {
   firewall(requirement: RequirementOption!): Boolean!
   diskEncryption(requirement: RequirementOption!): Boolean!
   screenLock(requirement: RequirementOption!): Boolean!
+  screenIdle(requirement: NumericRange!): Boolean!
   remoteLogin(requirement: RequirementOption!): Boolean!
   requiredApplications(requirement: RequirementOption!): [Boolean!]!
   bannedApplications(requirement: RequirementOption!): [Boolean!]!
