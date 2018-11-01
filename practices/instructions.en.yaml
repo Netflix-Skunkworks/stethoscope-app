@@ -192,7 +192,7 @@ practices:
       darwin: |
         1. Choose [System Preferences](x-apple.systempreferences:com.apple.systempreferences) from the Apple menu.
         1. Click Desktop & Screen Saver.
-        1. Click the Screen Saver tab.
+        1. Click the [Screen Saver](open:///System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/) tab.
         1. Adjust the "Start after" dropdown to less than or equal to the number of seconds shown below.
         {{securitySetting "screenIdle"}}
 
