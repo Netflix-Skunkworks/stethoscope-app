@@ -18,7 +18,7 @@ const osqueryBinaries = {
 }
 
 const socketPaths = {
-  darwin: `/tmp/osquery.em`,
+  darwin: `/private/tmp/osquery.em`,
   ubuntu: `/tmp/osquery.em`,
   linux: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
