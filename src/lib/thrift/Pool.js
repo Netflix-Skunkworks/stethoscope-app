@@ -112,7 +112,7 @@ const pooledRpc = (TService, rpc, pool) => (...args) => {
 
 const DEFAULT_POOL_OPTIONS = {
   max: 1,
-  min: 0,
+  min: 1,
   idleTimeoutMillis: 30000,
   acquireTimeoutMillis: 10000,
   testOnBorrow: true,
@@ -123,7 +123,7 @@ const DEFAULT_THRIFT_OPTIONS = {
   transport: Thrift.TFramedTransport,
   protocol: Thrift.TBinaryProtocol,
   connect_timeout: 1000,
-  max_attempts: 3,
+  max_attempts: 10,
 };
 
 /* Entrypoint */

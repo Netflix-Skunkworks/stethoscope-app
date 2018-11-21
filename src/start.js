@@ -58,6 +58,7 @@ const BASE_URL = process.env.ELECTRON_START_URL || url.format({
 // process command line arguments
 const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
+const DEBUG_UI = (process.env.STETHOSCOPE_DEBUG || '').split(',').map(s => s.trim()).includes('ui')
 
 const focusOrCreateWindow = () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -106,7 +107,7 @@ function createWindow () {
   mainWindow = new BrowserWindow(windowPrefs)
 
   // open developer console if env vars or args request
-  if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
+  if (enableDebugger || DEBUG_UI) mainWindow.webContents.openDevTools()
 
   updater = require('./updater')(env, mainWindow, log, OSQuery, server)
 

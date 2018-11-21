@@ -18,7 +18,7 @@ const osqueryBinaries = {
 }
 
 const socketPaths = {
-  darwin: `/private/tmp/osquery.em`,
+  darwin: `${app.getPath('userData')}/osquery.em`,
   ubuntu: `/tmp/osquery.em`,
   linux: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
@@ -75,18 +75,19 @@ class OSQuery {
     const osqueryPath = path.resolve(__dirname, prefix + binary)
 
     const osquerydArgs = [
-      '--ephemeral',
       '--disable_database',
-      '--disable_events=true',
       '--disable_logging',
-      '--force',
+      '--disable_events=true',
+      '--force=true',
+      `--pidfile="${OSQUERY_PID_PATH}"`,
+      '--verbose',
       '--config_path=null',
       '--allow_unsafe'
     ]
 
     // *nix based OS seem less opposed to custom socket paths
     if (platform !== 'win32') {
-      osquerydArgs.push(`--extensions_socket=${socket}`)
+      osquerydArgs.push(`--extensions_socket="${socket}"`)
     }
 
     const spawnArgs = {
@@ -96,14 +97,10 @@ class OSQuery {
 
     const launchCommand = `"${osqueryPath}"`
 
-    debug(`initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
+    console.log(`initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
 
     return new Promise((resolve, reject) => {
       this.osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
-
-      fs.writeFile(OSQUERY_PID_PATH, this.osqueryd.pid, (err) => {
-        if (err) log.error(`Unable to write osquery pidfile: ${OSQUERY_PID_PATH}`)
-      })
 
       this.osqueryd.stderr.on('data', debug)
       this.osqueryd.stdin.on('data', debug)
@@ -126,47 +123,7 @@ class OSQuery {
    * Kill the process identified by pidfile written at launch
    */
   static stop () {
-    return new Promise(resolve => {
-      try {
-        let pid = fs.readFileSync(OSQUERY_PID_PATH)
-        if (pid) {
-          debug(`found old osquery pid ${pid}`)
-
-          pid = parseInt(pid, 10)
-
-          if (process.platform !== 'win32') {
-            try {
-              process.kill(parseInt(pid + '', 10))
-            } catch (e) {
-              log.error('Unable to kill process', pid + '')
-            }
-
-            try {
-              fs.unlinkSync(OSQUERY_PID_PATH)
-            } catch (err) {
-              log.error('cannot unlink pidfile', err)
-            }
-            resolve()
-          } else {
-            exec(`taskkill /PID ${pid} /T /F`, (err, sout, serr) => {
-              if (!err) {
-                try {
-                  fs.unlinkSync(OSQUERY_PID_PATH)
-                } catch (err) {
-                  log.error('cannot unlink pidfile', err)
-                }
-              }
-              resolve()
-            })
-          }
-        } else {
-          resolve()
-        }
-      } catch (e) {
-        debug(`expected error reading pidfile ${e.message}`)
-        resolve()
-      }
-    })
+    return Promise.resolve()
   }
 
   /**

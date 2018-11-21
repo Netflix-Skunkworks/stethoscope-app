@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
-import Handlebars from 'handlebars'
+import Handlebars from 'handlebars/dist/cjs/handlebars'
 import semver from 'semver'
 import showdown from 'showdown'
 
