@@ -19,6 +19,21 @@ const WindowsSecurity = {
     return services && services.automaticUpdates === '1'
   },
 
+  async requiredHotfixes (root, args, context) {
+    const patches = await OSQuery.all('patches')
+    let { hotfix_ids } = args;
+    if (!Array.isArray(hotfix_ids)) {
+      hotfix_ids = [hotfix_ids]
+    }
+
+    return patches.filter(({ hotfix_id }) => {
+      if (!hotfix_ids.includes(hotfix_id)) {
+        return false
+      }
+      return true
+    })
+  },
+
   /*
     select data from registry where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
    */

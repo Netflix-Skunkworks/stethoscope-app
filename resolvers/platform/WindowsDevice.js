@@ -18,6 +18,17 @@ const WindowsDevice = {
     }))
   },
 
+  async hotfixes (root, args, context) {
+    let patches = await OSQuery.all('patches')
+    if (!patches) patches = []
+
+    console.log(patches)
+
+    return patches.map(({ hotifx_id, installed_on, caption }) =>
+      ({ hotfix_id, installed_on, caption, status: !!installed_on })
+    )
+  },
+
   async applications (root, args, context) {
     const programs = await OSQuery.all('programs', {
       fields: ['name', 'version', 'install_date as installDate']

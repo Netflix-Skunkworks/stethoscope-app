@@ -13,6 +13,15 @@ const Security = {
     return UNSUPPORTED
   },
 
+  async requiredHotfixes (root, args, context) {
+    const os = PlatformResolvers[context.platform]
+    if (os.requiredHotfixes) {
+      return os.requiredHotfixes(root, args, context)
+    }
+
+    return []
+  },
+
   async automaticDownloadUpdates (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if (os.automaticDownloadUpdates) {

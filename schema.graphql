@@ -51,6 +51,7 @@ type Device {
   disks: [Disk]
   security(policy:DevicePolicy): SecurityInfo
   policyResult: FeatureState
+  hotfixes: [HotfixFeatureState]
 }
 
 type SecurityInfo {
@@ -82,6 +83,8 @@ type SecurityInfo {
   privateFirewall: FeatureState
   # Windows
   domainFirewall: FeatureState
+  # Windows
+  requiredHotfixes: FeatureState
 }
 
 type Application {
@@ -126,6 +129,8 @@ input DevicePolicy {
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
   windowsMaxScreenLockTimeout: Int
+  # [WINDOWS ONLY] array of hotfix ids
+  requiredHotfixes: [String]
 }
 
 # Defines a requirement for an installed application
@@ -170,6 +175,8 @@ type PolicyResult {
   suggestedApplications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
+  # Required Windows Hotfixes that aren't installed
+  requiredHotfixes: [HotfixFeatureState]
 }
 
 type Security {
@@ -193,6 +200,7 @@ type Security {
   publicFirewall(requirement: RequirementOption!): Boolean!
   privateFirewall(requirement: RequirementOption!): Boolean!
   domainFirewall(requirement: RequirementOption!): Boolean!
+  requiredHotfixes(requirement: RequirementOption!): [Boolean!]!
 }
 
 type IpAddress {
@@ -223,6 +231,13 @@ type Disk {
 type ApplicationFeatureState {
   name: String
   status: FeatureState
+}
+
+# Hotfix Feature State
+type HotfixFeatureState {
+  hotfix_id: String
+  caption: String
+  installed_on: String
 }
 
 # a platform string requirement defines a target string value for specific platforms

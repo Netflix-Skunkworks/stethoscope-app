@@ -118,6 +118,15 @@ const Device = {
     return chrome.concat(firefox).concat(safari)
   },
 
+  async hotfixes (root, args, context) {
+    const os = PlatformResolvers[context.platform]
+    if ('hotfixes' in os) {
+      return os.hotfixes(root, args, context)
+    }
+
+    return []
+  },
+
   async applications (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if ('applications' in os) {
