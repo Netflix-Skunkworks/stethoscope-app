@@ -1,9 +1,21 @@
 const { Menu, shell } = require('electron')
 const pkg = require('../package.json')
 const config = require('./config.json')
+const AutoLauncher = require('./AutoLauncher')
+
+const unicodeCheck = '\u2714';
+
+const toggleAutoLaunchMenus = (autoLaunchOn) => {
+  let autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
+  autoLaunchMenuOptions.getMenuItemById('autolaunchOn').checked = autoLaunchOn
+  autoLaunchMenuOptions.getMenuItemById('autolaunchOff').checked = !autoLaunchOn
+}
 
 module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
   const { checkForUpdates } = updater
+  const autoLauncher = new AutoLauncher()
+  const isAutoLauncherEnabled = autoLauncher.isEnabled()
+
   const contextMenu = [
     { role: 'copy', accelerator: 'CmdOrCtrl+C' },
     {
@@ -17,6 +29,32 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
           click () {
             focusOrCreateWindow()
           }
+        }
+      ]
+    },
+    {
+      id: 'autolaunch',
+      label: 'Launch on Startup',
+      submenu: [
+        { 
+          id: 'autolaunchOn',
+          label: 'On',
+          type: 'checkbox',
+          checked: isAutoLauncherEnabled,
+          click (event) {
+            toggleAutoLaunchMenus(true)
+            autoLauncher.enable()
+          }  
+        },
+        {
+          id: 'autolaunchOff',
+          label: 'Off', 
+          type: 'checkbox',
+          checked: !isAutoLauncherEnabled,
+          click (event) {
+            toggleAutoLaunchMenus(false)
+            autoLauncher.disable()
+          }          
         }
       ]
     },
@@ -64,8 +102,11 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
     { role: 'quit', accelerator: 'CmdOrCtrl+Q' }
     ]
   }].concat(contextMenu))
+
+  // Left side main menu
   Menu.setApplicationMenu(applicationMenu)
 
+  // Rigth click menu
   const contextMenuInstance = Menu.buildFromTemplate(contextMenu)
   return contextMenuInstance
 }

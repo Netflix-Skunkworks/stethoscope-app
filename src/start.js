@@ -14,6 +14,7 @@ const startGraphQLServer = require('../server')
 const OSQuery = require('../sources/osquery')
 const IS_DEV = env === 'development'
 const { IS_MAC, IS_WIN } = require('./lib/platform')
+const AutoLauncher = require('./AutoLauncher')
 
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
@@ -112,6 +113,21 @@ function createWindow () {
 
   if (isFirstLaunch) {
     updater.checkForUpdates({}, {}, {}, true)
+    const autoLauncher = new AutoLauncher()
+    if (autoLauncher.shouldPromptToEnable()) {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Auto Launch',
+        message: 'Would you like to automatically launch Stethoscope on start-up?',
+        buttons: ['Yes', 'No']
+      }, (buttonIndex) => {
+        if (buttonIndex === 0) {
+          autoLauncher.enable()
+        } else {
+          autoLauncher.disable()
+        }
+      })
+    } 
     isFirstLaunch = false
   }
 
@@ -120,8 +136,7 @@ function createWindow () {
   tray = new Tray(statusImages.PASS)
   tray.on('click', focusOrCreateWindow)
 
-  let contextMenu = initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-  tray.on('right-click', () => tray.popUpContextMenu(contextMenu))
+  tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
 
   log.info('Starting osquery')
   // these methods allow express to update app state
@@ -169,7 +184,7 @@ function createWindow () {
   })
 
   // add right-click menu to app
-  ipcMain.on('contextmenu', event => contextMenu.popup({ window: mainWindow }))
+  ipcMain.on('contextmenu', event => initMenu(mainWindow, app, focusOrCreateWindow, updater, log).popup({ window: mainWindow }))
 
   // allow web app to restart application
   ipcMain.on('app:restart', () => {

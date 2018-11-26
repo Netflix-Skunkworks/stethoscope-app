@@ -18,7 +18,7 @@ const osqueryBinaries = {
 }
 
 const socketPaths = {
-  darwin: `/tmp/osquery.em`,
+  darwin: `${app.getPath('userData')}/osquery.em`,
   ubuntu: `/tmp/osquery.em`,
   linux: `/tmp/osquery.em`,
   win32: `\\\\.\\pipe\\osquery.em`
@@ -86,7 +86,7 @@ class OSQuery {
 
     // *nix based OS seem less opposed to custom socket paths
     if (platform !== 'win32') {
-      osquerydArgs.push(`--extensions_socket=${socket}`)
+      osquerydArgs.push(`--extensions_socket='${socket}'`)
     }
 
     const spawnArgs = {
@@ -98,7 +98,7 @@ class OSQuery {
 
     debug(`initialize: ${launchCommand} ${osquerydArgs.join(' ')}`)
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
 
       fs.writeFile(OSQUERY_PID_PATH, this.osqueryd.pid, (err) => {
@@ -117,8 +117,26 @@ class OSQuery {
       this.osqueryd.on('close', this.__endThriftConnection)
 
       // attempt to connect thrift client
-      this.connection = ThriftClient.getInstance({ path: socket }).connect()
+      this.connection = await this.openThriftConnection(socket)
+
       resolve()
+    })
+  }
+  
+  static openThriftConnection (socket) {
+    return new Promise((resolve, reject) => {
+      let connection;
+
+      let interval = setInterval(()=>{
+        if (fs.existsSync(socket)) {
+          clearInterval(interval)
+          log.info("Socket path exists, opening Thrift Client to: ", socket);
+          connection = ThriftClient.getInstance({ path: socket }).connect()
+          resolve(connection)
+        } else {
+          log.debug("Socket path does not yet exisit, waiting before checking again!")
+        }
+      }, 100)
     })
   }
 
