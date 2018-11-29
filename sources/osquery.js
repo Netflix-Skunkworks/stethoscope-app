@@ -125,20 +125,23 @@ class OSQuery {
   
   static openThriftConnection (socket) {
     return new Promise((resolve, reject) => {
-      let connection;
+      let connection
+      let start = new Date()
 
-      let interval = setInterval(()=>{
+      let backoffFileCheck = (delay) => {        
         if (fs.existsSync(socket)) {
-          clearInterval(interval)
-          log.info("Socket path exists, opening Thrift Client to: ", socket);
+          log.info("Socket path exists, opening Thrift Client to: "+socket+" elapsed time: "+(new Date().getTime() - start.getTime()))
           connection = ThriftClient.getInstance({ path: socket }).connect()
           resolve(connection)
         } else {
-          log.debug("Socket path does not yet exisit, waiting before checking again!")
+          log.debug("Socket path does not yet exisit, waiting "+delay+" ms before checking again! "+socket+" elapsed time: "+(new Date().getTime() - start.getTime()))
+          setTimeout(() => { backoffFileCheck(delay * 2) }, delay)
         }
-      }, 100)
+      }
+      backoffFileCheck(100)
     })
   }
+
 
   /**
    * Kill the process identified by pidfile written at launch
