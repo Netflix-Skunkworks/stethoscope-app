@@ -32,8 +32,8 @@ const Device = {
   },
 
   async deviceName (root, args, context) {
-    const { computer_name: computerName } = await context.systemInfo
-    return computerName
+    const { computer_name: computerName, hostname: hostName } = await context.systemInfo
+    return computerName || hostName
   },
 
   async platform (root, args, context) {
