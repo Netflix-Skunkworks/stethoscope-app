@@ -8,7 +8,7 @@ const ThriftClient = require('../src/lib/ThriftClient')
 const platform = os.platform()
 const { NODE_ENV, STETHOSCOPE_DEBUG } = process.env
 const IS_DEV = NODE_ENV === 'development'
-const OSQUERY_PID_PATH = `${app.getPath('userData')}${path.sep}.osquery.pid`
+const OSQUERY_PID_PATH = `${app.getPath('userData')}${path.sep}osquery.pid`
 
 const osqueryBinaries = {
   darwin: 'osqueryd_darwin',
@@ -78,7 +78,9 @@ class OSQuery {
       '--ephemeral',
       '--disable_database',
       '--disable_events=true',
+      '--force=true',
       '--disable_logging',
+      `--pidfile="${OSQUERY_PID_PATH}"`,
       '--force',
       '--config_path=null',
       '--allow_unsafe'
@@ -100,11 +102,6 @@ class OSQuery {
 
     return new Promise(async (resolve, reject) => {
       this.osqueryd = spawn(launchCommand, osquerydArgs, spawnArgs)
-
-      fs.writeFile(OSQUERY_PID_PATH, this.osqueryd.pid, (err) => {
-        if (err) log.error(`Unable to write osquery pidfile: ${OSQUERY_PID_PATH}`)
-      })
-
       this.osqueryd.stderr.on('data', debug)
       this.osqueryd.stdin.on('data', debug)
 
@@ -122,72 +119,29 @@ class OSQuery {
       resolve()
     })
   }
-  
+
   static openThriftConnection (socket) {
     return new Promise((resolve, reject) => {
-      let connection
-      let start = new Date()
+      let connection;
 
-      let backoffFileCheck = (delay) => {        
+      let interval = setInterval(()=>{
         if (fs.existsSync(socket)) {
-          log.info("Socket path exists, opening Thrift Client to: "+socket+" elapsed time: "+(new Date().getTime() - start.getTime()))
+          clearInterval(interval)
+          log.info(`Socket path exists, opening Thrift Client to: ${socket}`);
           connection = ThriftClient.getInstance({ path: socket }).connect()
           resolve(connection)
         } else {
-          log.debug("Socket path does not yet exisit, waiting "+delay+" ms before checking again! "+socket+" elapsed time: "+(new Date().getTime() - start.getTime()))
-          setTimeout(() => { backoffFileCheck(delay * 2) }, delay)
+          log.debug("Socket path does not yet exist, waiting before checking again!")
         }
-      }
-      backoffFileCheck(100)
+      }, 100)
     })
   }
-
 
   /**
    * Kill the process identified by pidfile written at launch
    */
   static stop () {
-    return new Promise(resolve => {
-      try {
-        let pid = fs.readFileSync(OSQUERY_PID_PATH)
-        if (pid) {
-          debug(`found old osquery pid ${pid}`)
-
-          pid = parseInt(pid, 10)
-
-          if (process.platform !== 'win32') {
-            try {
-              process.kill(parseInt(pid + '', 10))
-            } catch (e) {
-              log.error('Unable to kill process', pid + '')
-            }
-
-            try {
-              fs.unlinkSync(OSQUERY_PID_PATH)
-            } catch (err) {
-              log.error('cannot unlink pidfile', err)
-            }
-            resolve()
-          } else {
-            exec(`taskkill /PID ${pid} /T /F`, (err, sout, serr) => {
-              if (!err) {
-                try {
-                  fs.unlinkSync(OSQUERY_PID_PATH)
-                } catch (err) {
-                  log.error('cannot unlink pidfile', err)
-                }
-              }
-              resolve()
-            })
-          }
-        } else {
-          resolve()
-        }
-      } catch (e) {
-        debug(`expected error reading pidfile ${e.message}`)
-        resolve()
-      }
-    })
+    return Promise.resolve(true)
   }
 
   /**

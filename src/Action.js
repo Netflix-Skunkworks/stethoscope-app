@@ -171,7 +171,7 @@ class Action extends Component {
               <pre className='description'>{action.details}</pre>
             }
             { action.link &&
-              <a href={action.link} target='_blank'>More info</a>
+              <a href={action.link} rel="noopener noreferrer" target='_blank'>More info</a>
             }
           </div>
           { action.directions && (
