@@ -3,7 +3,7 @@ const pkg = require('../package.json')
 const config = require('./config.json')
 const AutoLauncher = require('./AutoLauncher')
 const path = require('path')
-const fs = require('fs')
+const fs = require('fs-extra')
 const unicodeCheck = '\u2714'
 
 const toggleAutoLaunchMenus = (autoLaunchOn) => {
@@ -13,7 +13,7 @@ const toggleAutoLaunchMenus = (autoLaunchOn) => {
 }
 
 module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
-  const appName = app.getName();
+  const appName = app.getName()
   const { checkForUpdates } = updater
   const autoLauncher = new AutoLauncher()
   const isAutoLauncherEnabled = autoLauncher.isEnabled()
