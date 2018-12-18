@@ -73,7 +73,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
     submenu: [{
       label: 'Reset Application',
       click() {
-        fs.unlink(getAppPath, err => {
+        fs.remove(getAppPath, err => {
           if (err) {
             const error = err.toString()
             const message = error.includes('EPERM') ? `The app doesn't seem to have permission to delete "${getAppPath}", you can manually delete this path and restart the app to reset.` : `Unexpected error:\n${error}\nPlease contact support.`
