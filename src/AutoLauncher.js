@@ -4,9 +4,9 @@ const config = require('./config.json')
 const log = require('./lib/logger')
 
 class AutoLauncher {
-  constructor() {
+  constructor(name) {
     const autoLaunchOpts = {
-      name: 'Stethoscope',
+      name,
       isHidden: true
     }
     this.stethoscopeAutoLauncher = new AutoLaunch(autoLaunchOpts)

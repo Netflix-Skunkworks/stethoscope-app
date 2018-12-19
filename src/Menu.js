@@ -15,7 +15,7 @@ const toggleAutoLaunchMenus = (autoLaunchOn) => {
 module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
   const appName = app.getName()
   const { checkForUpdates } = updater
-  const autoLauncher = new AutoLauncher()
+  const autoLauncher = new AutoLauncher(app.getName())
   const isAutoLauncherEnabled = autoLauncher.isEnabled()
   const getAppPath = path.join(app.getPath('appData'), appName)
 

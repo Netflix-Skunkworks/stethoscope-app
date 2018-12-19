@@ -25,7 +25,8 @@ let server
 let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
-let isFirstLaunch = true
+let isLaunching = true
+let isFirstLaunch = false
 let starting = false
 
 // icons that are displayed in the Menu bar
@@ -74,6 +75,11 @@ const focusOrCreateWindow = () => {
 }
 
 function createWindow () {
+  // set first launch flag
+  if (!settings.has('userHasLaunched')) {
+    isFirstLaunch = true
+    settings.set('userHasLaunched', true)
+  }
   // determine if app is already running
   const gotTheLock = app.requestSingleInstanceLock()
 
@@ -113,9 +119,13 @@ function createWindow () {
 
   updater = require('./updater')(env, mainWindow, log, OSQuery, server)
 
-  if (isFirstLaunch) {
+  if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
-    const autoLauncher = new AutoLauncher()
+    isLaunching = false
+  }
+
+  if (isFirstLaunch) {
+    const autoLauncher = new AutoLauncher(app.getName())
     if (autoLauncher.shouldPromptToEnable()) {
       dialog.showMessageBox({
         type: 'info',
@@ -130,7 +140,7 @@ function createWindow () {
         }
       })
     }
-    isFirstLaunch = false
+    isLaunching = false
   }
 
   if (tray) tray.destroy()
