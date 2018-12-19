@@ -5,15 +5,15 @@ const log = require('./lib/logger')
 
 class AutoLauncher {
   constructor() {
-    const autoLaunchOpts = { 
-      name: 'Stethoscope', 
+    const autoLaunchOpts = {
+      name: 'Stethoscope',
       isHidden: true
     }
     this.stethoscopeAutoLauncher = new AutoLaunch(autoLaunchOpts)
   }
 
   shouldPromptToEnable() {
-    return config.autoLaunchPrompt && settings.get('autoLaunch') === undefined
+    return config.autoLaunchPrompt && !settings.has('autoLaunch')
   }
 
   isEnabled () {
@@ -37,7 +37,7 @@ class AutoLauncher {
     })
     settings.set('autoLaunch', 'true')
   }
-  
+
 }
 
 module.exports = AutoLauncher
