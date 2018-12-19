@@ -75,8 +75,14 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
           if (server && server.listening) {
             server.close()
           }
-          // app.quit()
-          setImmediate(() => autoUpdater.quitAndInstall())
+          setImmediate(() => {
+            autoUpdater.quitAndInstall()
+
+            setTimeout(() => {
+              // if the app hasn't restarted in 5 seconds, exit.
+              app.exit(0)
+            }, 5000) // 🧙 MAGICAL NUMBERS!
+          })
         }
       })
     },
