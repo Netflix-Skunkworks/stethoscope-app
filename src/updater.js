@@ -1,4 +1,4 @@
-const { dialog, app } = require('electron')
+const { dialog, app, autoUpdater: nativeUpdater } = require('electron')
 const electronUpdater = require('electron-updater')
 
 let updater
@@ -77,7 +77,7 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
           }
 
           setImmediate(() => {
-            autoUpdater.quitAndInstall()
+            nativeUpdater.quitAndInstall()
             app.quit()
 
             setTimeout(() => {
