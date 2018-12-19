@@ -75,25 +75,27 @@ const focusOrCreateWindow = () => {
 
 function createWindow () {
   // determine if app is already running
-  const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
+  const gotTheLock = app.requestSingleInstanceLock()
+
+  if (!gotTheLock) {
+    app.quit()
+  } else {
+    // If someone tries to run a second instance, we should focus our window.
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore()
+        }
       }
-    }
 
-    if (IS_WIN) deeplinkingUrl = commandLine.slice(1)
+      if (IS_WIN) deeplinkingUrl = commandLine.slice(1)
 
-    if (String(deeplinkingUrl).indexOf('update') > -1) {
-      updater.checkForUpdates(env, mainWindow, log).catch(err => {
-        log.error(`error checking for update: ${err}`)
-      })
-    }
-  })
-
-  if (shouldQuit) {
-    return app.quit()
+      if (String(deeplinkingUrl).indexOf('update') > -1) {
+        updater.checkForUpdates(env, mainWindow, log).catch(err => {
+          log.error(`error checking for update: ${err}`)
+        })
+      }
+    })
   }
 
   // wait for process to load before hiding in dock, prevents the app
@@ -127,7 +129,7 @@ function createWindow () {
           autoLauncher.disable()
         }
       })
-    } 
+    }
     isFirstLaunch = false
   }
 
