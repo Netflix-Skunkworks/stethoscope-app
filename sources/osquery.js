@@ -75,7 +75,6 @@ class OSQuery {
     const osqueryPath = path.resolve(__dirname, prefix + binary)
 
     const osquerydArgs = [
-      '--ephemeral',
       '--disable_database',
       '--disable_events=true',
       '--force=true',
