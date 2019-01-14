@@ -145,10 +145,10 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
-"@netflix-internal/kmd@^0.0.4":
-  version "0.0.4"
-  resolved "https://artifacts.netflix.com/api/npm/npm-netflix/@netflix-internal/kmd/-/@netflix-internal/kmd-0.0.4.tgz#a3508918cc5d842ef8547eced817fe9cd1ea2a1a"
-  integrity sha1-o1CJGMxdhC74VH7O2Bf+nNHqKho=
+"@netflix-internal/kmd@^0.0.5":
+  version "0.0.5"
+  resolved "https://artifacts.netflix.com/api/npm/npm-netflix/@netflix-internal/kmd/-/@netflix-internal/kmd-0.0.5.tgz#5b282389c7828ee8acb3ccf68b237ad0df75617a"
+  integrity sha1-WygjiceCjuiss8z2iyN60N91YXo=
   dependencies:
     debug "^4.1.1"
     dot-prop "^4.2.0"

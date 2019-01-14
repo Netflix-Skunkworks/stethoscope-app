@@ -12,7 +12,7 @@ const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
 const semver = require('semver')
-const { compile, run } = require('./kmd/src')
+const { compile, run } = require('@netflix-internal/kmd/src')
 const glob = require('fast-glob')
 const {performance} = require('perf_hooks')
 

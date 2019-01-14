@@ -1,5 +1,5 @@
 #!/usr/bin/env kmd
-exec ls '~/Library/Application\ Support/Google/Chrome/Default/Extensions/*/*/manifest.json'
+exec ls '~/Library/Application Support/Google/Chrome/Default/Extensions/*/*/manifest.json'
 trim
 lines
   save line
