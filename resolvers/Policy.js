@@ -4,7 +4,6 @@ const {
 } = require('../src/constants')
 
 const Policy = {
-
   async validate (root, args, context) {
     const { policy } = Object.assign({}, args)
     const response = {}
@@ -15,8 +14,9 @@ const Policy = {
 
       if (!Security[verification]) continue
 
+      let passing = true
       // determine device state
-      const passing = await Security[verification](root, policy, context)
+      passing = await Security[verification](root, policy, context)
 
       // this handles multiplicable items like applications, etc.
       if (Array.isArray(passing)) {

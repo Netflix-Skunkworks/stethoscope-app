@@ -1,0 +1,44 @@
+{
+  "name": "@netflix-internal/kmd",
+  "version": "0.0.4",
+  "description": "A weird little scripting language",
+  "repository": {
+    "type": "git",
+    "url": "https://stash.corp.netflix.com/scm/cldsec/kmd.git"
+  },
+  "main": "app/main.js",
+  "bin": {
+    "kmd": "dist/index.min.js"
+  },
+  "scripts": {
+    "build": "shx rm -r dist/* ; ncc build src/cli.js -o dist ; terser --verbose dist/index.js -o dist/index.min.js ; shx rm dist/index.js",
+    "test": "faucet test/*",
+    "netflixpublish": "npm publish --_auth=`netflixcredentials`",
+    "benchmark": "node benchmark.js",
+    "start": "electron ."
+  },
+  "author": "Jesse Kriss <jkriss@netflix.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "dot-prop": "^4.2.0",
+    "execa": "^1.0.0",
+    "extend": "^3.0.2",
+    "fecha": "^3.0.2",
+    "fs-extra": "^7.0.1",
+    "shell-quote": "^1.6.1",
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "@netflix-internal/netflixcredentials": "^0.4.0",
+    "benchmark": "^2.1.4",
+    "electron": "^4.0.1",
+    "faucet": "0.0.1",
+    "microtime": "^2.1.8",
+    "ncc": "^0.3.6",
+    "shx": "^0.3.2",
+    "tap": "^12.1.1",
+    "terser": "^3.14.1",
+    "tiny-human-time": "^1.2.0"
+  }
+}

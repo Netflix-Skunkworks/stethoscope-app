@@ -95,7 +95,6 @@ export default class Stethoscope {
         friendlyName
         hardwareSerial
         stethoscopeVersion
-        osqueryVersion
 
         disks {
           label

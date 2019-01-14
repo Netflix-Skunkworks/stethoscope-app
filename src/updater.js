@@ -9,7 +9,7 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function (env, mainWindow, log = console, OSQuery, server) {
+module.exports = function (env, mainWindow, log = console, server) {
   const { autoUpdater } = electronUpdater
   autoUpdater.autoDownload = false
 
@@ -71,7 +71,6 @@ module.exports = function (env, mainWindow, log = console, OSQuery, server) {
         message: 'Updates downloaded, Stethoscope will quit and relaunch.'
       }, () => {
         if (!isDev) {
-          OSQuery.stop()
           if (server && server.listening) {
             server.close()
           }
