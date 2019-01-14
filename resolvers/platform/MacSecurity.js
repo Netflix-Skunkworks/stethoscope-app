@@ -1,6 +1,5 @@
 const semver = require('semver')
 const Device = require('./MacDevice')
-const OSQuery = require('../../sources/osquery')
 const pkg = require('../../package.json')
 const { exec } = require('child_process')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
@@ -67,37 +66,13 @@ const MacSecurity = {
   },
 
   async screenLock (root, args, { kmdResponse }) {
+    // TODO when branching logic works in kmd
     return true
-    // let { version } = kmdResponse.system
-    // if (semver.satisfies(version, '<10.13')) {
-    //   /*
-    //     select value as screenLock from preferences
-    //     where domain = 'com.apple.screensaver' and key = 'askForPassword'
-    //   */
-    //   const { screenLock } = await OSQuery.first('preferences', {
-    //     fields: ['value as screenLock'],
-    //     where: `domain = 'com.apple.screensaver' and key = 'askForPassword'`
-    //   })
-    //
-    //   return screenLock === '1'
-    // } else {
-    //   // macOS High Sierra removed support screen lock querying
-    //   return UNKNOWN
-    // }
   },
 
   async screenIdle (root, args, context) {
+    // TODO implement
     return true
-    /*
-      select value as screenIdle from preferences
-      where domain = 'com.apple.screensaver' and key = 'idleTime'
-    */
-    // const { screenIdle } = await OSQuery.first('preferences', {
-    //   fields: ['value as screenIdle'],
-    //   where: `domain = 'com.apple.screensaver' and key = 'idleTime'`
-    // })
-    //
-    // return semver.satisfies(semver.coerce(screenIdle), args.screenIdle)
   },
 
   async firewall (root, args, { kmdResponse }) {

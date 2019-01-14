@@ -1,6 +1,6 @@
 const semver = require('semver')
 const Device = require('../platform/WindowsDevice')
-const OSQuery = require('../../sources/osquery')
+// const OSQuery = require('../../sources/osquery')
 const powershell = require('../../src/lib/powershell')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')

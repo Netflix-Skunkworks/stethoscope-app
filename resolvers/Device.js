@@ -1,5 +1,4 @@
 const pkg = require('../package.json')
-// const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const Security = require('./Security')
 const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } = require('../src/constants')
@@ -97,10 +96,10 @@ const Device = {
     return UNKNOWN
   },
 
+  // TODO implement??
   // can/should these be filtered down?
   ipAddresses (root, args, context) {
     return []
-    // return OSQuery.all('interface_addresses')
   },
 
   // can/should these be filtered down?
