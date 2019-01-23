@@ -38,9 +38,6 @@ practices:
         1. Click "Windows Defender Firewall Properties" in the center pane
         1. Ensure "Firewall state" is set to "On (recommended)" on the Domain, Public, and Private Profile tabs
         1. Click OK
-          - {{{statusIcon privateFirewall 'Enable Private Firewall'}}}
-          - {{{statusIcon publicFirewall 'Enable Public Firewall'}}}
-          - {{{statusIcon domainFirewall 'Enable Domain Firewall'}}}
       linux: |
         1. Open a terminal.
         1. Enter the command: "sudo ufw enable".

@@ -30,7 +30,7 @@ const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
 
 function precompile() {
-  return glob(path.resolve(__dirname, './sources/darwin/*.sh')).then(files => {
+  return glob(path.resolve(__dirname, `./sources/${process.platform}/*.sh`)).then(files => {
     return files.map(file => {
       const content = readFileSync(file, 'utf8')
       const code = compile(content)
@@ -170,8 +170,8 @@ module.exports = async function startServer (env, log, language, appActions) {
       if (os.platform() === 'win32') {
         const { total, queries } = powershell.getTimingInfo()
         log.info(total, queries)
-        result.extensions.timing.total += total
-        result.extensions.timing.queries.push(...queries)
+        // result.extensions.timing.total += total
+        // result.extensions.timing.queries.push(...queries)
       }
 
       res.json(result)

@@ -31,9 +31,6 @@
     },
     "win": {
       "target": "nsis",
-      "extraResources": [
-        "bin/osqueryd.exe"
-      ],
       "files": [
         "practices/*",
         "build/**",

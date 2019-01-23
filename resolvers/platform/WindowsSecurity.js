@@ -1,126 +1,50 @@
 const semver = require('semver')
 const Device = require('../platform/WindowsDevice')
-// const OSQuery = require('../../sources/osquery')
-const powershell = require('../../src/lib/powershell')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')
 
 const WindowsSecurity = {
-  /*
-    select 1 as automatic_updates from services
-    where display_name = "Windows Update" and start_type != "DISABLED"
-   */
-  async automaticUpdates (root, args, context) {
-    const services = await OSQuery.first('services', {
-      fields: ['1 as automaticUpdates'],
-      where: 'display_name = "Windows Update" and start_type != "DISABLED"'
-    })
-
-    return services && services.automaticUpdates === '1'
+  async automaticUpdates (root, args, { kmdResponse }) {
+    return kmdResponse.automaticUpdates === "RUNNING"
   },
 
-  /*
-    select data from registry where path = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections'
-   */
-  async remoteLogin (root, args, context) {
-    const info = await context.platformInfo
-    // aws workspaces require remote login
-    if (info.version.includes('amazon')) {
-      return false
-    }
-
-    const result = await OSQuery.first('registry', {
-      fields: ['data'],
-      where: `path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections'`
-    })
-    return result.data !== '1'
+  async remoteLogin (root, args, { kmdResponse }) {
+    // // aws workspaces require remote login
+    // if (info.version.includes('amazon')) {
+    //   return false
+    // }
+    return kmdResponse.sharingPreferences.remoteDesktopDisabled !== '1'
   },
 
-  /*
-    select 1 as encrypted from services
-    where display_name = "BitLocker Drive Encryption Service" and status = "RUNNING"
-   */
-  async diskEncryption (root, args, context) {
-    const info = await context.platformInfo
-    // aws workspaces don't allow disk encryption
-    if (info.version.includes('amazon')) {
-      return UNKNOWN
+  async diskEncryption (root, args, { kmdResponse }) {
+    if (kmdResponse.encryptionMethod) {
+      const mthd = parseInt(kmdResponse.encryptionMethod, 10)
+      return mthd > 0
     }
-
-    const bitlockerRunning = await OSQuery.first('services', {
-      fields: ['1 as encrypted'],
-      where: 'display_name = "BitLocker Drive Encryption Service" and status = "RUNNING"'
-    })
-
-    return bitlockerRunning && bitlockerRunning.encrypted === '1'
+    return false
   },
 
-  /*
-    select name, data from registry
-    where path = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogin'
-   */
-  async screenLock (root, args, context) {
-    const info = await context.platformInfo
-    // screen lock creates problems in workspaces
-    if (info.version.includes('amazon')) {
-      return UNKNOWN
-    }
-    // const { autoAdminLogin } = await OSQuery.first('registry', {
-    //   fields: ['name', 'data as autoAdminLogin'],
-    //   where: `path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AutoAdminLogin'`
-    // })
+  async screenLock (root, args, { kmdResponse }) {
+    // // screen lock creates problems in workspaces
+    // if (info.version.includes('amazon')) {
+    //   return UNKNOWN
+    // }
     const { windowsMaxScreenLockTimeout = 600 } = args
-
-    //const screenLockIsActive = await powershell.getScreenLockActive()
-    //const workstationLockIsDisabled = await powershell.getDisableLockWorkStation()
-    const { pluggedIn, battery } = await powershell.getScreenLockTimeout()
+    const { chargingTimeout, batteryTimeout } = kmdResponse
 
     return (
-      // workstationLockIsDisabled === false &&
-      // screenLockIsActive === true &&
-      // autoAdminLogin !== '1' &&
-      pluggedIn <= windowsMaxScreenLockTimeout &&
-      battery <= windowsMaxScreenLockTimeout
+      chargingTimeout <= windowsMaxScreenLockTimeout &&
+      batteryTimeout <= windowsMaxScreenLockTimeout
     )
   },
 
-  async publicFirewall (root, args, context) {
-    const { publicFirewall } = await powershell.firewallStatus()
-    return publicFirewall === 'ON'
-  },
-
-  async privateFirewall (root, args, context) {
-    const { privateFirewall } = await powershell.firewallStatus()
-    return privateFirewall === 'ON'
-  },
-
-  async domainFirewall (root, args, context) {
-    const { domainFirewall } = await powershell.firewallStatus()
-    return domainFirewall === 'ON'
-  },
-
-  /*
-    select name, data from registry
-    where key like 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile' and name = 'EnableFirewall'
-   */
-  // const result = await OSQuery.first('registry', { fields: ['name', 'data'], where: `key like 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile' and name = 'EnableFirewall'` })
-  // return result && result.data === '1'
-  async firewall (root, args, context) {
-    const publicFirewall = await WindowsSecurity.publicFirewall()
-    const privateFirewall = await WindowsSecurity.privateFirewall()
-    const domainFirewall = await WindowsSecurity.domainFirewall()
-
-    // all must be ON for the overall Firewall test to pass
-    return [
-      domainFirewall,
-      privateFirewall,
-      publicFirewall
-    ].every(status => status)
+  async firewall (root, args, { kmdResponse }) {
+    return kmdResponse.firewalls.every(fw => fw.status === 'ON')
   },
 
   async suggestedApplications (root, args, context) {
     const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = await context.osVersion
+    const { version: osVersion } = context.kmdResponse.system
     const { suggestedApplications = [] } = args
 
     return suggestedApplications.filter((app) => {
@@ -163,7 +87,7 @@ const WindowsSecurity = {
 
   async requiredApplications (root, args, context) {
     const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = await context.osVersion
+    const { version: osVersion } = context.kmdResponse.system
     const { requiredApplications = [] } = args
 
     return requiredApplications.filter((app) => {

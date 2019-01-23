@@ -1,0 +1,5 @@
+#!/usr/bin/env kmd
+exec wmic os get Caption /value
+trim
+extract Caption=(.*)
+save system.platform
