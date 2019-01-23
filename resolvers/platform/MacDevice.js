@@ -18,7 +18,7 @@ const MacDevice = {
   },
 
   applications (root, args, { kmdResponse }) {
-    return kmdResponse.apps
+    return null
   }
 }
 

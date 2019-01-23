@@ -4,11 +4,11 @@ const WindowsDevice = {
   },
 
   async disks (root, args, context) {
-    return []
+    return null
   },
 
   async applications (root, args, { kmdResponse }) {
-    return []
+    return null
   }
 }
 
