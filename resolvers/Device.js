@@ -110,6 +110,10 @@ const Device = {
     }))
   },
 
+  osqueryVersion (root, args, context) {
+    return null
+  },
+
   stethoscopeVersion (root, args, context) {
     return pkg.version
   },
