@@ -104,10 +104,17 @@ const Device = {
 
   // can/should these be filtered down?
   macAddresses (root, args, { kmdResponse }) {
-    return kmdResponse.macAddresses.map(({ addr, device }) => ({
-      mac: addr,
-      interface: device
-    }))
+    return kmdResponse.macAddresses.filter(mac => mac.addr)
+      .map((mac) => ({
+        mac: mac.addr,
+        interface: mac.device,
+        type: mac.type,
+        physicalAdapter: mac.physicalAdapter,
+        lastChange: mac.lastChange
+      }))
+      .filter(({ mac }) => !NetworkInterface.isLocal(mac))
+      .filter(({ mac }) => !NetworkInterface.isMulticast(mac))
+      .filter(({ mac }) => !NetworkInterface.isPlaceholder(mac))
   },
 
   osqueryVersion (root, args, context) {
