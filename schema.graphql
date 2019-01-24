@@ -45,6 +45,8 @@ type Device {
   macAddresses: [NetworkInterface]
   # version of the stethoscope application
   stethoscopeVersion: String
+  # osquery version (platform specific)
+  osqueryVersion: String
   # available hard disks
   disks: [Disk]
   security(policy:DevicePolicy): SecurityInfo
