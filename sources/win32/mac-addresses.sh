@@ -11,9 +11,6 @@ split \n\n
   extract Description.+: (.*)
   save device
 
-  echo null
-  save physical_adapter
-
   remove line
 noEmpty
 save macAddresses

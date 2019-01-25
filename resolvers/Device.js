@@ -108,9 +108,9 @@ const Device = {
       .map((mac) => ({
         mac: mac.addr,
         interface: mac.device,
-        type: mac.type,
-        physicalAdapter: mac.physicalAdapter,
-        lastChange: mac.lastChange
+        type: 6,
+        physicalAdapter: true,
+        lastChange: null
       }))
       .filter(({ mac }) => !NetworkInterface.isLocal(mac))
       .filter(({ mac }) => !NetworkInterface.isMulticast(mac))
@@ -127,73 +127,73 @@ const Device = {
 
   security (root, args, context) {
     return {
-      firewall () {
-        const status = Security.firewall(root, args, context)
+      async firewall () {
+        const status = await Security.firewall(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticUpdates () {
-        const status = Security.automaticUpdates(root, args, context)
+      async automaticUpdates () {
+        const status = await Security.automaticUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticSecurityUpdates () {
-        const status = Security.automaticSecurityUpdates(root, args, context)
+      async automaticSecurityUpdates () {
+        const status = await Security.automaticSecurityUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticOsUpdates () {
-        const status = Security.automaticOsUpdates(root, args, context)
+      async automaticOsUpdates () {
+        const status = await Security.automaticOsUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticConfigDataInstall () {
-        const status = Security.automaticConfigDataInstall(root, args, context)
+      async automaticConfigDataInstall () {
+        const status = await Security.automaticConfigDataInstall(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticDownloadUpdates () {
-        const status = Security.automaticDownloadUpdates(root, args, context)
+      async automaticDownloadUpdates () {
+        const status = await Security.automaticDownloadUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      automaticAppUpdates () {
-        const status = Security.automaticAppUpdates(root, args, context)
+      async automaticAppUpdates () {
+        const status = await Security.automaticAppUpdates(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      diskEncryption () {
-        const status = Security.diskEncryption(root, args, context)
+      async diskEncryption () {
+        const status = await Security.diskEncryption(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      screenLock () {
-        const status = Security.screenLock(root, args, context)
+      async screenLock () {
+        const status = await Security.screenLock(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      screenIdle () {
-        const status = Security.screenIdle(root, args, context)
+      async screenIdle () {
+        const status = await Security.screenIdle(root, args, context)
         return securityToPassFailStatus(status)
       },
 
-      remoteLogin () {
-        const status = Security.remoteLogin(root, args, context)
+      async remoteLogin () {
+        const status = await Security.remoteLogin(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      publicFirewall () {
-        const status = Security.publicFirewall(root, args, context)
+      async publicFirewall () {
+        const status = await Security.publicFirewall(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      privateFirewall () {
-        const status = Security.privateFirewall(root, args, context)
+      async privateFirewall () {
+        const status = await Security.privateFirewall(root, args, context)
         return securityToDeviceStatus(status)
       },
 
-      domainFirewall () {
-        const status = Security.domainFirewall(root, args, context)
+      async domainFirewall () {
+        const status = await Security.domainFirewall(root, args, context)
         return securityToDeviceStatus(status)
       }
     }

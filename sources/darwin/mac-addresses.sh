@@ -2,19 +2,14 @@
 exec networksetup -listallhardwareports
 trim
 split \n\n
-  save line
+  save _line
   extract Device:\s+\w+[^:]+:\s+([0-9a-f:]+)
   save addr
 
-  load line
+  load _line
   extract Device:\s+(\w+)
   save device
 
-  remove line
-
-  echo null
-  save type
-  save physicalAdapter
-  save lastChange
+  remove _line
 noEmpty
 save macAddresses
