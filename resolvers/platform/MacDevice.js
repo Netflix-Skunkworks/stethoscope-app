@@ -7,12 +7,13 @@ const MacDevice = {
   },
 
   disks (root, args, { kmdResponse }) {
+    const encrypted = kmdResponse.disks.fileVaultEnabled === 'true'
     return kmdResponse.disks.volumes.map(disk => {
       return {
         name: disk.label,
         label: disk.label,
-        uuid: '',
-        encrypted: kmdResponse.disks.enabled === '1'
+        uuid: disk.uuid,
+        encrypted,
       }
     })
   },
