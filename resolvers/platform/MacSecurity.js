@@ -53,13 +53,8 @@ const MacSecurity = {
   },
 
   async remoteLogin (root, args, { kmdResponse }) {
-    const { sharingPreferences = [] } = kmdResponse
-    const setting = sharingPreferences.find(({ name }) => name === 'Remote Login - SSH')
-    if (setting) {
-      return setting.enabled === '1'
-    }
-
-    return false
+    const { remoteLogin = false } = kmdResponse
+    return !!remoteLogin
   },
 
   diskEncryption (root, args, { kmdResponse }) {
