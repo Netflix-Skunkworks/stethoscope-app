@@ -71,6 +71,11 @@ const focusOrCreateWindow = () => {
 }
 
 async function createWindow () {
+  if (!settings.has('userHasLaunched')) {
+    isFirstLaunch = true
+    settings.set('userHasLaunched', true)
+  }
+
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
