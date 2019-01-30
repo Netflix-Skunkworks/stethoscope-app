@@ -75,10 +75,10 @@ const Device = {
   },
 
   extensions (root, args, { kmdResponse }) {
-    const { browser = "all" } = args
-    let chrome = []
-    let firefox = []
-    let safari = []
+    // const { browser = 'all' } = args
+    // let chrome = []
+    // let firefox = []
+    // let safari = []
 
     return kmdResponse.extensions
   },

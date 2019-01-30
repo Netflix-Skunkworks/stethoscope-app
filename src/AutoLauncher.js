@@ -1,18 +1,17 @@
 const settings = require('electron-settings')
 const AutoLaunch = require('auto-launch')
 const config = require('./config.json')
-const log = require('./lib/logger')
 
 class AutoLauncher {
-  constructor() {
-    const autoLaunchOpts = { 
-      name: 'Stethoscope', 
+  constructor () {
+    const autoLaunchOpts = {
+      name: 'Stethoscope',
       isHidden: true
     }
     this.stethoscopeAutoLauncher = new AutoLaunch(autoLaunchOpts)
   }
 
-  shouldPromptToEnable() {
+  shouldPromptToEnable () {
     return config.autoLaunchPrompt && settings.get('autoLaunch') === undefined
   }
 
@@ -20,7 +19,7 @@ class AutoLauncher {
     return settings.get('autoLaunch') === 'true'
   }
 
-  disable() {
+  disable () {
     this.stethoscopeAutoLauncher.isEnabled().then((isEnabled) => {
       if (isEnabled) {
         this.stethoscopeAutoLauncher.disable()
@@ -37,7 +36,6 @@ class AutoLauncher {
     })
     settings.set('autoLaunch', 'true')
   }
-  
 }
 
 module.exports = AutoLauncher

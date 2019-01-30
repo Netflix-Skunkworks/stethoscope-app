@@ -26,7 +26,7 @@ describe('GraphQL', () => {
             platform
           }
         }
-      `})
+      ` })
       .end((err, res) => {
         if (err) {
           throw err
@@ -49,7 +49,7 @@ describe('GraphQL', () => {
             platform
           }
         }
-      `})
+      ` })
       .end((err, res) => {
         if (err) {
           throw err
@@ -185,7 +185,7 @@ describe('GraphQL', () => {
             friendly_name
           }
         }
-      `})
+      ` })
       .end((err, res) => {
         if (err) {
           throw err

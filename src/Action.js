@@ -69,7 +69,7 @@ class Action extends Component {
               width='18px'
               height='18px'
             />
-            <strong style={{color: this.iconColor(status)}}>{msg}</strong>
+            <strong style={{ color: this.iconColor(status) }}>{msg}</strong>
           </div>
         )
       )
@@ -93,7 +93,7 @@ class Action extends Component {
     Handlebars.registerHelper('securitySetting', (key) => {
       return new Handlebars.SafeString(
         ReactDOMServer.renderToStaticMarkup(
-          <table style={{width: 'auto'}}>
+          <table style={{ width: 'auto' }}>
             <tbody>
               <tr>
                 <td>Suggested setting:</td>
@@ -111,7 +111,7 @@ class Action extends Component {
       const version = semver.coerce(policy[key][platform].ok)
       return new Handlebars.SafeString(
         ReactDOMServer.renderToStaticMarkup(
-          <table style={{width: 'auto'}}>
+          <table style={{ width: 'auto' }}>
             <tbody>
               <tr>
                 <td>Suggested version:</td>
@@ -132,7 +132,7 @@ class Action extends Component {
     })
   }
 
-  getPlatformAndVersionSpecificFlags(device) {
+  getPlatformAndVersionSpecificFlags (device) {
     return {
       mojave: (
         device.platform === 'darwin' && semver.satisfies(device.osVersion, '>=10.14.0')
@@ -171,13 +171,13 @@ class Action extends Component {
               <pre className='description'>{action.details}</pre>
             }
             { action.link &&
-              <a href={action.link} target='_blank'>More info</a>
+              <a href={action.link} target='_blank' rel='noopener noreferrer'>More info</a>
             }
           </div>
           { action.directions && (
             <div
               className='instructions'
-              dangerouslySetInnerHTML={{__html: this.parseDirections()}}
+              dangerouslySetInnerHTML={{ __html: this.parseDirections() }}
             />
           )}
           {this.props.children}
@@ -199,7 +199,7 @@ class Action extends Component {
           {this.parseTitle()}
         </span>
         <Accessible label='Toggle action description' expanded={this.state.showDescription}>
-          <a className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>
+          <a href='#toggle' className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>
         </Accessible>
         {description}
       </li>

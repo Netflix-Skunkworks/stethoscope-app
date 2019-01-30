@@ -18,7 +18,7 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = MAC
-let shell, ipcRenderer, readLastLines, log, remote, settings, app, logPath = ''
+let shell; let ipcRenderer; let readLastLines; let log; let remote; let settings; let app; let logPath = ''
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
@@ -287,7 +287,7 @@ class App extends Component {
     const path = `${logPath}/dev-application-${today}.log`
     readLastLines.read(path, 10).then(recentLogs =>
       this.setState({ recentLogs })
-    ).catch(err => {})
+    ).catch(err => console.error(err))
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })

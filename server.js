@@ -11,25 +11,22 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
-const semver = require('semver')
 const { compile, run } = require('@netflix-internal/kmd/src')
 const glob = require('fast-glob')
-const {performance} = require('perf_hooks')
+const { performance } = require('perf_hooks')
 
 const { graphql } = require('graphql')
 const { makeExecutableSchema } = require('graphql-tools')
 const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
-const powershell = require('./src/lib/powershell')
-const NetworkInterface = require('./src/lib/NetworkInterface')
 const defaultPolicyServer = HOST
 
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
 
-function precompile() {
+function precompile () {
   return glob(path.resolve(__dirname, `./sources/${process.platform}/*.sh`)).then(files => {
     return files.map(file => {
       const content = readFileSync(file, 'utf8')
@@ -107,8 +104,6 @@ module.exports = async function startServer (env, log, language, appActions) {
   app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
     req.setTimeout(60000)
 
-    powershell.flushCache()
-
     const key = req.method === 'POST' ? 'body' : 'query'
     const origin = req.get('origin')
     const remote = origin !== 'stethoscope://main'
@@ -136,8 +131,6 @@ module.exports = async function startServer (env, log, language, appActions) {
 
     context.kmdResponse = extend(true, {}, ...checkData)
 
-    fs.writeFile('test.json', JSON.stringify(context.kmdResponse, null, 2), () => {})
-
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)
     }
@@ -162,18 +155,8 @@ module.exports = async function startServer (env, log, language, appActions) {
 
       // inform UI that scan is complete
       io.sockets.emit('scan:complete', scanResult)
-
       if (!result.extensions) result.extensions = {}
-
       result.extensions.timing = { total }
-
-      if (os.platform() === 'win32') {
-        const { total, queries } = powershell.getTimingInfo()
-        log.info(total, queries)
-        // result.extensions.timing.total += total
-        // result.extensions.timing.queries.push(...queries)
-      }
-
       res.json(result)
     }).catch(err => {
       log.error(err.message)
@@ -237,10 +220,6 @@ module.exports = async function startServer (env, log, language, appActions) {
     res.status(500).send(err.message)
   })
 
-  // const privateKey = fs.readFileSync('./ssl/stethoscope.key', 'utf8')
-  // const certificate = fs.readFileSync('./ssl/stethoscope.crt', 'utf8')
-  // const creds = { key: privateKey, cert: certificate }
-  // const httpsServer = https.createServer(creds, app)
   const serverInstance = http.listen(PORT, '127.0.0.1', () => {
     console.log(`local server listening on ${PORT}`)
     serverInstance.emit('server:ready')
@@ -250,6 +229,5 @@ module.exports = async function startServer (env, log, language, appActions) {
 }
 
 process.on('unhandledRejection', error => {
-  // Will print "unhandledRejection err is not defined"
-  console.log('unhandledRejection', error.message, error.reason, error.stack);
-});
+  console.log('unhandledRejection', error.message, error.reason, error.stack)
+})

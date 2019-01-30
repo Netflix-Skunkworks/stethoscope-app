@@ -25,7 +25,6 @@ let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
 let isFirstLaunch = true
-let starting = false
 
 // icons that are displayed in the Menu bar
 const statusImages = {
@@ -41,8 +40,6 @@ const windowPrefs = {
   maximizable: false,
   autoHideMenuBar: true,
   skipTaskbar: true,
-  // uncomment the line before to keep window controls but hide title bar
-  // titleBarStyle: 'hidden',
   webPreferences: {
     webSecurity: false,
     sandbox: false
@@ -140,11 +137,9 @@ async function createWindow () {
   // these methods allow express to update app state
   const appHooksForServer = {
     setScanStatus (status = 'PASS') {
-      let next
+      let next = statusImages.PASS
       if (status in statusImages) {
         next = statusImages[status]
-      } else {
-        next = statusImages.PASS
       }
       tray.setImage(next)
     },
@@ -152,8 +147,6 @@ async function createWindow () {
       updater.checkForUpdates()
     }
   }
-  // ensure that this process doesn't start multiple times
-  starting = true
 
   // used to select the appropriate instructions file
   const [ language ] = app.getLocale().split('-')
@@ -266,24 +259,10 @@ app.on('ready', () => setTimeout(() => {
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
 
-  if (hangTime) {
-    if (hangTime >= 3) {
-      settings.delete('recentHang')
-    } else {
-      settings.set('recentHang', settings.get('recentHang', 1) + 1)
-    }
-  }
-
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
     server.close()
   }
-})
-
-app.on('window-all-closed', () => {
-  // NOTE: this is removed so that closing the main window collapses
-  // the app back down to the tray/menubar rather than quitting
-  // if (!IS_MAC) app.quit()
 })
 
 app.on('open-url', (event, url) => {

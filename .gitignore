@@ -2,7 +2,7 @@
 # built dmg/exe/etc
 /dist
 *.psd
-
+report/
 .python-version
 
 .DS_Store
