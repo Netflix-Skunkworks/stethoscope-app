@@ -24,7 +24,8 @@ let server
 let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
-let isFirstLaunch = true
+let isLaunching = true
+let isFirstLaunch = false
 
 // icons that are displayed in the Menu bar
 const statusImages = {
@@ -107,9 +108,15 @@ async function createWindow () {
 
   updater = require('./updater')(env, mainWindow, log, server)
 
-  if (isFirstLaunch) {
+  if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
-    const autoLauncher = new AutoLauncher()
+    isLaunching = false
+  }
+
+  console.log('isFirstLaunch', isFirstLaunch)
+
+  if (isFirstLaunch) {
+    const autoLauncher = new AutoLauncher(app.getName())
     if (autoLauncher.shouldPromptToEnable()) {
       dialog.showMessageBox({
         type: 'info',
@@ -124,7 +131,7 @@ async function createWindow () {
         }
       })
     }
-    isFirstLaunch = false
+    isLaunching = false
   }
 
   if (tray) tray.destroy()

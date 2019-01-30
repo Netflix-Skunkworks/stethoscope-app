@@ -12,7 +12,7 @@ class AutoLauncher {
   }
 
   shouldPromptToEnable () {
-    return config.autoLaunchPrompt && settings.get('autoLaunch') === undefined
+    return config.autoLaunchPrompt && !settings.has('autoLaunch')
   }
 
   isEnabled () {
