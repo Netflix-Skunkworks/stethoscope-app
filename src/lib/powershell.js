@@ -7,21 +7,18 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 */
 const execPowershell = (cmd, logError = true) => {
   const ps = new Shell({ debugMsg: false })
-
-  return cache.set(cmd, new Promise((resolve, reject) => {
-    ps.addCommand(cmd).then(() => {
-      ps.invoke().then(output => {
-        IS_DEV && log.info('powershell:output', output)
-        resolve(output)
-        ps.dispose()
-      }).catch(e => {
-        ps.dispose()
-        // ps._cmds = []
-        if (logError !== false) log.error(`powershell error: ${e} | cmd: ${cmd}`)
-        reject(new Error(e))
-      })
+  return ps.addCommand(cmd).then(() => {
+    ps.invoke().then(output => {
+      IS_DEV && log.info('powershell:output', output)
+      ps.dispose()
+      return output
+    }).catch(e => {
+      ps.dispose()
+      // ps._cmds = []
+      if (logError !== false) log.error(`powershell error: ${e} | cmd: ${cmd}`)
+      return e
     })
-  })).get(cmd)
+  })
 }
 
 const openPreferences = pane => {

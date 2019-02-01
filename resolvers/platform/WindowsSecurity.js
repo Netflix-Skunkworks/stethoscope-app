@@ -17,9 +17,8 @@ const WindowsSecurity = {
   },
 
   async diskEncryption (root, args, { kmdResponse }) {
-    if (kmdResponse.encryptionMethod) {
-      const mthd = parseInt(kmdResponse.encryptionMethod, 10)
-      return mthd > 0
+    if (kmdResponse.bitlockerStatus) {
+      return kmdResponse.bitlockerStatus === 'ON'
     }
     return false
   },
