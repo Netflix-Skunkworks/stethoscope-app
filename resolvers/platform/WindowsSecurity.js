@@ -5,7 +5,7 @@ const { NUDGE, UNKNOWN } = require('../../src/constants')
 
 const WindowsSecurity = {
   async automaticUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.automaticUpdates === "RUNNING"
+    return kmdResponse.automaticUpdatesNotificationLevel > 1
   },
 
   async remoteLogin (root, args, { kmdResponse }) {

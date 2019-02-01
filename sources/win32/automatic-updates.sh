@@ -1,7 +1,4 @@
 #/usr/bin/env kmd
-exec sc query wuauserv
-trim
-save line
-extract STATE[\s]+\:[\s\d]+([A-Z_]+)
-save automaticUpdates
-remove line
+exec powershell -Command \\$AUSettings=\\(New-Object -com Microsoft.Update.AutoUpdate\\).Settings\\;echo \\$AUSettings.NotificationLevel
+parseInt
+save automaticUpdatesNotificationLevel
