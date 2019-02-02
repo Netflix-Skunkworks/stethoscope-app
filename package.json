@@ -41,15 +41,6 @@
         "bitlocker-status/Microsoft.WindowsAPICodePack.Shell.dll",
         "bitlocker-status/Microsoft.WindowsAPICodePack.ShellExtensions.dll"
       ],
-      "binaries": [
-        "bitlocker-status/bitlocker-status.exe",
-        "bitlocker-status/bitlocker-status.pdb",
-        "bitlocker-status/Microsoft.WindowsAPICodePack.dll",
-        "bitlocker-status/Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll",
-        "bitlocker-status/Microsoft.WindowsAPICodePack.Sensors.dll",
-        "bitlocker-status/Microsoft.WindowsAPICodePack.Shell.dll",
-        "bitlocker-status/Microsoft.WindowsAPICodePack.ShellExtensions.dll"
-      ],
       "files": [
         "bitlocker-status/*",
         "practices/*",
