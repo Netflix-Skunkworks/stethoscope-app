@@ -148,6 +148,13 @@ practices:
         1. Click "Apply".
         1. Click "OK".
 
+        If you manually disabled Windows Update using Group Policy Editor:
+
+        1. Open [Local Group Policy Editor](ps://gpedit.msc) (Start > Run > gpedit.msc)
+        1. Expand: Computer Configuration > Administrative Templates > Windows Components > Windows Update
+        1. Find and double-click on "Configure Automatic Updates"
+        1. Select "Enabled" or "Not Configured" to turn automatic updates back on
+
   screenLock:
     title:  >
       {{#if passing}}

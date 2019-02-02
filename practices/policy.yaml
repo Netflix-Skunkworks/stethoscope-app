@@ -20,7 +20,7 @@ osVersion:
     nudge: ">=18.0.2"
 firewall: ALWAYS
 diskEncryption: ALWAYS
-automaticUpdates: ALWAYS
+automaticUpdates: SUGGESTED
 screenLock: IF_SUPPORTED
 screenIdle: "<=120"
 remoteLogin: NEVER
