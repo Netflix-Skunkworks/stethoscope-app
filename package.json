@@ -32,6 +32,7 @@
     "win": {
       "target": "nsis",
       "files": [
+        "bitlocker-status/*",
         "practices/*",
         "build/**",
         "public/**",
