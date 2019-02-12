@@ -62,7 +62,7 @@
       "target": "AppImage",
       "category": "System",
       "extraResources": [
-        "bin/osqueryi_linux"
+        "bin/osqueryd_linux"
       ],
       "files": [
         "practices/*",
