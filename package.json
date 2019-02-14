@@ -65,6 +65,7 @@
       "target": "AppImage",
       "category": "System",
       "files": [
+        "kmd/**",
         "practices/*",
         "build/**",
         "public/**",

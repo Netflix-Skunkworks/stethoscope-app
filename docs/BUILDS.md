@@ -72,6 +72,6 @@ We use S3 internally as a generic file server and manually deploy the assets (th
 ]
 ```
 3. Build and sign app(s)
-4. Upload signed build artifacts (`dist/*.{dmg,exe,blockmap,yml}`) to S3
+4. Upload signed build artifacts (`dist/*.{dmg,exe,blockmap,yml,zip}`) to S3
 
 Once that is in place, the app's "Check for updates" link in the menu will download new versions and prompt the user to restart.
