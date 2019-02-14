@@ -11,7 +11,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
-const { compile, run } = require('@netflix-internal/kmd/src')
+const { compile, run } = require('kmd-script/src')
 const glob = require('fast-glob')
 const { performance } = require('perf_hooks')
 
