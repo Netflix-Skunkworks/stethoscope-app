@@ -42,10 +42,10 @@ it('adds space and enter handlers and allows original action', () => {
     </Accessible>
   )
 
-  wrapper.simulate('keyDown', {keyCode: 13})
+  wrapper.simulate('keyDown', { keyCode: 13 })
   expect(count).toEqual(1)
 
-  wrapper.simulate('keyDown', {keyCode: 32})
+  wrapper.simulate('keyDown', { keyCode: 32 })
   expect(count).toEqual(2)
 
   wrapper.simulate('click')
@@ -61,7 +61,7 @@ it('will infer action if none specified', () => {
     </Accessible>
   )
 
-  wrapper.simulate('keyDown', {keyCode: 13})
+  wrapper.simulate('keyDown', { keyCode: 13 })
   expect(count).toEqual(1)
 })
 

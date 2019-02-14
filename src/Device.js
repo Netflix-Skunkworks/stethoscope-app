@@ -165,7 +165,7 @@ class Device extends Component {
             <div className='device-name'>{device.friendlyName}</div>
             <div className='device-identifier'>{device.identifier}&nbsp;</div>
             <Accessible expanded={this.state.showInfo} label={`Toggle and review ${device.deviceRating} device information for ${device.friendlyName}`}>
-              <a className={`device-info-toggle ${this.state.showInfo ? 'open' : 'closed'}`} onClick={this.toggleInfo}>&#9660;</a>
+              <a href='#toggle' className={`device-info-toggle ${this.state.showInfo ? 'open' : 'closed'}`} onClick={this.toggleInfo}>&#9660;</a>
             </Accessible>
           </header>
 

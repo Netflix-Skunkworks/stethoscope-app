@@ -3,8 +3,6 @@ const pkg = require('../package.json')
 const config = require('./config.json')
 const AutoLauncher = require('./AutoLauncher')
 
-const unicodeCheck = '\u2714';
-
 const toggleAutoLaunchMenus = (autoLaunchOn) => {
   let autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
   autoLaunchMenuOptions.getMenuItemById('autolaunchOn').checked = autoLaunchOn
@@ -36,7 +34,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
       id: 'autolaunch',
       label: 'Launch on Startup',
       submenu: [
-        { 
+        {
           id: 'autolaunchOn',
           label: 'On',
           type: 'checkbox',
@@ -44,17 +42,17 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
           click (event) {
             toggleAutoLaunchMenus(true)
             autoLauncher.enable()
-          }  
+          }
         },
         {
           id: 'autolaunchOff',
-          label: 'Off', 
+          label: 'Off',
           type: 'checkbox',
           checked: !isAutoLauncherEnabled,
           click (event) {
             toggleAutoLaunchMenus(false)
             autoLauncher.disable()
-          }          
+          }
         }
       ]
     },

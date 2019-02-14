@@ -1,5 +1,4 @@
 const pkg = require('../package.json')
-const OSQuery = require('../sources/osquery')
 const NetworkInterface = require('../src/lib/NetworkInterface')
 const Security = require('./Security')
 const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } = require('../src/constants')
@@ -26,47 +25,39 @@ const securityToPassFailStatus = status => {
 }
 
 const Device = {
-  async deviceId (root, args, context) {
-    const { uuid } = await context.systemInfo
-    return uuid
+  deviceId (root, args, { kmdResponse }) {
+    return kmdResponse.system.uuid
   },
 
-  async deviceName (root, args, context) {
-    const { computer_name: computerName, hostname: hostName } = await context.systemInfo
-    return computerName || hostName
+  deviceName (root, args, { kmdResponse }) {
+    return kmdResponse.system.hostname
   },
 
-  async platform (root, args, context) {
-    const { platform } = await context.osVersion
-    return platform
+  platform (root, args, context) {
+    return context.platform
   },
 
-  async platformName (root, args, context) {
-    const { vendor = '' } = await context.platformInfo
-    return vendor.trim()
+  platformName (root, args, { kmdResponse }) {
+    return kmdResponse.system.platform
   },
 
-  async osVersion (root, args, context) {
-    const { version } = await context.osVersion
-    return version
+  osVersion (root, args, { kmdResponse }) {
+    return kmdResponse.system.version
   },
 
-  async osBuild (root, args, context) {
-    const { build } = await context.osVersion
-    return build
+  osBuild (root, args, { kmdResponse }) {
+    return kmdResponse.system.build
   },
 
-  async osName (root, args, context) {
-    const { name } = await context.osVersion
-    return name
+  osName (root, args, { kmdResponse }) {
+    return kmdResponse.system.platform
   },
 
-  async firmwareVersion (root, args, context) {
-    const { revision } = await context.platformInfo
-    return revision
+  firmwareVersion (root, args, { kmdResponse }) {
+    return kmdResponse.system.firmwareVersion
   },
 
-  async friendlyName (root, args, context) {
+  friendlyName (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if ('friendlyName' in os) {
       return os.friendlyName(root, args, context)
@@ -75,50 +66,24 @@ const Device = {
     return UNSUPPORTED
   },
 
-  async hardwareModel (root, args, context) {
-    const { hardware_model: hardwareModel } = await context.systemInfo
-    return hardwareModel
+  hardwareModel (root, args, { kmdResponse }) {
+    return kmdResponse.system.hardwareVersion
   },
 
-  async hardwareSerial (root, args, context) {
-    const { hardware_serial: hardwareSerial } = await context.systemInfo
-    return hardwareSerial
+  hardwareSerial (root, args, { kmdResponse }) {
+    return kmdResponse.system.serialNumber
   },
 
-  async extensions (root, args, context) {
-    const { browser = "all" } = args
-    let chrome = []
-    let firefox = []
-    let safari = []
+  extensions (root, args, { kmdResponse }) {
+    // const { browser = 'all' } = args
+    // let chrome = []
+    // let firefox = []
+    // let safari = []
 
-    if (['all', 'chrome'].includes(browser)) {
-      chrome = await OSQuery.all('chrome_extensions').then(results =>
-        results.map(({ name, version, identifier, path, author }) =>
-          ({ name, path, version, identifier, author, browser: 'chrome' })
-        )
-      )
-    }
-
-    if (['all', 'firefox'].includes(browser)) {
-      firefox = await OSQuery.all('firefox_addons').then(results =>
-        results.map(({ name, version, identifier, path, creator: author }) =>
-          ({ name, path, version, identifier, author, browser: 'firefox' })
-        )
-      )
-    }
-
-    if (['all', 'safari'].includes(browser)) {
-      safari = await OSQuery.all('safari_extensions').then(results =>
-        results.map(({ name, version, identifier, path, creator: author }) =>
-          ({ name, path, version, identifier, author, browser: 'safari' })
-        )
-      )
-    }
-
-    return chrome.concat(firefox).concat(safari)
+    return kmdResponse.extensions
   },
 
-  async applications (root, args, context) {
+  applications (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if ('applications' in os) {
       return os.applications(root, args, context)
@@ -131,26 +96,36 @@ const Device = {
     return UNKNOWN
   },
 
+  // TODO implement??
   // can/should these be filtered down?
   ipAddresses (root, args, context) {
-    return OSQuery.all('interface_addresses')
+    return []
   },
 
   // can/should these be filtered down?
-  async macAddresses (root, args, context) {
-    return context.macAddresses
+  macAddresses (root, args, { kmdResponse }) {
+    return kmdResponse.macAddresses.filter(mac => mac.addr)
+      .map((mac) => ({
+        mac: mac.addr,
+        interface: mac.device,
+        type: 6,
+        physicalAdapter: true,
+        lastChange: null
+      }))
+      .filter(({ mac }) => !NetworkInterface.isLocal(mac))
+      .filter(({ mac }) => !NetworkInterface.isMulticast(mac))
+      .filter(({ mac }) => !NetworkInterface.isPlaceholder(mac))
   },
 
-  async osqueryVersion (root, args, context) {
-    const info = await OSQuery.first('osquery_info')
-    return info.version
+  osqueryVersion (root, args, context) {
+    return null
   },
 
   stethoscopeVersion (root, args, context) {
     return pkg.version
   },
 
-  async security (root, args, context) {
+  security (root, args, context) {
     return {
       async firewall () {
         const status = await Security.firewall(root, args, context)
@@ -224,7 +199,7 @@ const Device = {
     }
   },
 
-  async disks (root, args, context) {
+  disks (root, args, context) {
     const os = PlatformResolvers[context.platform]
     if ('disks' in os) {
       return os.disks(root, args, context)

@@ -1,0 +1,31 @@
+#/usr/bin/env kmd
+exec reg query 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
+trim
+lines
+  save _line
+  template reg query '{_line}'
+  exec
+  trim
+  save _output
+
+  extract DisplayName\s+[A-Z\s_]+\s+(.*)
+  save name
+  save displayName
+
+  load output
+  extract Publisher\s+[A-Z\s_]+\s+(.*)
+  save publisher
+
+  load output
+  extract InstallDate\s+[A-Z\s_]+\s+(.*)
+  parseDate YYYYMMDD
+  save installDate
+
+  load output
+  extract DisplayVersion\s+[A-Z\s_]+\s+(\d+\.\d+\.\d+)
+  save version
+
+  remove _output
+  remove _line
+noEmpty
+save apps

@@ -11,7 +11,6 @@ const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
-const OSQuery = require('../sources/osquery')
 const IS_DEV = env === 'development'
 const { IS_MAC, IS_WIN } = require('./lib/platform')
 const AutoLauncher = require('./AutoLauncher')
@@ -25,8 +24,8 @@ let server
 let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
-let isFirstLaunch = true
-let starting = false
+let isLaunching = true
+let isFirstLaunch = false
 
 // icons that are displayed in the Menu bar
 const statusImages = {
@@ -42,8 +41,6 @@ const windowPrefs = {
   maximizable: false,
   autoHideMenuBar: true,
   skipTaskbar: true,
-  // uncomment the line before to keep window controls but hide title bar
-  // titleBarStyle: 'hidden',
   webPreferences: {
     webSecurity: false,
     sandbox: false
@@ -73,7 +70,12 @@ const focusOrCreateWindow = () => {
   }
 }
 
-function createWindow () {
+async function createWindow () {
+  if (!settings.has('userHasLaunched')) {
+    isFirstLaunch = true
+    settings.set('userHasLaunched', true)
+  }
+
   // determine if app is already running
   const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
@@ -109,11 +111,17 @@ function createWindow () {
   // open developer console if env vars or args request
   if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
 
-  updater = require('./updater')(env, mainWindow, log, OSQuery, server)
+  updater = require('./updater')(env, mainWindow, log, server)
+
+  if (isLaunching) {
+    updater.checkForUpdates({}, {}, {}, true)
+    isLaunching = false
+  }
+
+  console.log('isFirstLaunch', isFirstLaunch)
 
   if (isFirstLaunch) {
-    updater.checkForUpdates({}, {}, {}, true)
-    const autoLauncher = new AutoLauncher()
+    const autoLauncher = new AutoLauncher(app.getName())
     if (autoLauncher.shouldPromptToEnable()) {
       dialog.showMessageBox({
         type: 'info',
@@ -127,8 +135,8 @@ function createWindow () {
           autoLauncher.disable()
         }
       })
-    } 
-    isFirstLaunch = false
+    }
+    isLaunching = false
   }
 
   if (tray) tray.destroy()
@@ -138,15 +146,12 @@ function createWindow () {
 
   tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
 
-  log.info('Starting osquery')
   // these methods allow express to update app state
   const appHooksForServer = {
     setScanStatus (status = 'PASS') {
-      let next
+      let next = statusImages.PASS
       if (status in statusImages) {
         next = statusImages[status]
-      } else {
-        next = statusImages.PASS
       }
       tray.setImage(next)
     },
@@ -154,33 +159,24 @@ function createWindow () {
       updater.checkForUpdates()
     }
   }
-  // ensure that this process doesn't start multiple times
-  starting = true
 
-  OSQuery.start().then(() => {
-    log.info('osquery started')
-    // used to select the appropriate instructions file
-    const [ language ] = app.getLocale().split('-')
-    // start GraphQL server, close the app if 37370 is already in use
-    server = startGraphQLServer(env, log, language, appHooksForServer, OSQuery)
-    server.on('error', error => {
-      log.info(`startup:express:error ${JSON.stringify(serializeError(error))}`)
-      if (error.message.includes('EADDRINUSE')) {
-        dialog.showMessageBox({
-          message: 'Something is already using port 37370'
-        })
-      }
-    })
+  // used to select the appropriate instructions file
+  const [ language ] = app.getLocale().split('-')
+  // start GraphQL server, close the app if 37370 is already in use
+  server = await startGraphQLServer(env, log, language, appHooksForServer)
+  server.on('error', error => {
+    log.info(`startup:express:error ${JSON.stringify(serializeError(error))}`)
+    if (error.message.includes('EADDRINUSE')) {
+      dialog.showMessageBox({
+        message: 'Something is already using port 37370'
+      })
+    }
+  })
 
-    server.on('server:ready', () => {
-      if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
-      mainWindow.loadURL(BASE_URL)
-      mainWindow.focus()
-    })
-
-  }).catch(err => {
-    log.info('startup error')
-    log.error(`start:osquery unable to start osquery: ${err}`, err)
+  server.on('server:ready', () => {
+    if (!mainWindow) mainWindow = new BrowserWindow(windowPrefs)
+    mainWindow.loadURL(BASE_URL)
+    mainWindow.focus()
   })
 
   // add right-click menu to app
@@ -188,7 +184,6 @@ function createWindow () {
 
   // allow web app to restart application
   ipcMain.on('app:restart', () => {
-    OSQuery.stop()
     if (server && server.listening) {
       server.close()
     }
@@ -275,28 +270,11 @@ app.on('ready', () => setTimeout(() => {
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
-  log.info('stopping osquery')
-  const hangTime = settings.get('recentHang', false)
 
-  if (hangTime) {
-    if (hangTime >= 3) {
-      settings.delete('recentHang')
-    } else {
-      settings.set('recentHang', settings.get('recentHang', 1) + 1)
-    }
-  }
-
-  OSQuery.stop()
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {
     server.close()
   }
-})
-
-app.on('window-all-closed', () => {
-  // NOTE: this is removed so that closing the main window collapses
-  // the app back down to the tray/menubar rather than quitting
-  // if (!IS_MAC) app.quit()
 })
 
 app.on('open-url', (event, url) => {
@@ -330,8 +308,8 @@ process.on('uncaughtException', err => {
   if (server && server.listening) {
     server.close()
   }
-  OSQuery.stop()
   log.error('exiting on uncaught exception')
-  log.error(err)
+  log.error(err.message)
+  log.error(err.stack)
   process.exit(1)
 })

@@ -8,17 +8,17 @@ let timeout
 export default class Loader extends React.Component {
   state = { startLoading: 0, slowLoad: false }
 
-  componentDidMount() {
+  componentDidMount () {
     timeout = setTimeout(() => {
       this.setState({ slowLoad: true })
     }, TOO_SLOW)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(timeout)
   }
 
-  render() {
+  render () {
     const { slowLoad } = this.state
     const {
       recentHang,
@@ -35,29 +35,29 @@ export default class Loader extends React.Component {
       msg = (
         <span>
           This{slowLoad ? ' still' : ''} seems to be taking a while...<br />
-          <div className="loadingMessage">
-            <span role="img" aria-label="Thinking face">🤔</span>
+          <div className='loadingMessage'>
+            <span role='img' aria-label='Thinking face'>🤔</span>
           </div>
           <div className='loaderAdditionalContent'>
-          {recentHang ? (
-            <div>
-              <span>There seems to be a problem, contact support?</span>
-              {this.props.children}
-              <pre>
-                <code>
-                  {`Version: ${this.props.version}
+            {recentHang ? (
+              <div>
+                <span>There seems to be a problem, contact support?</span>
+                {this.props.children}
+                <pre>
+                  <code>
+                    {`Version: ${this.props.version}
                   Platform: ${this.props.platform}
                   Recent Logs:
                   ${this.props.recentLogs}`}
-                </code>
-              </pre>
-            </div>
-          ) : (
-            <div>
+                  </code>
+                </pre>
+              </div>
+            ) : (
+              <div>
               Sometimes restarting Stethoscope can resolve slow loading issues.<br />
-              <button onClick={onRestart}>Restart Application</button>
-            </div>
-          )}
+                <button onClick={onRestart}>Restart Application</button>
+              </div>
+            )}
           </div>
         </span>
       )

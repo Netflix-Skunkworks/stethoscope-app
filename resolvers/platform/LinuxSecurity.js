@@ -1,4 +1,4 @@
-const OSQuery = require('../../sources/osquery')
+// const OSQuery = require('../../sources/osquery')
 
 module.exports = {
   async firewall (root, args, context) {

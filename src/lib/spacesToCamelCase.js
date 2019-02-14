@@ -1,4 +1,10 @@
-const capitalize = require('./capitalize')
+/*
+spacesToCamelCase continues to exist for backwards compat of previously
+supported yaml format (e.g. "os version" instead of "osVersion")
+ */
+function capitalize (str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
 
 module.exports = function spacesToCamelCase (initialPolicy) {
   return Object.keys(initialPolicy).reduce((p, key) => {

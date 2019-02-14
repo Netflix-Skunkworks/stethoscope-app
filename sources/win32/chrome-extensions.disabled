@@ -1,0 +1,27 @@
+#!/usr/bin/env kmd
+exec ls '~/AppData/Local/Google/Chrome/User Data/Default/Extensions/*/*/manifest.json'
+trim
+lines
+  save _line
+  extract /([\w]+)/([\d\._]+)/manifest.json
+  save identifier
+
+  load _line
+  cat
+  save _data
+
+  extract \"name\": \"(.*)\"
+  save name
+
+  load _data
+  extract \"version\": \"([\d\.]+)\"
+  save version
+
+  load _data
+  extract \"author\": \"(.*)\"
+  save author
+
+  remove _data
+  remove _line
+noEmpty
+save chromeExtensions

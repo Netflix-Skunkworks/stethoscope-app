@@ -1,6 +1,8 @@
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
+const extend = require('extend')
+const { readFileSync } = fs
 
 const express = require('express')
 const { HOST, PORT } = require('./src/constants')
@@ -9,27 +11,38 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
-const semver = require('semver')
+const { compile, run } = require('kmd-script/src')
+const glob = require('fast-glob')
+const { performance } = require('perf_hooks')
 
 const { graphql } = require('graphql')
 const { makeExecutableSchema } = require('graphql-tools')
 const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
-const powershell = require('./src/lib/powershell')
-const NetworkInterface = require('./src/lib/NetworkInterface')
 const defaultPolicyServer = HOST
 
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
 
+function precompile () {
+  return glob(path.resolve(__dirname, `./sources/${process.platform}/*.sh`)).then(files => {
+    return files.map(file => {
+      const content = readFileSync(file, 'utf8')
+      const code = compile(content)
+      return code
+    })
+  })
+}
+
 // used to ensure that user is not shown multiple notifications for a login scan
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = function startServer (env, log, language, appActions, OSQuery) {
+module.exports = async function startServer (env, log, language, appActions) {
   log.info('starting express server')
+  const checks = await precompile()
   const find = filePath => env === 'development' ? filePath : path.join(__dirname, filePath)
 
   const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
@@ -85,33 +98,11 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
 
   // this doesn't change per request, capture it prior to scan
   const context = {
-    platform: process.platform || os.platform(),
-    systemInfo: OSQuery.first('system_info'),
-    platformInfo: OSQuery.first('platform_info'),
-    macAddresses: OSQuery.all('interface_details', {
-      fields: ['interface', 'type', 'mac', 'physical_adapter as physicalAdapter', 'last_change as lastChange']
-    }).then((addresses = []) => {
-      const { isLocal, isMulticast, isPlaceholder } = NetworkInterface
-      return addresses.filter(({ mac }) =>
-        !isLocal(mac) && !isMulticast(mac) && !isPlaceholder(mac)
-      )
-    }),
-    osVersion: OSQuery.first('os_version').then(v => {
-      let version = [v.major, v.minor]
-      if (process.platform === 'win32') {
-        version.push(v.build)
-      } else {
-        version.push(v.patch)
-      }
-      v.version = semver.coerce(version.join('.'))
-      return v
-    })
+    platform: process.platform || os.platform()
   }
 
-  app.use(['/scan', '/graphql'], cors(corsOptions), (req, res) => {
+  app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
     req.setTimeout(60000)
-
-    powershell.flushCache()
 
     const key = req.method === 'POST' ? 'body' : 'query'
     const origin = req.get('origin')
@@ -131,6 +122,14 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
 
     let { query, variables: policy, sessionId = false } = req[key]
     let showNotification = sessionId && !alertCache.has(sessionId)
+    const start = performance.now()
+    const checkData = await Promise.all(checks.map(async script => {
+      const response = await run(script)
+      return response
+    }))
+    const total = performance.now() - start
+
+    context.kmdResponse = extend(true, {}, ...checkData)
 
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)
@@ -156,17 +155,8 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
 
       // inform UI that scan is complete
       io.sockets.emit('scan:complete', scanResult)
-
       if (!result.extensions) result.extensions = {}
-      result.extensions.timing = OSQuery.getTimingInfo()
-
-      if (os.platform() === 'win32') {
-        const { total, queries } = powershell.getTimingInfo()
-        log.info(total, queries)
-        result.extensions.timing.total += total
-        result.extensions.timing.queries.push(...queries)
-      }
-
+      result.extensions.timing = { total }
       res.json(result)
     }).catch(err => {
       log.error(err.message)
@@ -230,10 +220,6 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
     res.status(500).send(err.message)
   })
 
-  // const privateKey = fs.readFileSync('./ssl/stethoscope.key', 'utf8')
-  // const certificate = fs.readFileSync('./ssl/stethoscope.crt', 'utf8')
-  // const creds = { key: privateKey, cert: certificate }
-  // const httpsServer = https.createServer(creds, app)
   const serverInstance = http.listen(PORT, '127.0.0.1', () => {
     console.log(`local server listening on ${PORT}`)
     serverInstance.emit('server:ready')
@@ -241,3 +227,7 @@ module.exports = function startServer (env, log, language, appActions, OSQuery) 
 
   return serverInstance
 }
+
+process.on('unhandledRejection', error => {
+  console.log('unhandledRejection', error.message, error.reason, error.stack)
+})

@@ -1,5 +1,5 @@
 const applescript = require('applescript')
-const {promisify} = require('es6-promisify')
+const { promisify } = require('util')
 const execString = promisify(applescript.execString)
 
 const openPreferences = async function (preferencePaneId) {
@@ -21,17 +21,9 @@ const openApp = async function (appName) {
   return execString(script)
 }
 
-const getScreenLock = async () => {
-  const script = `tell application "System Events" to tell security preferences to get require password to wake`
-  const response = await execString(script)
-  // setting seems to be the opposite
-  return response === 'false'
-}
-
 module.exports = {
   openPreferences,
-  openApp,
-  getScreenLock
+  openApp
 }
 
 if (require.main === module) {
