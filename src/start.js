@@ -8,7 +8,7 @@ const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
 const settings = require('electron-settings')
 const serializeError = require('serialize-error')
 const initProtocols = require('./lib/protocolHandlers')
-const env = process.env.NODE_ENV || 'production'
+const env = process.env.STETHOSCOPE_ENV || 'production'
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const IS_DEV = env === 'development'

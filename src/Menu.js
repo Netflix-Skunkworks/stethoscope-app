@@ -78,7 +78,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
   { role: 'separator', enabled: false }
   )
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.STETHOSCOPE_ENV === 'development') {
     contextMenu.push({ role: 'toggleDevTools', accelerator: 'Alt+CmdOrCtrl+I' })
   }
 

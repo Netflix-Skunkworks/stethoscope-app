@@ -97,7 +97,7 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "electron": "cross-env NODE_ENV=development electron .",
+    "electron": "cross-env STETHOSCOPE_ENV=development electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",

@@ -299,7 +299,7 @@ class App extends Component {
       instructions, loading, highlightRescan
     } = this.state
 
-    const isDev = process.env.NODE_ENV === 'development'
+    const isDev = process.env.STETHOSCOPE_ENV === 'development'
 
     let content = null
 
