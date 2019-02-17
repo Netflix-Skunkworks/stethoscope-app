@@ -71,9 +71,9 @@ const focusOrCreateWindow = () => {
 }
 
 async function createWindow () {
-  if (!settings.has('userHasLaunched')) {
+  if (!settings.has('userHasLaunchedApp')) {
     isFirstLaunch = true
-    settings.set('userHasLaunched', true)
+    settings.set('userHasLaunchedApp', true)
   }
 
   // determine if app is already running
@@ -118,7 +118,7 @@ async function createWindow () {
     isLaunching = false
   }
 
-  console.log('isFirstLaunch', isFirstLaunch)
+  log.info('isFirstLaunch', isFirstLaunch)
 
   if (isFirstLaunch) {
     const autoLauncher = new AutoLauncher(app.getName())
