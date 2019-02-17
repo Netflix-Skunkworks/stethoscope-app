@@ -5,6 +5,10 @@
   "homepage": "./",
   "author": "Netflix",
   "description": "Local Stethoscope app",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/Netflix-Skunkworks/stethoscope-app.git"
+  },
   "main": "src/start.js",
   "build": {
     "appId": "com.netflix.stethoscope-local",
@@ -100,11 +104,12 @@
     "electron": "cross-env NODE_ENV=development electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
-    "build": "rm -r dist/ ; react-scripts build && electron-builder -mwl",
+    "build": "rm -r dist/; react-scripts build && electron-builder -mwl",
     "postinstall": "electron-builder install-app-deps",
-    "build:react": "react-scripts build",
-    "build:mac": "rm -r dist/; react-scripts build && ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -m && npm run test:spectron",
-    "build:windows": "react-scripts build && electron-builder -w && npm run test:spectron",
+    "build:react": "react-scripts build && node update-download-page.js",
+    "build:mac": "rm -r dist/; npm run build:react && npm run build:electron -m && npm run test:spectron",
+    "build:windows": " npm run build:react && npm run build:electron -w && npm run test:spectron",
+    "build:electron": "ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
     "test:spectron": "node src/__tests__/test-build.js",
     "build:linux": "rm -r dist/ ; react-scripts build && electron-builder -l",
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js"
