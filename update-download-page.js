@@ -4,10 +4,11 @@ const moment = require('moment')
 const { build: { publish = [{ url: 'https://test/url/'}] } } = pkg
 const [{ url }] = publish
 const rev = readFileSync('.git/HEAD').toString();
-let revision = rev;
+let revision = rev.trim();
+
 if (rev.includes(':')) {
   const [ refs, pth ] = rev.split(': ')
-  readFileSync(`.git/${pth}`);
+  revision = readFileSync(`.git/${pth.trim()}`);
 }
 
 const template = readFileSync('./public/download.html', 'utf8')
@@ -16,7 +17,7 @@ const replacements = {
   WIN_LINK: `${url}Stethoscope%20Setup%20${pkg.version}.exe`,
   VERSION: pkg.version,
   BUILD_DATE: moment().format('MMMM Do YYYY'),
-  REVISION: revision,
+  REVISION: String(revision).substr(0, 7),
   REPO: pkg.repository.url
 }
 
