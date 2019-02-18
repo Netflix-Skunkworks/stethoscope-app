@@ -9,6 +9,7 @@ const settings = require('electron-settings')
 const serializeError = require('serialize-error')
 const initProtocols = require('./lib/protocolHandlers')
 const env = process.env.NODE_ENV || 'production'
+const loadReactDevTools = require('./lib/loadReactDevTools')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
 const IS_DEV = env === 'development'
@@ -68,6 +69,10 @@ const focusOrCreateWindow = () => {
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
     mainWindow.loadURL(BASE_URL)
   }
+
+  if (IS_DEV) {
+    loadReactDevTools(mainWindow)
+  }
 }
 
 async function createWindow () {
@@ -108,8 +113,12 @@ async function createWindow () {
 
   mainWindow = new BrowserWindow(windowPrefs)
 
+  if (IS_DEV) loadReactDevTools(BrowserWindow)
+
   // open developer console if env vars or args request
-  if (enableDebugger || DEBUG_MODE) mainWindow.webContents.openDevTools()
+  if (enableDebugger || DEBUG_MODE) {
+    mainWindow.webContents.openDevTools()
+  }
 
   updater = require('./updater')(env, mainWindow, log, server)
 

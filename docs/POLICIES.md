@@ -2,10 +2,6 @@
 
 Policies are a declarative way to describe your organization's security recommendations for endpoint devices. The default policy for Stethoscope can be found in the practices directory [default policy](https://github.com/Netflix-Skunkworks/stethoscope-app/blob/master/practices/policy.yaml).
 
-Though [osquery](https://osquery.io/) (the main mechanism Stethoscope uses to query device details) provides read access to [most aspects of a device](https://osquery.io/schema/3.2.6), we have chosen to disallow raw queries and limit queries to a predefined set of attributes and schemas to prevent potential abuse.
-
-If you would like access to data that osquery provides but Stethoscope does not, please file an issue.
-
 ## Specifying Requirements
 
 The specifics are explained in more detail below, but generally there are two main ways to express a requirement:
