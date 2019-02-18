@@ -29,7 +29,7 @@ const io = require('socket.io')(http, { wsEngine: 'ws' })
 
 setKmdEnv({
   NODE_ENV: process.env.STETHOSCOPE_ENV,
-  BASE_PATH: process.resourcesPath
+  FILE_BASE_PATH: process.resourcesPath
 })
 
 function precompile () {
