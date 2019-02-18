@@ -1,6 +1,6 @@
 {
   "name": "Stethoscope",
-  "version": "3.0.1",
+  "version": "3.0.3",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
@@ -101,7 +101,7 @@
   "scripts": {
     "start": "nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
-    "electron": "cross-env NODE_ENV=development electron .",
+    "electron": "cross-env STETHOSCOPE_ENV=development electron .",
     "electron:start": "node src/start-react",
     "react:start": "react-scripts start",
     "build": "rm -r dist/; react-scripts build && electron-builder -mwl",
@@ -139,7 +139,7 @@
     "helmet": "^3.9.0",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.10.0",
-    "kmd-script": "^0.0.5",
+    "kmd-script": "^0.0.6",
     "marked": "^0.3.7",
     "moment": "^2.19.3",
     "node-powershell": "^3.3.1",

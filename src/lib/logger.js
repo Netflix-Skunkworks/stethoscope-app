@@ -11,7 +11,7 @@ const { app } = require('electron')
 const winston = require('winston')
 const path = require('path')
 require('winston-daily-rotate-file')
-const IS_DEV = process.env.NODE_ENV === 'development'
+const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 
 let log
 // log path is %USERDATA%/Stethoscope/application-log-{YYYY-MM-DD}.log

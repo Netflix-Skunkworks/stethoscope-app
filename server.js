@@ -11,7 +11,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
-const { compile, run } = require('kmd-script/src')
+const { compile, run, setKmdEnv } = require('kmd-script/src')
 const glob = require('fast-glob')
 const { performance } = require('perf_hooks')
 
@@ -26,6 +26,11 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http, { wsEngine: 'ws' })
+
+setKmdEnv({
+  NODE_ENV: process.env.STETHOSCOPE_ENV,
+  FILE_BASE_PATH: process.resourcesPath
+})
 
 function precompile () {
   return glob(path.resolve(__dirname, `./sources/${process.platform}/*.sh`)).then(files => {

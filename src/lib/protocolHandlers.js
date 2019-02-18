@@ -11,7 +11,7 @@ const log = require('./logger')
 const applescript = require('./applescript')
 const { shell } = require('electron')
 const { MAC, WIN } = require('./platform')
-const env = process.env.NODE_ENV || 'production'
+const env = process.env.STETHOSCOPE_ENV || 'production'
 
 module.exports = function initProtocols (mainWindow) {
   const { checkForUpdates } = require('../updater')(env, mainWindow)

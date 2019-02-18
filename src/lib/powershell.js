@@ -1,7 +1,7 @@
 const { UNKNOWN } = require('../constants')
 const Shell = require('node-powershell')
 const log = require('./logger')
-const IS_DEV = process.env.NODE_ENV === 'development'
+const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 /*
   NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
 */

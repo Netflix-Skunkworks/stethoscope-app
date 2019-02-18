@@ -8,7 +8,7 @@ const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
 const settings = require('electron-settings')
 const serializeError = require('serialize-error')
 const initProtocols = require('./lib/protocolHandlers')
-const env = process.env.NODE_ENV || 'production'
+const env = process.env.STETHOSCOPE_ENV || 'production'
 const loadReactDevTools = require('./lib/loadReactDevTools')
 const findIcon = require('./lib/findIcon')(env)
 const startGraphQLServer = require('../server')
@@ -130,21 +130,19 @@ async function createWindow () {
   log.info('isFirstLaunch', isFirstLaunch)
 
   if (isFirstLaunch) {
-    const autoLauncher = new AutoLauncher(app.getName())
-    if (autoLauncher.shouldPromptToEnable()) {
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Auto Launch',
-        message: 'Would you like to automatically launch Stethoscope on start-up?',
-        buttons: ['Yes', 'No']
-      }, (buttonIndex) => {
-        if (buttonIndex === 0) {
-          autoLauncher.enable()
-        } else {
-          autoLauncher.disable()
-        }
-      })
-    }
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Auto Launch',
+      message: 'Would you like to automatically launch Stethoscope on start-up?',
+      buttons: ['Yes', 'No']
+    }, (buttonIndex) => {
+      const autoLauncher = new AutoLauncher(app.getName())
+      if (buttonIndex === 0) {
+        autoLauncher.enable()
+      } else {
+        autoLauncher.disable()
+      }
+    })
     isLaunching = false
   }
 
