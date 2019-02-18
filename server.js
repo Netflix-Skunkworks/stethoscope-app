@@ -21,6 +21,7 @@ const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const defaultPolicyServer = HOST
+const IS_DEV = process.env.NODE_ENV === 'development'
 
 const app = express()
 const http = require('http').Server(app)

@@ -99,7 +99,6 @@ describe('GraphQL', () => {
         friendlyName
         hardwareSerial
         stethoscopeVersion
-        osqueryVersion
 
         disks {
           label
