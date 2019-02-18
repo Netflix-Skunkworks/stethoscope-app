@@ -12,7 +12,7 @@ Opening the app will run a quick check of your device configuration and present 
 
 It does not automatically report device status to a central server, but can be configured to allow requests from particular web pages. This approach enables data collection and device-to-user mapping when people access certain web applications or go through integrated web authentication flows.
 
-The Stethoscope app is built using [Electron](https://electron.atom.io/), [osquery](https://osquery.io/), and [GraphQL](https://graphql.org/).
+The Stethoscope app is built using [Electron](https://electron.atom.io/), [kmd](https://github.com/Netflix-Skunkworks/kmd), and [GraphQL](https://graphql.org/).
 
 For examples of data reporting via a web application (in Chrome or Firefox), see the [stethoscope-examples](https://github.com/Netflix-Skunkworks/stethoscope-examples) repo.
 
@@ -53,15 +53,15 @@ Device information is never reported straight from the app to a central server. 
 
 ### Technical approach
 
-The Stethoscope app bundles the osqueryi executable for all supported platforms. Rather than running scheduled queries in the background with osqueryd, the Electron app can query osqueryi as needed as a child process, without elevated permissions.
+The Stethoscope app uses `kmd` to to execute and parse output from `bash`, `powershell`, and bundled executables (e.g. `bitlocker-status.exe`) to obtain system information. Rather than running scheduled queries in the background, `graphql` queries trigger execution of relevant scripts.
 
-For information not sufficiently covered with osquery, we maintain a small set of platform-specific shell scripts.
+The Electron app runs an `express` web server that is only accessible locally (127.0.0.1), not over the network. This web server presents a GraphQL api for device information and policy status.
 
-The Electron app also runs a web server that is only accessible locally, not over the network. This web server presents a GraphQL api for device information and policy status.
+Even though the server runs over HTTP, most browsers [carve out an exception for mixed content from 127.0.0.1](https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy). Webkit (Safari) does not currently conform to the spec; however, there is [an ongoing ticket](https://bugs.webkit.org/show_bug.cgi?id=171934) requesting they address this.
 
 ### Local device checks and instructions
 
-The app is built with a default policy, which specifies recommended OS versions and security settings: disk encryption, screensaver password, no remote login, etc. When you open the app, it will run the osquery device queries, evaluate the results against the policy, and show instructions for any recommended actions.
+The app is built with a default policy, which specifies recommended OS versions and security settings: disk encryption, screensaver password, no remote login, etc. When you open the app, it will run the `bash`/`powershell` device queries, evaluate the results against the policy, and show instructions for any recommended actions.
 
 This will work as a standalone checklist, without needing to report any data to a central server. In fact, it doesn’t even require internet connectivity.
 
