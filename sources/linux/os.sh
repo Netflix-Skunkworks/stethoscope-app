@@ -5,7 +5,7 @@ extract NAME="(.*)"
 save system.platform
 
 load output
-extract VERSION_ID=(.*)
+extract VERSION_ID="*([\d\.]+)"*
 save system.version
 remove output
 
