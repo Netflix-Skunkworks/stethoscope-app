@@ -21,7 +21,7 @@ const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
 const defaultPolicyServer = HOST
-const IS_DEV = process.env.NODE_ENV === 'development'
+const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 
 const app = express()
 const http = require('http').Server(app)
@@ -33,23 +33,23 @@ setKmdEnv({
 })
 
 function precompile () {
-  return glob(path.resolve(__dirname, `./sources/${process.platform}/*.sh`)).then(files => {
-    return files.map(file => {
-      const content = readFileSync(file, 'utf8')
-      const code = compile(content)
-      return code
-    })
-  })
+  const searchPath = path.resolve(__dirname, `./sources/${process.platform}/*.sh`)
+  return glob(searchPath)
+    .then(files =>
+      files.map(file =>
+        compile(readFileSync(file, 'utf8'))
+      )
+    )
 }
 
 // used to ensure that user is not shown multiple notifications for a login scan
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = async function startServer (env, log, language, appActions) {
+module.exports = async function startServer (env, log, language = 'en-US', appActions) {
   log.info('starting express server')
   const checks = await precompile()
-  const find = filePath => env === 'development' ? filePath : path.join(__dirname, filePath)
+  const find = filePath => IS_DEV ? filePath : path.join(__dirname, filePath)
 
   const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
   const defaultConfig = yaml.safeLoad(settingsHandle)
@@ -69,9 +69,10 @@ module.exports = async function startServer (env, log, language, appActions) {
     policyServer = defaultPolicyServer
   } = defaultConfig
 
+  // wide open in dev, limited to hosts specified in './practices/config.yaml' in production
   const corsOptions = {
     origin (origin, callback) {
-      if (env === 'development') return callback(null, true)
+      if (IS_DEV) return callback(null, true)
       if (allowHosts.includes(origin)) return callback(null, true)
       if (hostLabels.length) {
         const isAllowed = hostLabels
@@ -97,7 +98,7 @@ module.exports = async function startServer (env, log, language, appActions) {
     }
   }
 
-  if (env === 'development') {
+  if (IS_DEV) {
     const { graphiqlExpress } = require('graphql-server-express')
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
@@ -115,6 +116,7 @@ module.exports = async function startServer (env, log, language, appActions) {
     const remote = origin !== 'stethoscope://main'
     let remoteLabel
 
+    // Try to find the host label to display in app ("Last scanned by X")
     if (remote) {
       try {
         const matchHost = ({ pattern }) => (new RegExp(pattern)).test(origin)
@@ -127,8 +129,13 @@ module.exports = async function startServer (env, log, language, appActions) {
     }
 
     let { query, variables: policy, sessionId = false } = req[key]
+    // native notifications are only shown for external requests and
+    // are throttled by the users's session id
     let showNotification = sessionId && !alertCache.has(sessionId)
     const start = performance.now()
+    // TODO each of these checks should probably be individually executed
+    // by relecvant resolvers. Since it is currently super fast, there is no
+    // real performance penalty for running all checks on each request
     const checkData = await Promise.all(checks.map(async script => {
       const response = await run(script)
       return response
@@ -136,6 +143,8 @@ module.exports = async function startServer (env, log, language, appActions) {
     const total = performance.now() - start
 
     context.kmdResponse = extend(true, {}, ...checkData)
+
+    policy = policy || {}
 
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)
@@ -145,6 +154,7 @@ module.exports = async function startServer (env, log, language, appActions) {
       policy = JSON.parse(policy)
     }
 
+    // tell the app if a policy was passed to display scanning status
     if (Object.keys(policy).length) {
       // show the scan is happening in the UI
       io.sockets.emit('scan:init', { remote, remoteLabel })
@@ -154,6 +164,7 @@ module.exports = async function startServer (env, log, language, appActions) {
       const { data = {} } = result
       let scanResult = { noResults: true }
 
+      // update the tray icon if a policy result is in the response
       if (data.policy && data.policy.validate) {
         appActions.setScanStatus(data.policy.validate.status)
         scanResult = { result, remote, remoteLabel, policy, showNotification }
@@ -227,7 +238,8 @@ module.exports = async function startServer (env, log, language, appActions) {
   })
 
   const serverInstance = http.listen(PORT, '127.0.0.1', () => {
-    console.log(`local server listening on ${PORT}`)
+    console.log(`GraphQL server listening on ${PORT}`)
+    IS_DEV && console.log(`Explore the schema: http://127.0.0.1:${PORT}/graphiql`)
     serverInstance.emit('server:ready')
   })
 

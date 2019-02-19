@@ -1,3 +1,19 @@
+/**
+ * main entry point for the electron app. This file configures and initializes
+ * the entire application which includes:
+ *  - Handle launch/deeplink events
+ *  - Initialize custom protocols used within the app (e.g. app://foo, ps://bar)
+ *  - Initialize auto launch behavior
+ *  - Create the BrowserWindow (stored as global.app for use throughout the app)
+ *  - initialize app menus and dock/tray behavior
+ *  - Start the GraphQL (express) server
+ *  - handle server triggered events (e.g. changing app icon based on policy result)
+ *  - Handle uncaught exceptions in any part of the app
+ *  - Handle IPC calls from other parts of the application
+ *    - 'scan:init' - Automatic update triggered (resizes app, displays progress)
+ *    - 'app:loaded' - Notify when client side app is loaded
+ *    - 'download:completed' - update has finished downloading
+ */
 const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
 const path = require('path')
 const url = require('url')
@@ -48,6 +64,7 @@ const windowPrefs = {
   }
 }
 
+// use build/ assets in production, webpack HMR server in dev
 const BASE_URL = process.env.ELECTRON_START_URL || url.format({
   pathname: path.join(__dirname, '/../build/index.html'),
   protocol: 'file:',
@@ -69,13 +86,10 @@ const focusOrCreateWindow = () => {
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
     mainWindow.loadURL(BASE_URL)
   }
-
-  if (IS_DEV) {
-    loadReactDevTools(mainWindow)
-  }
 }
 
 async function createWindow () {
+  // used to show initial launch messages to user
   if (!settings.has('userHasLaunchedApp')) {
     isFirstLaunch = true
     settings.set('userHasLaunchedApp', true)
@@ -105,7 +119,7 @@ async function createWindow () {
 
   // wait for process to load before hiding in dock, prevents the app
   // from flashing into view and then hiding
-  if (!IS_DEV && IS_MAC) setTimeout(() => app.dock.hide(), 0)
+  if (!IS_DEV && IS_MAC) setImmediate(() => app.dock.hide())
   // windows detection of deep link path
   if (IS_WIN) deeplinkingUrl = process.argv.slice(1)
   // only allow resize if debugging production build
@@ -114,12 +128,12 @@ async function createWindow () {
   mainWindow = new BrowserWindow(windowPrefs)
 
   if (IS_DEV) loadReactDevTools(BrowserWindow)
-
   // open developer console if env vars or args request
   if (enableDebugger || DEBUG_MODE) {
     mainWindow.webContents.openDevTools()
   }
 
+  // required at run time so dependencies can be injected
   updater = require('./updater')(env, mainWindow, log, server)
 
   if (isLaunching) {
@@ -268,6 +282,7 @@ app.on('ready', () => setTimeout(() => {
   })
 
   if (launchIntoUpdater) {
+    // triggered via stethoscope://update app link
     log.info(`Launching into updater: ${launchIntoUpdater}`)
     updater.checkForUpdates(env, mainWindow).catch(err =>
       log.error(`start:launch:check for updates exception${err}`)

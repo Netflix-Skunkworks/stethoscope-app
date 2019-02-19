@@ -1,3 +1,7 @@
+/**
+ * Used in dev - polls for create-react-app HMR server readyness,
+ * triggers `npm run electron` once react is ready
+ */
 const net = require('net')
 const { spawn } = require('child_process')
 const os = require('os')
@@ -13,7 +17,8 @@ const tryConnection = () => {
   client.connect({ port }, () => {
     client.end()
     if (!startedElectron) {
-      console.log('starting electron')
+      console.log(`npm start react:start - react ready on http://127.0.0.1:${port}`)
+      console.log('npm start electron:start')
       startedElectron = true
       const cmd = os.platform() === 'win32' ? 'npm.cmd' : 'npm'
       const appServer = spawn(cmd, ['run', 'electron'], {
