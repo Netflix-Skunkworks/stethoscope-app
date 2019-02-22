@@ -9,9 +9,8 @@ module.exports = {
     return kmdResponse.disks.encryption === "true"
   },
 
-  // TODO update once data source is in place
-  async remoteLogin (root, args, context) {
-    return UNKNOWN
+  async remoteLogin (root, args, { kmdResponse }) {
+    return !!kmdResponse.remoteLogin
   },
 
   async automaticUpdates (root, args, { kmdResponse }) {
