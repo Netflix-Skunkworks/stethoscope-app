@@ -45,6 +45,10 @@ const Device = {
     return kmdResponse.system.version
   },
 
+  osqueryVersion (root, args, context) {
+    return UNSUPPORTED
+  },
+
   osBuild (root, args, { kmdResponse }) {
     return kmdResponse.system.build
   },
@@ -115,10 +119,6 @@ const Device = {
       .filter(({ mac }) => !NetworkInterface.isLocal(mac))
       .filter(({ mac }) => !NetworkInterface.isMulticast(mac))
       .filter(({ mac }) => !NetworkInterface.isPlaceholder(mac))
-  },
-
-  osqueryVersion (root, args, context) {
-    return null
   },
 
   stethoscopeVersion (root, args, context) {

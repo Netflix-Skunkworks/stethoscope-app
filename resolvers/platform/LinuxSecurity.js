@@ -1,31 +1,22 @@
-// const OSQuery = require('../../sources/osquery')
+const { UNKNOWN } = require('../../src/constants')
 
 module.exports = {
-  async firewall (root, args, context) {
-    /*
-      select * form iptables
-     */
-    const ufwRules = await OSQuery.all('iptables', {
-      fields: ['chain'],
-      where: 'chain like "%ufw%" and target in ("DROP", "REJECT")'
-    })
-    return Array.isArray(ufwRules) && ufwRules.length > 0
+  async firewall (root, args, { kmdResponse }) {
+    return kmdResponse.firewallEnabled === "1"
   },
 
-  async diskEncryption (root, args, context) {
-    const disks = await OSQuery.all('disk_encryption', {
-      fields: ['encrypted'],
-      where: 'name = (select device from mounts where path = "/")'
-    })
-    return disks.every(({ encrypted }) => encrypted === "1")
+  async diskEncryption (root, args, { kmdResponse }) {
+    return kmdResponse.disks.encryption === "true"
   },
 
-  async remoteLogin (root, args, context) {
-    const sshEnabled = await OSQuery.all('processes', {
-      fields: ['*'],
-      where: 'name LIKE "%sshd%"'
-    })
+  async remoteLogin (root, args, { kmdResponse }) {
+    return !!kmdResponse.remoteLogin
+  },
 
-    return Array.isArray(sshEnabled) && sshEnabled.length > 0
+  async automaticUpdates (root, args, { kmdResponse }) {
+    if (kmdResponse.updates) {
+      return updates.criticalUpdateInstall === "1"
+    }
+    return UNKNOWN
   }
 }
