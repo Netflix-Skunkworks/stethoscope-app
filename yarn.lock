@@ -7090,9 +7090,9 @@ kleur@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-2.0.2.tgz#b704f4944d95e255d038f0cb05fb8a602c55a300"
 
-kmd-script@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/kmd-script/-/kmd-script-0.0.5.tgz#648e9a6b55cc3903d2d6363f549134c2de0a9522"
+kmd-script@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/kmd-script/-/kmd-script-0.0.7.tgz#3120e620ef3e3d9ae86d2bb1070d2f2c848f74e7"
   dependencies:
     debug "^4.1.1"
     dot-prop "^4.2.0"
