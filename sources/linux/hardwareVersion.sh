@@ -2,12 +2,12 @@
 
 exec cat /sys/devices/virtual/dmi/id/board_vendor /sys/devices/virtual/dmi/id/board_name
 save output
-extract (\w+)\n
+extract (.+)\n
 defaultTo Unavailable
 save boardVendor
 
 load output
-extract .+\n(\w+)
+extract .+\n(.+)
 defaultTo Unavailable
 save boardName
 

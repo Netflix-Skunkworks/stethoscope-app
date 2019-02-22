@@ -11,4 +11,3 @@ defaultTo 0
 save updates.criticalUpdateInstall
 
 remove output
-save updates
