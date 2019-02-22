@@ -2,7 +2,7 @@ const { UNKNOWN } = require('../../src/constants')
 
 module.exports = {
   async firewall (root, args, { kmdResponse }) {
-    return kmdResponse.firewallEnabled === "true"
+    return kmdResponse.firewallEnabled === "1"
   },
 
   async diskEncryption (root, args, { kmdResponse }) {
