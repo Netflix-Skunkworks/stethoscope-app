@@ -1,5 +1,5 @@
 const { GraphQLScalarType } = require('graphql')
-const semver = require('semver')
+const semver = require('../src/lib/patchedSemver')
 
 // NumericRange is an alias for the Semver scalar type
 

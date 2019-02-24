@@ -1,4 +1,4 @@
-const semver = require('semver')
+const semver = require('../../src/lib/patchedSemver')
 const Device = require('../platform/WindowsDevice')
 const pkg = require('../../package.json')
 const { NUDGE, UNKNOWN } = require('../../src/constants')

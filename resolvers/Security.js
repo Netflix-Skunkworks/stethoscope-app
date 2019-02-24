@@ -1,4 +1,4 @@
-const semver = require('semver')
+const semver = require('../src/lib/patchedSemver')
 const pkg = require('../package.json')
 const { NUDGE, UNSUPPORTED } = require('../src/constants')
 const { Security: PlatformResolvers } = require('./platform/')

@@ -1,4 +1,4 @@
-const semver = require('semver')
+const semver = require('../../src/lib/patchedSemver')
 const Device = require('./MacDevice')
 const pkg = require('../../package.json')
 const { exec } = require('child_process')
