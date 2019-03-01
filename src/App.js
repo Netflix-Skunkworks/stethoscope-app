@@ -283,11 +283,7 @@ class App extends Component {
   }
 
   getRecentLogs = () => {
-    const today = moment().format('YYYY-MM-DD')
-    const path = `${logPath}/dev-application-${today}.log`
-    readLastLines.read(path, 10).then(recentLogs =>
-      this.setState({ recentLogs })
-    ).catch(err => console.error(err))
+    return '';
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })
