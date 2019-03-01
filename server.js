@@ -137,8 +137,12 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     // by relecvant resolvers. Since it is currently super fast, there is no
     // real performance penalty for running all checks on each request
     const checkData = await Promise.all(checks.map(async script => {
-      const response = await run(script)
-      return response
+      try {
+        const response = await run(script)
+        return response
+      } catch (e) {
+        return ''
+      }
     }))
     const total = performance.now() - start
 
