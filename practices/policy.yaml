@@ -1,14 +1,14 @@
 osVersion:
   darwin:
     # High Sierra
-    ok: ">=10.13.6"
+    ok: ">=10.14.3"
     # Sierra
     nudge: ">=10.12.6"
   win32:
-    # Version 1803 - April 2018 Update
-    ok: ">=10.0.17134"
-    # Version 1803 - Redstone 3 Fall Creators Update
-    nudge: ">=10.0.16299"
+    # Version 1809
+    ok: ">=10.0.17763"
+    # Version 1803
+    nudge: ">=10.0.17134"
   awsWorkspace:
     ok: ">=10.0.14393"
     nudge: ">=10.0.10240"
