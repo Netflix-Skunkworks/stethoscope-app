@@ -182,6 +182,11 @@ practices:
         1. Ensure that "Users must enter a user name and password to use this computer" is checked.
         1. Click "Apply".
         1. Click "OK".
+      linux: |
+        1. From the upper-right drop-down menu, click the Settings icon.
+        1. In the left-hand pane, select Privacy.
+        1. Click on ScreenLock
+        1. Ensure that "Automatic Screen Lock" is set to ON.
 
   screenIdle:
     title:  >
@@ -198,6 +203,12 @@ practices:
         1. Click Desktop & Screen Saver.
         1. Click the [Screen Saver](open:///System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/) tab.
         1. Adjust the "Start after" dropdown to less than or equal to the number of seconds shown below.
+        {{securitySetting "screenIdle"}}
+      linux: |
+        1. From the upper-right drop-down menu, click the Settings icon.
+        1. In the left-hand pane, select Privacy.
+        1. Click on ScreenLock
+        1. Adjust the "Lock screen after blank" dropdown to less than or equal to the number of seconds shown below.
         {{securitySetting "screenIdle"}}
 
   osVersion:
