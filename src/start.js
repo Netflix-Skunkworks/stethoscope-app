@@ -141,8 +141,6 @@ async function createWindow () {
     isLaunching = false
   }
 
-  log.info('isFirstLaunch', isFirstLaunch)
-
   if (isFirstLaunch) {
     dialog.showMessageBox({
       type: 'info',

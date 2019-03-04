@@ -71,16 +71,17 @@ class Device extends Component {
 
       if (hasResults) {
         return (
-          <Action {...actionProps}>
-            <ul className='result-list'>
+          <Action {...actionProps} key={`action-container-${action.name}`}>
+            <ul className='result-list' key={`action-ul-${action.name}`}>
               {results.map(({ name, url, status, description }) => {
                 const iconProps = status === 'PASS'
                   ? { name: 'checkmark', color: '#bbd8ca' }
                   : { name: 'blocked', color: '#a94442' }
+
                 return (
                   <li
                     className='result-list-item'
-                    key={name}
+                    key={`action-li-${action.name}`}
                   >
                     <div className='result-heading'>
                       <strong>
@@ -106,7 +107,7 @@ class Device extends Component {
         )
       } else {
         return (
-          <Action {...actionProps} />
+          <Action {...actionProps} key={`action-container-${action.name}`} />
         )
       }
     })
@@ -178,7 +179,7 @@ class Device extends Component {
           <h4>{org} {this.props.strings.policyDescription}</h4>
 
           <div className='action-list'>
-            <ul>
+            <ul key="action-list-main-ul">
               { this.actions(device.critical, 'critical', device) }
               { this.actions(device.suggested, 'suggested', device) }
               { this.actions(device.done, 'done', device) }

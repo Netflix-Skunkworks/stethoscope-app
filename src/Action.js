@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
-import Handlebars from 'handlebars'
 import semver from 'semver'
 import showdown from 'showdown'
+import Handlebars from 'handlebars/dist/handlebars.min.js';
 
 const converter = new showdown.Converter()
 
@@ -186,7 +186,11 @@ class Action extends Component {
     }
 
     return (
-      <li className={type} key={action.title} ref={el => { this.el = el }}>
+      <li
+        className={type}
+        key={String(action.title).replace(/[^a-zA-Z]+/g, '')}
+        ref={el => { this.el = el }}
+      >
         <span className='title' onClick={this.toggleDescription}>
           <ActionIcon
             className='action-icon'

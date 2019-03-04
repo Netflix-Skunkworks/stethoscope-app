@@ -109,8 +109,11 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
   }
 
   app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
-    req.setTimeout(60000)
+    // set upper boundary on scan time
+    const MAX_SCAN_SECONDS = 45
+    req.setTimeout(MAX_SCAN_SECONDS * 1000)
 
+    // allow GET/POST requests and determine what property to use
     const key = req.method === 'POST' ? 'body' : 'query'
     const origin = req.get('origin')
     const remote = origin !== 'stethoscope://main'
@@ -133,40 +136,47 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     // are throttled by the users's session id
     let showNotification = sessionId && !alertCache.has(sessionId)
     const start = performance.now()
-    // TODO each of these checks should probably be individually executed
+    // TODO each of these checks should be individually executed
     // by relecvant resolvers. Since it is currently super fast, there is no
     // real performance penalty for running all checks on each request
+    // this would require loading the script files differently so the resolvers
+    // could execute the appropriate pre-compiled scripts
     const checkData = await Promise.all(checks.map(async script => {
-      try {
-        const response = await run(script)
-        return response
-      } catch (e) {
-        return ''
-      }
+      try { return await run(script) }
+      catch (e) { return '' }
     }))
+    // perf data
     const total = performance.now() - start
 
     context.kmdResponse = extend(true, {}, ...checkData)
-
-    policy = policy || {}
-
+    // throttle native push notifications to user by session id
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)
     }
 
+    // policy needs to be an object, regardless of whether or not one was
+    // supplied in the request, parse if String was supplied
     if (typeof policy === 'string') {
       policy = JSON.parse(policy)
+    } else {
+      policy = Object.assign({}, policy)
     }
 
-    // tell the app if a policy was passed to display scanning status
+    // if a policy was passed, tell the app display scanning status
     if (Object.keys(policy).length) {
       // show the scan is happening in the UI
       io.sockets.emit('scan:init', { remote, remoteLabel })
     }
 
-    graphql(schema, query, null, context, policy).then((result) => {
-      const { data = {} } = result
+    graphql(schema, query, null, context, policy).then(result => {
+      const { data = {}, errors } = result
       let scanResult = { noResults: true }
+
+      if (errors && !remote) {
+        const errMessage = errors.reduce((p, c) => p + c + '\n', '')
+        io.sockets.emit('scan:error', { error: errMessage })
+        throw new Error(errMessage)
+      }
 
       // update the tray icon if a policy result is in the response
       if (data.policy && data.policy.validate) {
@@ -181,7 +191,7 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
       res.json(result)
     }).catch(err => {
       log.error(err.message)
-      io.sockets.emit('scan:error')
+      io.sockets.emit('scan:error', { error: err.message })
       res.status(500).json({ error: err.message })
     })
   })

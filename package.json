@@ -99,7 +99,7 @@
     ]
   },
   "scripts": {
-    "start": "nf start -p 12000",
+    "start": "cross-env FORCE_COLOR=true nf start -p 12000",
     "test": "react-scripts test --env=jsdom",
     "electron": "cross-env STETHOSCOPE_ENV=development electron .",
     "electron:start": "node src/start-react",
@@ -118,6 +118,7 @@
     "applescript": "^1.0.0",
     "auto-launch": "^5.0.5",
     "body-parser": "^1.18.2",
+    "chalk": "^2.4.2",
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",

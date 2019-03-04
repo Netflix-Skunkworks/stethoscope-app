@@ -18,13 +18,20 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch (error, info) {
-    this.setState({ hasError: true })
+    this.setState({ hasError: true, error: serializeError(error) })
     log.error(JSON.stringify(serializeError(error)))
   }
 
   render () {
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>
+      return (
+        <React.Fragment>
+          <h1>Something went wrong.</h1>
+          <pre>
+            {JSON.stringify(this.state.error, null, 3)}
+          </pre>
+        </React.Fragment>
+      )
     }
     return this.props.children
   }
