@@ -16,7 +16,7 @@ module.exports = {
 
   async automaticUpdates (root, args, { kmdResponse }) {
     if (kmdResponse.updates) {
-      return updates.criticalUpdateInstall === "1"
+      return kmdResponse.updates.criticalUpdateInstall === "1"
     }
     return UNKNOWN
   },
