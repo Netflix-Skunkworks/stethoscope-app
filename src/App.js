@@ -18,16 +18,13 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = MAC
-let shell; let ipcRenderer; let readLastLines; let log; let remote; let settings; let app; let logPath = ''
+let shell; let ipcRenderer; let log; let remote; let settings;
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
   shell = window.require('electron').shell
   remote = window.require('electron').remote
-  readLastLines = window.require('read-last-lines')
   settings = window.require('electron-settings')
-  app = remote.getGlobal('app')
-  logPath = app.getPath('userData')
   log = remote.getGlobal('log')
   platform = os.platform()
   ipcRenderer = window.require('electron').ipcRenderer
@@ -47,7 +44,6 @@ class App extends Component {
     scanIsRunning: false,
     loading: false,
     lastScanDuration: 0,
-    recentLogs: '',
     // determines loading screen language
     remoteScan: false,
     // surface which app performed the most recent scan
@@ -71,8 +67,6 @@ class App extends Component {
 
     this.setState({ recentHang: settings.get('recentHang', 0) > 1 })
 
-    this.getRecentLogs()
-
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
     await this.loadPractices()
@@ -87,7 +81,6 @@ class App extends Component {
     // trigger scan from main process
     ipcRenderer.on('autoscan:start', ({ notificationOnViolation = false }) => {
       if (!this.state.scanIsRunning) {
-        console.log('autoscan')
         ipcRenderer.send('scan:init')
         if (Object.keys(this.state.policy).length) {
           this.scan()
@@ -100,6 +93,8 @@ class App extends Component {
     socket.on('scan:init', this.onScanInit)
     // setup a socket io listener to refresh the app when a scan is performed
     socket.on('scan:complete', this.onScanComplete)
+    // TODO handle errors that happen on local scans
+    // socket.on('scan:error', this.onScanError)
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({ focused: true }))
     window.addEventListener('blur', () => this.setState({ focused: false }))
@@ -132,6 +127,11 @@ class App extends Component {
       // reset this so downloading can start again
       this.downloadStartSent = false
     })
+  }
+
+  onScanError = ({ error }) => {
+    this.errorThrown = true
+    throw new Error(error)
   }
 
   onScanInit = ({ remote, remoteLabel }) => {
@@ -275,19 +275,11 @@ class App extends Component {
       }).catch(err => {
         console.log(err)
         log.error(JSON.stringify(err))
-        let message = new Error('Request timeout')
+        let message = new Error(err.message)
         if (err.errors) message = new Error(JSON.stringify(err.errors))
         this.handleErrorGraphQL({ message })
       })
     })
-  }
-
-  getRecentLogs = () => {
-    const today = moment().format('YYYY-MM-DD')
-    const path = `${logPath}/dev-application-${today}.log`
-    readLastLines.read(path, 10).then(recentLogs =>
-      this.setState({ recentLogs })
-    ).catch(err => console.error(err))
   }
 
   highlightRescanButton = event => this.setState({ highlightRescan: true })

@@ -1,3 +1,3 @@
 #!/usr/bin/env kmd
-exec fdesetup isactive
+exec /usr/bin/fdesetup isactive
 save disks.fileVaultEnabled
