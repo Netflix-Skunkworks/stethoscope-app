@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
-import semver from 'semver'
+import semver from './lib/patchedSemver'
 import showdown from 'showdown'
 import Handlebars from 'handlebars/dist/handlebars.min.js';
 
