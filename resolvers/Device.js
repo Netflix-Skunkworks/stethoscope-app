@@ -42,7 +42,8 @@ const Device = {
   },
 
   osVersion (root, args, { kmdResponse }) {
-    return kmdResponse.system.version
+    const [ major, minor, patch = 0 ] = String(kmdResponse.system.version).split('.')
+    return `${major}.${minor}.${patch}`
   },
 
   osqueryVersion (root, args, context) {
