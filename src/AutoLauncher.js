@@ -1,12 +1,16 @@
 const settings = require('electron-settings')
 const AutoLaunch = require('auto-launch')
 const config = require('./config.json')
+const os = require('os');
 
 class AutoLauncher {
   constructor () {
     const autoLaunchOpts = {
       name: 'Stethoscope',
       isHidden: true
+    }
+    if (os.platform() === 'linux' && process.env.APPIMAGE) {
+      autoLaunchOpts.path = process.env.APPIMAGE
     }
     this.stethoscopeAutoLauncher = new AutoLaunch(autoLaunchOpts)
   }
