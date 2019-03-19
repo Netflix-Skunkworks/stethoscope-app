@@ -166,7 +166,7 @@
     "benchmark": "^2.1.4",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
-    "electron": "^2.0.6",
+    "electron": "^2.0.18",
     "electron-builder": "20.22.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
