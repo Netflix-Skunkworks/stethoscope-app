@@ -41,7 +41,7 @@ class Device extends Component {
   actions (actions, type, device) {
     const status = type === 'done' ? 'PASS' : 'FAIL'
 
-    return actions.map((action) => {
+    return actions.map((action, index) => {
       const actionProps = {
         action,
         device,
@@ -51,7 +51,8 @@ class Device extends Component {
         onExpandPolicyViolation: this.props.onExpandPolicyViolation,
         platform: this.props.platform,
         policy: this.props.policy,
-        security: this.props.security
+        security: this.props.security,
+        expandedByDefault: type === 'critical' && index === 0
       }
 
       const hasResults = Array.isArray(action.results)
