@@ -10,7 +10,7 @@ const converter = new showdown.Converter()
 
 class Action extends Component {
   state = {
-    showDescription: false
+    showDescription: this.props.expandedByDefault
   }
 
   constructor (props) {
