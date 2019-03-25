@@ -149,6 +149,10 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     const total = performance.now() - start
 
     context.kmdResponse = extend(true, {}, ...checkData)
+    // AWS workspace override
+    if (context.kmdResponse.system.platform.includes('Server 2016 Datacenter')) {
+      context.kmdResponse.system.platform = 'awsWorkspace'
+    }
     // throttle native push notifications to user by session id
     if (sessionId && !alertCache.has(sessionId)) {
       alertCache.set(sessionId, true)

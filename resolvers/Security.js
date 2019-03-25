@@ -102,7 +102,7 @@ const Security = {
     let plat = context.platform
     const info = context.kmdResponse.system
     // aws workspaces are on a different version than Windows 10
-    if (info.version.includes('amazon')) {
+    if (info.platform === 'awsWorkspace') {
       plat = 'awsWorkspace'
     }
 

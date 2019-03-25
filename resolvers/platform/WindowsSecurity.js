@@ -9,14 +9,19 @@ const WindowsSecurity = {
   },
 
   async remoteLogin (root, args, { kmdResponse }) {
-    // // aws workspaces require remote login
-    // if (info.version.includes('amazon')) {
-    //   return false
-    // }
+    // aws workspaces require remote login
+    if (kmdResponse.system.platform === 'awsWorkspace') {
+      return false
+    }
     return kmdResponse.sharingPreferences.remoteDesktopDisabled !== '1'
   },
 
   async diskEncryption (root, args, { kmdResponse }) {
+    // workspaces don't support disk encryption - bail
+    if (kmdResponse.system.platform === 'awsWorkspace') {
+      return true
+    }
+
     if (kmdResponse.bitlockerStatus) {
       return kmdResponse.bitlockerStatus === 'ON'
     }
@@ -25,9 +30,9 @@ const WindowsSecurity = {
 
   async screenLock (root, args, { kmdResponse }) {
     // // screen lock creates problems in workspaces
-    // if (info.version.includes('amazon')) {
-    //   return UNKNOWN
-    // }
+    if (kmdResponse.system.platform === 'awsWorkspace') {
+       return UNKNOWN
+    }
     const { windowsMaxScreenLockTimeout = 600 } = args
     const { chargingTimeout, batteryTimeout } = kmdResponse
 
