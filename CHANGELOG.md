@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.5](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.0.5)
+
+### Fixed
+- kmd requiring node to be installed on user's machine
+- Lack of proper error handling when scan fails
+- Timing destructuring error
+- Issue reading logs when files haven't been created
+- Update Electron to 2.0.18 to fix security issue
+- Semver parsing issue
+
+### Added
+- Debugger app link - [stethoscope://debugger](stethoscope://debugger)
+- AWS Workspace support
+- Auto-expand first failing item
+
+----
+
+## [3.0.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.0.1)
+
+### Removed
+- OSquery dependency, it's been a good run, but not a great fit for our use-case. We switched to [`kmd`](https://github.com/Netflix-Skunkworks/kmd)
+
+----
+
 ## [2.1.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v2.1.0)
 
 ### Fixed

@@ -138,7 +138,8 @@ export default class Stethoscope {
             return res
         }
       })
-      .then(({ errors, data = {}, extensions: { timing } }) => {
+      .then(({ errors, data = {}, extensions = {} }) => {
+        const { timing = { total: 0 }} = extensions
         const { policy, device } = data
         if (errors) {
           reject({ errors })

@@ -1,15 +1,7 @@
-/**
- * Global Logger, pipes appropriate logs to file in dev and production incl.
- * auto-rotation.
- *
- *   // visible in dev
- *   log.info('foo', true, { hello: 'world' })
- *   // visible in dev and prod
- *   log.error(new Error("ohnos"))
- */
 const { app } = require('electron')
 const winston = require('winston')
 const path = require('path')
+const moment = require('moment')
 const chalk = require('chalk')
 require('winston-daily-rotate-file')
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
@@ -30,14 +22,13 @@ const logColors = ['red', 'yellow', 'cyan', 'magenta']
 // change if you want more than 'error' and 'warn'
 const productionLogs = logLevels.slice(0, 2)
 
-
-
 if (!global.log) {
+  const filename = `${envPrefix}application-%DATE%.log`
   log = winston.createLogger({
     format: winston.format.simple(),
     transports: [
       new (winston.transports.DailyRotateFile)({
-        filename: `${envPrefix}application-%DATE%.log`,
+        filename,
         datePattern: 'YYYY-MM-DD',
         dirname: path.resolve(userDataPath),
         zippedArchive: true,
@@ -46,6 +37,13 @@ if (!global.log) {
       })
     ]
   })
+
+  log.getLogFile = function() {
+    return path.join(
+      path.resolve(userDataPath),
+      filename.replace('%DATE%', moment().format('YYYY-MM-DD'))
+    )
+  }
 
   // support multiple arguments to winston logger
   const wrapper = ( original, level ) => {

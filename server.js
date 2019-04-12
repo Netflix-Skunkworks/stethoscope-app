@@ -13,6 +13,7 @@ const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
 const { compile, run, setKmdEnv } = require('kmd-script/src')
 const glob = require('fast-glob')
+const pkg = require('./package.json')
 const { performance } = require('perf_hooks')
 
 const { graphql } = require('graphql')
@@ -29,7 +30,8 @@ const io = require('socket.io')(http, { wsEngine: 'ws' })
 
 setKmdEnv({
   NODE_ENV: process.env.STETHOSCOPE_ENV,
-  FILE_BASE_PATH: process.resourcesPath + path.sep
+  FILE_BASE_PATH: process.resourcesPath + path.sep,
+  NODE_PATH: process.execPath
 })
 
 function precompile () {
@@ -107,6 +109,30 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
   const context = {
     platform: process.platform || os.platform()
   }
+
+  app.get('/debugger', cors(corsOptions), (req, res) => {
+    appActions.enableDebugger()
+    appActions.requestLogPermission(req.get('origin')).then(async () => {
+      const file = fs.readFileSync(log.getLogFile())
+      const checkData = await Promise.all(checks.map(async script => {
+        try { return await run(script) }
+        catch (e) { return '' }
+      }))
+      const noColor = String(file).replace(/\[[\d]+m?:?/g, '')
+      const out = `Stethoscope version: ${pkg.version}
+
+LOGS
+==============================
+${noColor}
+DEVICE DATA
+==============================
+${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
+
+      res.send(out)
+    }).catch(() => {
+      res.status(403).send('ACCESS DENIED')
+    })
+  })
 
   app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
     // set upper boundary on scan time

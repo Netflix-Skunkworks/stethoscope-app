@@ -40,6 +40,7 @@ let appStartTime = Date.now()
 let server
 let updater
 let launchIntoUpdater = false
+let launchIntoDebugger = false
 let deeplinkingUrl
 let isLaunching = true
 let isFirstLaunch = false
@@ -72,7 +73,7 @@ const BASE_URL = process.env.ELECTRON_START_URL || url.format({
 })
 
 // process command line arguments
-const enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
+let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
 const focusOrCreateWindow = () => {
@@ -138,6 +139,9 @@ async function createWindow () {
 
   if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
+    // check for updates in background
+    const EVERY_DAY = 86400 * 1000
+    setInterval(() => updater.checkForUpdates({}, {}, {}, true), EVERY_DAY)
     isLaunching = false
   }
 
@@ -176,6 +180,23 @@ async function createWindow () {
     },
     requestUpdate () {
       updater.checkForUpdates()
+    },
+    enableDebugger: enableAppDebugger,
+    requestLogPermission(origin) {
+      return new Promise((resolve, reject) => {
+        dialog.showMessageBox({
+          type: 'info',
+          title: 'Allow Access',
+          message: `Will you allow your Stethoscope log files to be sent to ${origin}?`,
+          buttons: ['Yes', 'No']
+        }, (buttonIndex) => {
+          if (buttonIndex === 0) {
+            resolve()
+          } else {
+            reject()
+          }
+        })
+      })
     }
   }
 
@@ -261,6 +282,13 @@ async function createWindow () {
 
 global.app = app
 
+function enableAppDebugger() {
+  if (mainWindow) {
+    mainWindow.webContents.openDevTools()
+    mainWindow.setResizable(true)
+  }
+}
+
 // wrap ready callback in 0-delay setTimeout to reduce serious jank
 // issues on Windows
 app.on('ready', () => setTimeout(() => {
@@ -302,6 +330,15 @@ app.on('open-url', (event, url) => {
 
   if (url.includes('update')) {
     launchIntoUpdater = true
+  }
+
+  if (url.includes('debugger')) {
+    if (!mainWindow) {
+      enableDebugger = true
+      createWindow()
+    } else {
+      enableAppDebugger()
+    }
   }
 
   if (mainWindow) {

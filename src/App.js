@@ -94,7 +94,7 @@ class App extends Component {
     // setup a socket io listener to refresh the app when a scan is performed
     socket.on('scan:complete', this.onScanComplete)
     // TODO handle errors that happen on local scans
-    // socket.on('scan:error', this.onScanError)
+    socket.on('scan:error', this.onScanError)
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({ focused: true }))
     window.addEventListener('blur', () => this.setState({ focused: false }))
@@ -131,6 +131,7 @@ class App extends Component {
 
   onScanError = ({ error }) => {
     this.errorThrown = true
+    log.error("Scan error", error)
     throw new Error(error)
   }
 

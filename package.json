@@ -1,6 +1,6 @@
 {
   "name": "Stethoscope",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
@@ -107,11 +107,12 @@
     "build": "rm -r dist/; react-scripts build && electron-builder -mwl",
     "postinstall": "electron-builder install-app-deps",
     "build:react": "react-scripts build && node update-download-page.js",
-    "build:mac": "rm -r dist/; npm run build:react && npm run build:electron -m && npm run test:spectron",
-    "build:windows": " npm run build:react && npm run build:electron -w && npm run test:spectron",
+    "build:clean": "rm -r dist/",
+    "build:mac": "npm run build:react && npm run build:electron -m && npm run test:spectron",
+    "build:windows": "npm run build:react && npm run build:electron -w && npm run test:spectron",
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
     "test:spectron": "node src/__tests__/test-build.js",
-    "build:linux": "rm -r dist/ ; react-scripts build && electron-builder -l",
+    "build:linux": "react-scripts build && electron-builder -l",
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js"
   },
   "dependencies": {
@@ -140,7 +141,7 @@
     "helmet": "^3.9.0",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.10.0",
-    "kmd-script": "^0.0.7",
+    "kmd-script": "^0.0.8",
     "marked": "^0.3.7",
     "moment": "^2.19.3",
     "node-powershell": "^3.3.1",

@@ -37,6 +37,9 @@ const WindowsSecurity = {
     const { chargingTimeout, batteryTimeout } = kmdResponse
 
     return (
+      // According to Windows: 0 = Never
+      chargingTimeout !== 0 &&
+      batteryTimeout !== 0 &&
       chargingTimeout <= windowsMaxScreenLockTimeout &&
       batteryTimeout <= windowsMaxScreenLockTimeout
     )

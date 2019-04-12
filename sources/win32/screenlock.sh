@@ -7,12 +7,12 @@ template powercfg /query '{_activePowerGUID}' 7516b95f-f776-4464-8c53-06167f40cc
 exec
 trim
 save _output
-extract Current AC Power Setting Index: 0x([\d]+)
+extract Current AC Power Setting Index: 0x([0-9a-fA-F]+)
 parseInt 16
 save chargingTimeout
 
 load _output
-extract Current DC Power Setting Index: 0x([\d]+)
+extract Current DC Power Setting Index: 0x([0-9a-fA-F]+)
 parseInt 16
 save batteryTimeout
 
