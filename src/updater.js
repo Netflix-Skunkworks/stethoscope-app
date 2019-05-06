@@ -81,9 +81,11 @@ module.exports = function (env, mainWindow, log = console, server) {
     },
     // TODO move this to ipc, remove mainWindow dependency
     'download-progress': (progressObj) => {
-      mainWindow.webContents.send('download:progress', progressObj)
-      // NOTE: uncomment to have download update progress displayed over app icon
-      // mainWindow.setProgressBar(progressObj.percent / 100)
+      if (mainWindow) {
+        mainWindow.webContents.send('download:progress', progressObj)
+        // NOTE: uncomment to have download update progress displayed over app icon
+        // mainWindow.setProgressBar(progressObj.percent / 100)
+      }
     }
   }
 
@@ -96,7 +98,7 @@ module.exports = function (env, mainWindow, log = console, server) {
   }
 
   return {
-    checkForUpdates (menuItem, focusedWindow, event, isLaunch = false) {
+    checkForUpdates (menuItem = {}, focusedWindow = {}, event = {}, isLaunch = false) {
       // don't allow multiple concurrent attempts
       attemptingUpdate = true
 
