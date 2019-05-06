@@ -1,4 +1,4 @@
-const { Menu, shell } = require('electron')
+const { Menu, shell, clipboard } = require('electron')
 const pkg = require('../package.json')
 const config = require('./config.json')
 const AutoLauncher = require('./AutoLauncher')
@@ -73,6 +73,13 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
     })).concat({
       label: `Stethoscope version ${pkg.version}`,
       enabled: false
+    }, {
+      label: 'Copy Debug Info',
+      click () {
+        fetch(`http://127.0.0.1:37370/debugger`)
+          .then(res => res.text())
+          .then(data => clipboard.writeText(data))
+      }
     })
   },
   { role: 'separator', enabled: false }

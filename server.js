@@ -111,8 +111,14 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
   }
 
   app.get('/debugger', cors(corsOptions), (req, res) => {
-    appActions.enableDebugger()
-    appActions.requestLogPermission(req.get('origin')).then(async () => {
+    let promise = Promise.resolve()
+
+    if (req.get('host') !== '127.0.0.1:37370') {
+      promise = appActions.requestLogPermission(req.get('origin'))
+      appActions.enableDebugger()
+    }
+
+    promise.then(async () => {
       const file = fs.readFileSync(log.getLogFile())
       const checkData = await Promise.all(checks.map(async script => {
         try { return await run(script) }
