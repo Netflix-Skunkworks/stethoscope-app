@@ -18,7 +18,8 @@ split \n\n
   # each disk has to be run through
   # diskutil info to get the uuid
   template diskutil info '{_path}'
-  exec
+  tryExec
+  defaultTo
   extract Partition UUID:\s+([A-Z0-9-]+)
   save uuid
 
