@@ -76,7 +76,11 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
     }, {
       label: 'Copy Debug Info',
       click () {
-        fetch(`http://127.0.0.1:37370/debugger`)
+        fetch(`http://127.0.0.1:37370/debugger`, {
+          headers: {
+            Origin: 'stethoscope://main'
+          }
+        })
           .then(res => res.text())
           .then(data => clipboard.writeText(data))
       }

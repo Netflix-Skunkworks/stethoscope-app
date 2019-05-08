@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.6](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.0.6)
+
+### Fixed
+- kmd disk script (moved to `tryExec` to prevent failures)
+- Crash when update is triggered after window is destroyed
+- Screenlock regex on Windows
+
+### Added
+- Users can now copy debug info from Help menu
+
+----
+
 ## [3.0.5](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.0.5)
 
 ### Fixed
