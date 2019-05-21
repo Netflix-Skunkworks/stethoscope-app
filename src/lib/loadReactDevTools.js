@@ -12,8 +12,8 @@ if (os.platform() === 'win32') {
   basePath = path.resolve('%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi')
 }
 
-module.exports = function(BrowserWindow) {
-  fs.readdir(basePath, function(err, items) {
+module.exports = function (BrowserWindow) {
+  fs.readdir(basePath, function (err, items) {
     if (!err) {
       const [ version ] = items
       if (version) {

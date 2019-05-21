@@ -4,7 +4,7 @@ import Accessible from './Accessible'
 import ActionIcon from './ActionIcon'
 import semver from './lib/patchedSemver'
 import showdown from 'showdown'
-import Handlebars from 'handlebars/dist/handlebars.min.js';
+import Handlebars from 'handlebars/dist/handlebars.min.js'
 
 const converter = new showdown.Converter()
 

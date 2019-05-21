@@ -5,11 +5,10 @@ const extend = require('extend')
 const { readFileSync } = fs
 
 const express = require('express')
-const { HOST, PORT } = require('./src/constants')
+const { PORT } = require('./src/constants')
 const helmet = require('helmet')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const fetch = require('isomorphic-fetch')
 const yaml = require('js-yaml')
 const { compile, run, setKmdEnv } = require('kmd-script/src')
 const glob = require('fast-glob')
@@ -21,7 +20,6 @@ const { makeExecutableSchema } = require('graphql-tools')
 const Resolvers = require('./resolvers/')
 const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
-const defaultPolicyServer = HOST
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 
 const app = express()
@@ -38,9 +36,7 @@ function precompile () {
   const searchPath = path.resolve(__dirname, `./sources/${process.platform}/*.sh`)
   return glob(searchPath)
     .then(files =>
-      files.map(file =>
-        compile(readFileSync(file, 'utf8'))
-      )
+      files.map(file => compile(readFileSync(file, 'utf8')))
     )
 }
 
@@ -65,11 +61,7 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     resolvers: Resolvers
   })
 
-  let {
-    allowHosts = [],
-    hostLabels = [],
-    policyServer = defaultPolicyServer
-  } = defaultConfig
+  let { allowHosts = [], hostLabels = [] } = defaultConfig
 
   // wide open in dev, limited to hosts specified in './practices/config.yaml' in production
   const corsOptions = {
@@ -121,12 +113,10 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     promise.then(async () => {
       const file = fs.readFileSync(log.getLogFile())
       const checkData = await Promise.all(checks.map(async script => {
-        try { return await run(script) }
-        catch (e) { return '' }
+        try { return await run(script) } catch (e) { return '' }
       }))
       const noColor = String(file).replace(/\[[\d]+m?:?/g, '')
       const out = `Stethoscope version: ${pkg.version}
-
 LOGS
 ==============================
 ${noColor}
@@ -141,26 +131,22 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
   })
 
   app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
-    // set upper boundary on scan time
-    const MAX_SCAN_SECONDS = 45
-    req.setTimeout(MAX_SCAN_SECONDS * 1000)
+    // set upper boundary on scan time (45 seconds)
+    req.setTimeout(45000)
 
     // allow GET/POST requests and determine what property to use
     const key = req.method === 'POST' ? 'body' : 'query'
     const origin = req.get('origin')
-    const remote = origin !== 'stethoscope://main'
-    let remoteLabel
+    const isRemote = origin !== 'stethoscope://main'
+    let remoteLabel = 'Stethoscope'
 
     // Try to find the host label to display in app ("Last scanned by X")
-    if (remote) {
-      try {
-        const matchHost = ({ pattern }) => (new RegExp(pattern)).test(origin)
-        remoteLabel = hostLabels.find(matchHost).name
-      } catch (e) {
-        remoteLabel = 'Unknown App'
+    if (isRemote) {
+      const matchHost = ({ pattern }) => (new RegExp(pattern)).test(origin)
+      const label = hostLabels.find(matchHost)
+      if (label) {
+        remoteLabel = label.name
       }
-    } else {
-      remoteLabel = 'Stethoscope'
     }
 
     let { query, variables: policy, sessionId = false } = req[key]
@@ -174,12 +160,10 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
     // this would require loading the script files differently so the resolvers
     // could execute the appropriate pre-compiled scripts
     const checkData = await Promise.all(checks.map(async script => {
-      try { return await run(script) }
-      catch (e) { return '' }
+      try { return await run(script) } catch (e) { return '' }
     }))
     // perf data
     const total = performance.now() - start
-
     context.kmdResponse = extend(true, {}, ...checkData)
     // AWS workspace override
     if (context.kmdResponse.system.platform.includes('Server 2016 Datacenter')) {
@@ -198,17 +182,16 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
       policy = Object.assign({}, policy)
     }
 
-    // if a policy was passed, tell the app display scanning status
+    // if a policy was passed, tell the UI a scan has started
     if (Object.keys(policy).length) {
-      // show the scan is happening in the UI
-      io.sockets.emit('scan:init', { remote, remoteLabel })
+      io.sockets.emit('scan:init', { remote: isRemote, remoteLabel })
     }
 
     graphql(schema, query, null, context, policy).then(result => {
       const { data = {}, errors } = result
       let scanResult = { noResults: true }
 
-      if (errors && !remote) {
+      if (errors && !isRemote) {
         const errMessage = errors.reduce((p, c) => p + c + '\n', '')
         io.sockets.emit('scan:error', { error: errMessage })
         throw new Error(errMessage)
@@ -217,7 +200,7 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
       // update the tray icon if a policy result is in the response
       if (data.policy && data.policy.validate) {
         appActions.setScanStatus(data.policy.validate.status)
-        scanResult = { result, remote, remoteLabel, policy, showNotification }
+        scanResult = { result, remote: isRemote, remoteLabel, policy, showNotification }
       }
 
       // inform UI that scan is complete
@@ -226,65 +209,53 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
       result.extensions.timing = { total }
       res.json(result)
     }).catch(err => {
-      log.error(err.message)
       io.sockets.emit('scan:error', { error: err.message })
-      res.status(500).json({ error: err.message })
+      throw err
     })
   })
 
-  app.get('/policy', cors(policyRequestOptions), (req, res) => {
-    if (!policyServer) {
-      const path = find('./practices/policy.yaml')
-      const initialPolicy = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
-      const policy = spacesToCamelCase(initialPolicy)
-      res.json(policy)
-    } else {
-      fetch(`${policyServer}/policy.yaml`)
-        .then(body => body.text())
-        .then(yml => yaml.safeLoad(yml, 'utf8'))
-        .then(spacesToCamelCase)
-        .then(data => res.json(data))
-    }
-  })
+  app.get('/config', serveConfig('config'))
+  app.get('/policy', serveConfig('policy', false, spacesToCamelCase))
+  // default to English if system language isn't supported
+  app.get('/instructions', serveConfig(`instructions.${language}`, `instructions.en`))
 
-  app.get('/instructions', cors(policyRequestOptions), (req, res) => {
-    if (!policyServer) {
-      let path = find(`./practices/instructions.${language}.yaml`)
-      let instructions
+  // serves up YAML files
+  function serveConfig (filename, fallbackPath = false, transform = d => d) {
+    return [ cors(policyRequestOptions), (req, res) => {
+      const path = find(`./practices/${filename}.yaml`)
       try {
-        instructions = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+        const response = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+        res.json(transform(response))
       } catch (e) {
-        // default to English if system language isn't supported
-        path = find(`./practices/instructions.en.yaml`)
-        instructions = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+        if (fallbackPath) {
+          const response = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+          res.json(transform(response))
+        }
       }
-      res.json(instructions)
-    } else {
-      fetch(`${policyServer}/instructions.yaml`)
-        .then(body => body.text())
-        .then(yml => yaml.safeLoad(yml, 'utf8'))
-        .then(data => res.json(data))
-    }
-  })
-
-  app.get('/config', cors(policyRequestOptions), (req, res) => {
-    if (!policyServer) {
-      res.json(defaultConfig)
-    } else {
-      fetch(`${policyServer}/config.yaml`)
-        .then(body => body.text())
-        .then(yml => yaml.safeLoad(yml, 'utf8'))
-        .then(data => res.json(data))
-    }
-  })
+    } ]
+  }
 
   // handles all other routes
-  app.get('*', (req, res) => res.status(403).end())
+  app.get('*', (_, res) => res.status(403).end())
 
   // error handler
   app.use((err, req, res, next) => {
-    log.error(err.message)
-    res.status(500).send(err.message)
+    res.status(500).format({
+      'text/plain': () => {
+        res.send(err.message)
+      },
+      'text/html': () => {
+        res.send(`<p>Error: ${err.message}</p>`)
+      },
+      'application/json': () => {
+        res.send({ error: err.message })
+      },
+      'default': () => {
+        // log the request and respond with 406
+        res.status(406).send('Not Acceptable')
+      }
+    })
+    log.error(`server: ${err.message}`)
   })
 
   const serverInstance = http.listen(PORT, '127.0.0.1', () => {

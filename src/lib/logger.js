@@ -38,7 +38,7 @@ if (!global.log) {
     ]
   })
 
-  log.getLogFile = function() {
+  log.getLogFile = function () {
     return path.join(
       path.resolve(userDataPath),
       filename.replace('%DATE%', moment().format('YYYY-MM-DD'))
@@ -46,7 +46,7 @@ if (!global.log) {
   }
 
   // support multiple arguments to winston logger
-  const wrapper = ( original, level ) => {
+  const wrapper = (original, level) => {
     return (...args) => original(args.map(o => {
       let color = false
       let transform = s => s
@@ -70,7 +70,7 @@ if (!global.log) {
     )
     log.add(new winston.transports.Console({
       format: winston.format.simple()
-    }));
+    }))
   } else {
     // only error/warn should be logged in prod
     logLevels.forEach(level => {

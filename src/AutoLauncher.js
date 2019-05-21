@@ -1,7 +1,7 @@
 const settings = require('electron-settings')
 const AutoLaunch = require('auto-launch')
 const config = require('./config.json')
-const os = require('os');
+const os = require('os')
 
 class AutoLauncher {
   constructor () {

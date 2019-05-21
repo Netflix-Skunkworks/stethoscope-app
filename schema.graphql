@@ -83,13 +83,22 @@ type SecurityInfo {
   # Windows
   domainFirewall: FeatureState
 }
+#
+# type Application {
+#   name: String!
+#   displayName: String
+#   version: String!
+#   lastOpenedTime: String
+#   installDate: String
+# }
 
 type Application {
-  name: String!
-  displayName: String
-  version: String!
-  lastOpenedTime: String
-  installDate: String
+  name: String! # e.g. Slack.app
+  path: String # ~/Applications
+  version: Semver
+  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  description: String
+  installFrom: String
 }
 
 type Extension {

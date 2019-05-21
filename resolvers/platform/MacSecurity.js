@@ -25,6 +25,10 @@ const MacSecurity = {
     return kmdResponse.updates.restartRequired !== '0'
   },
 
+  async applications (root, args, { kmdResponse }) {
+
+  },
+
   async automaticUpdates (root, args, context) {
     const { kmdResponse } = context
     if (kmdResponse.updates.automaticCheckEnabled === '0') {

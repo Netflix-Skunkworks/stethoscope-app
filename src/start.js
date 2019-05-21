@@ -182,7 +182,7 @@ async function createWindow () {
       updater.checkForUpdates()
     },
     enableDebugger: enableAppDebugger,
-    requestLogPermission(origin) {
+    requestLogPermission (origin) {
       return new Promise((resolve, reject) => {
         dialog.showMessageBox({
           type: 'info',
@@ -282,7 +282,7 @@ async function createWindow () {
 
 global.app = app
 
-function enableAppDebugger() {
+function enableAppDebugger () {
   if (mainWindow) {
     mainWindow.webContents.openDevTools()
     mainWindow.setResizable(true)

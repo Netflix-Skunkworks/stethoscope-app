@@ -180,7 +180,7 @@ class Device extends Component {
           <h4>{org} {this.props.strings.policyDescription}</h4>
 
           <div className='action-list'>
-            <ul key="action-list-main-ul">
+            <ul key='action-list-main-ul'>
               { this.actions(device.critical, 'critical', device) }
               { this.actions(device.suggested, 'suggested', device) }
               { this.actions(device.done, 'done', device) }
