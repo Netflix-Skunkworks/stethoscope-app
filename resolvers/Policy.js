@@ -1,9 +1,7 @@
-const Security = require('./Security')
-const {
-  PASS, FAIL, NUDGE, SUGGESTED, NEVER
-} = require('../src/constants')
+import Security from './Security'
+import { PASS, FAIL, NUDGE, SUGGESTED, NEVER } from '../src/constants'
 
-const Policy = {
+export default {
   async validate (root, args, context) {
     const { policy } = Object.assign({}, args)
     const response = {}
@@ -85,5 +83,3 @@ const Policy = {
     return response
   }
 }
-
-module.exports = Policy

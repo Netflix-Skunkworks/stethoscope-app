@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   async device (root, args, context) {
     return true
   },

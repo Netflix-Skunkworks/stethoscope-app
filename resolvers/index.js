@@ -1,8 +1,8 @@
-const Device = require('./Device')
-const Policy = require('./Policy')
-const Query = require('./Query')
-const Security = require('./Security')
-const Semver = require('./Semver')
-const NumericRange = require('./NumericRange')
+import Device from './Device'
+import Policy from './Policy'
+import Query from './Query'
+import Security from './Security'
+import Semver from './Semver'
+import NumericRange from './NumericRange'
 
-module.exports = { Device, Policy, Query, Security, Semver, NumericRange }
+export default { Device, Policy, Query, Security, Semver, NumericRange }

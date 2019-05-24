@@ -179,7 +179,7 @@ const database = {
   'Xserve3,1': 'Xserve Xeon Nehalem 2.93 "Eight Core"'
 }
 
-module.exports = function getFriendlyName (modelName) {
+export default function getFriendlyName (modelName) {
   const trimmedName = (modelName || '').trim()
   return database[trimmedName] || 'Unknown device'
 }

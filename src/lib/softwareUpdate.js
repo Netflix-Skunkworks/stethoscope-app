@@ -1,6 +1,6 @@
-const { spawn } = require('child_process')
-const { MAC, WIN } = require('./platform')
-const ps = require('./powershell')
+import { spawn } from 'child_process'
+import { MAC, WIN } from './platform'
+import ps from './powershell'
 
 const darwinUpdates = async function () {
   const softwareupdate = spawn('softwareupdate', ['-l'])
@@ -25,7 +25,7 @@ const windowsUpdates = async function () {
   return updates.split(/[\r\n]/g).slice(2)
 }
 
-module.exports = async function softwareUpdate (platform) {
+export default async function softwareUpdate (platform) {
   let update = false
   switch (platform) {
     case MAC:

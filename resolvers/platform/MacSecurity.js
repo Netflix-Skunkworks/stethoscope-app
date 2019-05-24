@@ -1,37 +1,45 @@
-const semver = require('../../src/lib/patchedSemver')
-const Device = require('./MacDevice')
-const pkg = require('../../package.json')
-const { exec } = require('child_process')
-const { NUDGE, UNKNOWN } = require('../../src/constants')
+import { NUDGE } from '../../src/constants'
+import kmd from '../../src/lib/kmd'
 
 const MacSecurity = {
-  async automaticAppUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.updates.autoUpdate !== '0'
+  async automaticAppUpdates (root, args, context) {
+    const result = await kmd('com.apple.commerce', context)
+    return result.updates.autoUpdate !== '0'
   },
 
-  async automaticDownloadUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.updates.automaticDownload !== '0'
+  async automaticDownloadUpdates (root, args, context) {
+    const result = await kmd('com.apple.SoftwareUpdate', context)
+    return result.updates.automaticDownload !== '0'
   },
 
-  async automaticConfigDataInstall (root, args, { kmdResponse }) {
-    return kmdResponse.updates.configDataInstall !== '0'
+  async automaticConfigDataInstall (root, args, context) {
+    const result = await kmd('com.apple.SoftwareUpdate', context)
+    return result.updates.configDataInstall !== '0'
   },
 
-  async automaticSecurityUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.updates.criticalUpdateInstall !== '0'
+  async automaticSecurityUpdates (root, args, context) {
+    const result = await kmd('com.apple.SoftwareUpdate', context)
+    return result.updates.criticalUpdateInstall !== '0'
   },
 
-  async automaticOsUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.updates.restartRequired !== '0'
+  async automaticOsUpdates (root, args, context) {
+    const result = await kmd('com.apple.commerce', context)
+    return result.updates.restartRequired !== '0'
   },
 
-  async applications (root, args, { kmdResponse }) {
+  async automaticCheckEnabled (root, args, context) {
+    const result = await kmd('com.apple.SoftwareUpdate', context)
+    return result.updates.automaticCheckEnabled !== '0'
+  },
 
+  async applications (root, args, context) {
+    // const result = await kmd('apps', context)
+    return []
   },
 
   async automaticUpdates (root, args, context) {
-    const { kmdResponse } = context
-    if (kmdResponse.updates.automaticCheckEnabled === '0') {
+    const checkEnabled = await MacSecurity.automaticCheckEnabled(root, args, context)
+    if (!checkEnabled) {
       return false
     }
 
@@ -47,7 +55,7 @@ const MacSecurity = {
       securityUpdates,
       automaticDownloadUpdates,
       automaticConfigDataInstall
-    ].some(setting => setting === NUDGE)
+    ].some((setting) => setting !== true)
 
     if (missingSuggested) {
       return NUDGE
@@ -56,152 +64,78 @@ const MacSecurity = {
     return true
   },
 
-  async remoteLogin (root, args, { kmdResponse }) {
-    const { remoteLogin = false } = kmdResponse
-    return !!remoteLogin
+  async remoteLogin (root, args, context) {
+    const result = await kmd('remote-login', context)
+    return parseInt(result.remoteLogin, 10) > 0
   },
 
-  diskEncryption (root, args, { kmdResponse }) {
-    return kmdResponse.disks.fileVaultEnabled === 'true'
+  async diskEncryption (root, args, context) {
+    const result = await kmd('file-vault', context)
+    return result.fileVaultEnabled === 'true'
   },
 
-  async screenLock (root, args, { kmdResponse }) {
-    // TODO when branching logic works in kmd
+  // TODO when branching logic works in kmd
+  async screenLock (root, args, context) {
+    // const result = await kmd('screen-lock', context)
     return true
   },
 
+  // TODO implement
   async screenIdle (root, args, context) {
-    // TODO implement
+    // const result = await kmd('screen-idle', context)
     return true
   },
 
-  async firewall (root, args, { kmdResponse }) {
-    return parseInt(kmdResponse.firewallEnabled, 10) > 0
-  },
-
-  async suggestedApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = context.kmdResponse.system
-    const { suggestedApplications = [] } = args
-
-    return suggestedApplications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
-      exactMatch = false,
-      name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
-    }) => {
-      let userApp = false
-
-      if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
-      } else {
-        userApp = applications.find((app) => app.name === name)
-      }
-
-      // app isn't installed - fail
-      if (!userApp) return { name, passing: NUDGE, reason: 'NOT_INSTALLED' }
-      // app is out of date - fail
-      if (version && !semver.satisfies(userApp.version, version)) {
-        return { name, passing: NUDGE, reason: 'OUT_OF_DATE' }
-      }
-
-      return { name, passing: true }
-    })
-  },
-
-  async requiredApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = context.kmdResponse.system
-    const { requiredApplications = [] } = args
-
-    return requiredApplications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
-      exactMatch = false,
-      name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
-    }) => {
-      let userApp = false
-
-      if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
-      } else {
-        userApp = applications.find((app) => app.name === name)
-      }
-
-      // app isn't installed - fail
-      if (!userApp) return { name, passing: false, reason: 'NOT_INSTALLED' }
-      // app is out of date - fail
-      if (version && !semver.satisfies(userApp.version, version)) {
-        return { name, passing: false, reason: 'OUT_OF_DATE' }
-      }
-
-      return { name, passing: true }
-    })
-  },
-
-  async bannedApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = context.kmdResponse.system
-    const { bannedApplications = [] } = args
-
-    return bannedApplications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
-      exactMatch = false,
-      name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
-    }) => {
-      let userApp = false
-
-      if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
-      } else {
-        userApp = applications.find((app) => app.name === name)
-      }
-
-      if (userApp) return { name, passing: false, reason: 'INSTALLED' }
-
-      return { name, passing: true }
-    })
+  async firewall (root, args, context) {
+    const result = await kmd('firewall', context)
+    return parseInt(result.firewallEnabled, 10) > 0
   }
+
+  // await kmd('app', context)
+  //  async applications (root, args, context) {
+  //   const apps = await Device.applications(root, args, context)
+  //   const { version: osVersion } = context.kmdResponse.system
+  //   const { applications = [] } = args
+  //
+  //   return applications.filter((app) => {
+  //     const { platform = false } = app
+  //     // if a platform is required
+  //     if (platform) {
+  //       if (platform[context.platform]) {
+  //         return patchedSemver.satisfies(osVersion, platform[context.platform])
+  //       },
+  //       return platform.all
+  //     },
+  //     // no platform specified - default to ALL
+  //     return true
+  //   }).map(({
+  //     exactMatch = false,
+  //     name,
+  //     version,
+  //     platform,
+  //     // ignored for now
+  //     includePackages
+  //   }) => {
+  //     let userApp
+  //
+  //     if (!exactMatch) {
+  //       userApp = apps.find((app: IApp) => (new RegExp(name, 'ig')).test(app.name))
+  //     } else {
+  //       userApp = apps.find((app: IApp) => app.name === name)
+  //     },
+  //
+  //     // app isn't installed - fail
+  //     if (!userApp) {
+  //       return { name, passing: false, reason: 'NOT_INSTALLED' },
+  //     },
+  //     // app is out of date - fail
+  //     if (version && !patchedSemver.satisfies(userApp.version, version)) {
+  //       return { name, passing: false, reason: 'OUT_OF_DATE' },
+  //     },
+  //
+  //     return { name, passing: true },
+  //   })
+  // },
 }
 
-module.exports = MacSecurity
+export default MacSecurity

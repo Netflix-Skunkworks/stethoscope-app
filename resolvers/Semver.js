@@ -1,5 +1,5 @@
-const { GraphQLScalarType } = require('graphql')
-const semver = require('../src/lib/patchedSemver')
+import { GraphQLScalarType } from 'graphql'
+import semver from '../src/lib/patchedSemver'
 
 const Semver = new GraphQLScalarType({
   name: 'Semver',
@@ -24,4 +24,4 @@ const Semver = new GraphQLScalarType({
   }
 })
 
-module.exports = Semver
+export default Semver

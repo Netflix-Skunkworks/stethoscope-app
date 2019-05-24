@@ -1,8 +1,9 @@
-const pkg = require('../package.json')
-const NetworkInterface = require('../src/lib/NetworkInterface')
-const Security = require('./Security')
-const { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } = require('../src/constants')
-const { Device: PlatformResolvers } = require('./platform')
+import pkg from '../package.json'
+import NetworkInterface from '../src/lib/NetworkInterface'
+import Security from './Security'
+import kmd from '../src/lib/kmd'
+import { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } from '../src/constants'
+import { PlatformDevice } from './platform/'
 
 const securityToDeviceStatus = status => {
   if (typeof status === 'boolean') {
@@ -25,24 +26,29 @@ const securityToPassFailStatus = status => {
 }
 
 const Device = {
-  deviceId (root, args, { kmdResponse }) {
-    return kmdResponse.system.uuid
+  async deviceId (root, args, context) {
+    const result = await kmd('hardware', context)
+    return result.system.uuid
   },
 
-  deviceName (root, args, { kmdResponse }) {
-    return kmdResponse.system.hostname
+  async deviceName (root, args, context) {
+    const result = await kmd('hostname', context)
+    return result.system.hostname
   },
 
   platform (root, args, context) {
-    return context.platform
+    return (context && context.platform) || process.platform
   },
 
-  platformName (root, args, { kmdResponse }) {
-    return kmdResponse.system.platform
+  async platformName (root, args, context) {
+    const result = await kmd('os', context)
+    return result.system.platform
   },
 
-  osVersion (root, args, { kmdResponse }) {
-    const [ major, minor, patch = 0 ] = String(kmdResponse.system.version).split('.')
+  async osVersion (root, args, context) {
+    const result = await kmd('os', context)
+    const version = result.system.version
+    const [ major, minor, patch = 0 ] = String(version).split('.')
     return `${major}.${minor}.${patch}`
   },
 
@@ -50,48 +56,52 @@ const Device = {
     return UNSUPPORTED
   },
 
-  osBuild (root, args, { kmdResponse }) {
-    return kmdResponse.system.build
+  async osBuild (root, args, context) {
+    const result = await kmd('os', context)
+    return result.system.build
   },
 
-  osName (root, args, { kmdResponse }) {
-    return kmdResponse.system.platform
+  async osName (root, args, context) {
+    const result = await kmd('os', context)
+    return result.system.platform
   },
 
-  firmwareVersion (root, args, { kmdResponse }) {
-    return kmdResponse.system.firmwareVersion
+  async firmwareVersion (root, args, context) {
+    const result = await kmd('hardware', context)
+    return result.system.firmwareVersion
   },
 
   friendlyName (root, args, context) {
-    const os = PlatformResolvers[context.platform]
-    if ('friendlyName' in os) {
-      return os.friendlyName(root, args, context)
+    if ('friendlyName' in Device) {
+      return PlatformDevice.friendlyName(root, args, context)
     }
 
     return UNSUPPORTED
   },
 
-  hardwareModel (root, args, { kmdResponse }) {
-    return kmdResponse.system.hardwareVersion
+  async hardwareModel (root, args, context) {
+    const result = await kmd('hardware', context)
+    return result.system.hardwareVersion
   },
 
-  hardwareSerial (root, args, { kmdResponse }) {
-    return kmdResponse.system.serialNumber
+  async hardwareSerial (root, args, context) {
+    const result = await kmd('hardware', context)
+    return result.system.serialNumber
   },
 
-  extensions (root, args, { kmdResponse }) {
+  // await kmd('chrome-extensions', context)
+  extensions (root, args, context) {
     // const { browser = 'all' } = args
     // let chrome = []
     // let firefox = []
     // let safari = []
 
-    return kmdResponse.extensions
+    return []
   },
 
   applications (root, args, context) {
-    const os = PlatformResolvers[context.platform]
-    if ('applications' in os) {
-      return os.applications(root, args, context)
+    if ('applications' in Device) {
+      return PlatformDevice.applications(root, args, context)
     }
 
     return UNSUPPORTED
@@ -107,15 +117,15 @@ const Device = {
     return []
   },
 
-  // can/should these be filtered down?
-  macAddresses (root, args, { kmdResponse }) {
-    return kmdResponse.macAddresses.filter(mac => mac.addr)
+  async macAddresses (root, args, context) {
+    const result = await kmd('mac-addresses', context)
+    return result.macAddresses.filter(mac => mac.addr)
       .map((mac) => ({
-        mac: mac.addr,
         interface: mac.device,
-        type: 6,
+        lastChange: null,
+        mac: mac.addr,
         physicalAdapter: true,
-        lastChange: null
+        type: 6
       }))
       .filter(({ mac }) => !NetworkInterface.isLocal(mac))
       .filter(({ mac }) => !NetworkInterface.isMulticast(mac))
@@ -201,13 +211,12 @@ const Device = {
   },
 
   disks (root, args, context) {
-    const os = PlatformResolvers[context.platform]
-    if ('disks' in os) {
-      return os.disks(root, args, context)
+    if ('disks' in Device) {
+      return PlatformDevice.disks(root, args, context)
     }
 
     return UNSUPPORTED
   }
 }
 
-module.exports = Device
+export default Device

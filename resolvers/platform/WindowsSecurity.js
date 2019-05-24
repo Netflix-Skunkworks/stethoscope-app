@@ -1,40 +1,50 @@
-const semver = require('../../src/lib/patchedSemver')
-const Device = require('../platform/WindowsDevice')
-const pkg = require('../../package.json')
-const { NUDGE, UNKNOWN } = require('../../src/constants')
+import semver from '../../src/lib/patchedSemver'
+import Device from '../platform/WindowsDevice'
+import kmd from '../../src/lib/kmd'
+import { UNKNOWN } from '../../src/constants'
 
-const WindowsSecurity = {
-  async automaticUpdates (root, args, { kmdResponse }) {
-    return kmdResponse.automaticUpdatesNotificationLevel > 1
+export default {
+  async automaticUpdates (root, args, context) {
+    const result = await kmd('automatic-updates', context)
+    return result.automaticUpdatesNotificationLevel > 1
   },
 
-  async remoteLogin (root, args, { kmdResponse }) {
+  async remoteLogin (root, args, context) {
+    const device = await kmd('os', context)
     // aws workspaces require remote login
-    if (kmdResponse.system.platform === 'awsWorkspace') {
+    if (device.system.platform === 'awsWorkspace') {
       return false
     }
-    return kmdResponse.sharingPreferences.remoteDesktopDisabled !== '1'
+
+    const prefs = await kmd('remote-desktop', context)
+    return prefs.sharingPreferences.remoteDesktopDisabled !== '1'
   },
 
-  async diskEncryption (root, args, { kmdResponse }) {
+  async diskEncryption (root, args, context) {
+    const device = await kmd('os', context)
     // workspaces don't support disk encryption - bail
-    if (kmdResponse.system.platform === 'awsWorkspace') {
+    if (device.system.platform === 'awsWorkspace') {
       return true
     }
 
-    if (kmdResponse.bitlockerStatus) {
-      return kmdResponse.bitlockerStatus === 'ON'
+    const disk = await kmd('encryption', context)
+
+    if (disk.bitlockerStatus) {
+      return disk.bitlockerStatus === 'ON'
     }
     return false
   },
 
-  async screenLock (root, args, { kmdResponse }) {
+  async screenLock (root, args, context) {
+    const device = await kmd('os', context)
     // // screen lock creates problems in workspaces
-    if (kmdResponse.system.platform === 'awsWorkspace') {
-       return UNKNOWN
+    if (device.system.platform === 'awsWorkspace') {
+      return UNKNOWN
     }
+
+    const lock = await kmd('screenlock', context)
     const { windowsMaxScreenLockTimeout = 600 } = args
-    const { chargingTimeout, batteryTimeout } = kmdResponse
+    const { chargingTimeout, batteryTimeout } = lock
 
     return (
       // According to Windows: 0 = Never
@@ -45,21 +55,24 @@ const WindowsSecurity = {
     )
   },
 
-  async firewall (root, args, { kmdResponse }) {
-    return kmdResponse.firewalls.every(fw => fw.status === 'ON')
+  async firewall (root, args, context) {
+    const result = await kmd('firewall', context)
+    return result.firewalls.every(fw => fw.status === 'ON')
   },
 
-  async suggestedApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = context.kmdResponse.system
-    const { suggestedApplications = [] } = args
+  async applications (root, args, context) {
+    const device = await kmd('os', context)
+    const apps = await Device.applications(root, args, context)
+    const { version: osVersion } = device.system
+    const { applications = [] } = args
+    const devicePlatform = process.platform
 
-    return suggestedApplications.filter((app) => {
+    return applications.filter((app) => {
       const { platform = false } = app
       // if a platform is required
       if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
+        if (platform[devicePlatform]) {
+          return semver.satisfies(osVersion, platform[devicePlatform])
         }
         return platform.all
       }
@@ -76,52 +89,9 @@ const WindowsSecurity = {
       let userApp = false
 
       if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
+        userApp = apps.find((app) => (new RegExp(name, 'ig')).test(app.name))
       } else {
-        userApp = applications.find((app) => app.name === name)
-      }
-
-      // app isn't installed - fail
-      if (!userApp) return { name, passing: NUDGE, reason: 'NOT_INSTALLED' }
-      // app is out of date - fail
-      if (version && !semver.satisfies(userApp.version, version)) {
-        return { name, passing: NUDGE, reason: 'OUT_OF_DATE' }
-      }
-
-      return { name, passing: true }
-    })
-  },
-
-  async requiredApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = context.kmdResponse.system
-    const { requiredApplications = [] } = args
-
-    return requiredApplications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
-      exactMatch = false,
-      name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
-    }) => {
-      let userApp = false
-
-      if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
-      } else {
-        userApp = applications.find((app) => app.name === name)
+        userApp = apps.find((app) => app.name === name)
       }
 
       // app isn't installed - fail
@@ -133,45 +103,5 @@ const WindowsSecurity = {
 
       return { name, passing: true }
     })
-  },
-
-  async bannedApplications (root, args, context) {
-    const applications = await Device.applications(root, args, context)
-    const { version: osVersion } = await context.osVersion
-    const { bannedApplications = [] } = args
-
-    return bannedApplications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[context.platform]) {
-          return semver.satisfies(osVersion, platform[context.platform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
-      exactMatch = false,
-      name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
-    }) => {
-      let userApp = false
-
-      if (!exactMatch) {
-        userApp = applications.find((app) => (new RegExp(name, 'ig')).test(app.name))
-      } else {
-        userApp = applications.find((app) => app.name === name)
-      }
-
-      if (userApp) return { name, passing: false, reason: 'INSTALLED' }
-
-      return { name, passing: true }
-    })
   }
 }
-
-module.exports = WindowsSecurity

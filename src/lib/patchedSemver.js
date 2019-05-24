@@ -8,7 +8,7 @@
 // "decorator" solves both of these issues, but should be removed if the
 // upstream project someday supports Canonical-style versions.
 
-const semver = require('semver')
+import semver from 'semver'
 
 const LeadingZeroRE = new RegExp(/0+(\d+)/, 'g')
 
@@ -46,4 +46,4 @@ semver.satisfies = function (version, constraint) {
   return origSatisfies(safeStr(version), safeStr(constraint))
 }
 
-module.exports = semver
+export default semver

@@ -1,5 +1,5 @@
-const applescript = require('applescript')
-const { promisify } = require('util')
+import applescript from 'applescript'
+import { promisify } from 'util'
 const execString = promisify(applescript.execString)
 
 const openPreferences = async function (preferencePaneId) {
@@ -21,7 +21,7 @@ const openApp = async function (appName) {
   return execString(script)
 }
 
-module.exports = {
+export {
   openPreferences,
   openApp
 }

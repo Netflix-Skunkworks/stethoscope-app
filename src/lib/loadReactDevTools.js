@@ -1,7 +1,7 @@
-const path = require('path')
-const os = require('os')
-const fs = require('fs')
-const log = require('./logger')
+import path from 'path'
+import os from 'os'
+import fs from 'fs'
+import log from './logger'
 
 let basePath = path.join(
   os.homedir(),
@@ -12,7 +12,7 @@ if (os.platform() === 'win32') {
   basePath = path.resolve('%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi')
 }
 
-module.exports = function (BrowserWindow) {
+export default function loadReactDevTools (BrowserWindow) {
   fs.readdir(basePath, function (err, items) {
     if (!err) {
       const [ version ] = items

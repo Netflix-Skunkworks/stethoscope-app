@@ -1,14 +1,15 @@
-const { readFileSync, writeFileSync } = require('fs')
-const pkg = require('./package.json')
-const moment = require('moment')
-const { build: { publish = [{ url: 'https://test/url/'}] } } = pkg
+import { readFileSync, writeFileSync } from 'fs'
+import pkg from './package.json'
+import moment from 'moment'
+
+const { build: { publish = [{ url: 'https://test/url/' }] } } = pkg
 const [{ url }] = publish
-const rev = readFileSync('.git/HEAD').toString();
-let revision = rev.trim();
+const rev = readFileSync('.git/HEAD').toString()
+let revision = rev.trim()
 
 if (rev.includes(':')) {
-  const [ refs, pth ] = rev.split(': ')
-  revision = readFileSync(`.git/${pth.trim()}`);
+  const [ , pth ] = rev.split(': ')
+  revision = readFileSync(`.git/${pth.trim()}`)
 }
 
 const template = readFileSync('./public/download.html', 'utf8')

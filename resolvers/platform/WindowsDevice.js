@@ -1,15 +1,16 @@
-const WindowsDevice = {
-  async friendlyName (root, args, { kmdResponse }) {
-    return kmdResponse.system.hardwareVersion
+import kmd from '../../src/lib/kmd'
+
+export default {
+  async friendlyName (root, args, context) {
+    const result = await kmd('hardware', context)
+    return result.system.hardwareVersion
   },
 
   async disks (root, args, context) {
     return null
   },
 
-  async applications (root, args, { kmdResponse }) {
+  async applications (root, args, context) {
     return null
   }
 }
-
-module.exports = WindowsDevice

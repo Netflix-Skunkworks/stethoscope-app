@@ -1,21 +1,28 @@
-const macSecurity = require('./MacSecurity')
-const macDevice = require('./MacDevice')
-const windowsSecurity = require('./WindowsSecurity')
-const windowsDevice = require('./WindowsDevice')
-const linuxSecurity = require('./LinuxSecurity')
-const linuxDevice = require('./LinuxDevice')
+import macSecurity from './MacSecurity'
+import macDevice from './MacDevice'
+import windowsSecurity from './WindowsSecurity'
+import windowsDevice from './WindowsDevice'
+import linuxSecurity from './LinuxSecurity'
+import linuxDevice from './LinuxDevice'
 
-module.exports = {
-  Security: {
-    darwin: macSecurity,
-    linux: linuxSecurity,
-    ubuntu: linuxSecurity,
-    win32: windowsSecurity
-  },
-  Device: {
-    darwin: macDevice,
-    linux: linuxDevice,
-    ubuntu: linuxDevice,
-    win32: windowsDevice
-  }
+let PlatformSecurity = macSecurity
+let PlatformDevice = macDevice
+
+const platform = process.platform
+
+switch (platform) {
+  case 'win32':
+    PlatformSecurity = windowsSecurity
+    PlatformDevice = windowsDevice
+    break
+  case 'ubuntu':
+  case 'linux':
+    PlatformSecurity = linuxSecurity
+    PlatformDevice = linuxDevice
+    break
+}
+
+export {
+  PlatformDevice,
+  PlatformSecurity
 }

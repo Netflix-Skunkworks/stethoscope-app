@@ -10,6 +10,10 @@ split \n\n
   save label
   save name
 
+  load _line
+  boolMatch Encrypted
+  save encrypted
+
   # retrieve the disk path for the next call
   load _line
   extract (/dev/[a-z0-9]+)\s+
@@ -26,4 +30,4 @@ split \n\n
   remove _path
   remove _line
 noEmpty
-save disks.volumes
+save disks

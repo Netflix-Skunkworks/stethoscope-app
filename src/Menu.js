@@ -1,7 +1,7 @@
-const { Menu, shell, clipboard } = require('electron')
-const pkg = require('../package.json')
-const config = require('./config.json')
-const AutoLauncher = require('./AutoLauncher')
+import { Menu, shell, clipboard } from 'electron'
+import pkg from '../package.json'
+import config from './config.json'
+import AutoLauncher from './AutoLauncher'
 
 const toggleAutoLaunchMenus = (autoLaunchOn) => {
   let autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
@@ -9,7 +9,7 @@ const toggleAutoLaunchMenus = (autoLaunchOn) => {
   autoLaunchMenuOptions.getMenuItemById('autolaunchOff').checked = !autoLaunchOn
 }
 
-module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
+export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
   const { checkForUpdates } = updater
   const autoLauncher = new AutoLauncher()
   const isAutoLauncherEnabled = autoLauncher.isEnabled()
@@ -76,7 +76,7 @@ module.exports = function (mainWindow, app, focusOrCreateWindow, updater, log) {
     }, {
       label: 'Copy Debug Info',
       click () {
-        fetch(`http://127.0.0.1:37370/debugger`, {
+        window.fetch(`http://127.0.0.1:37370/debugger`, {
           headers: {
             Origin: 'stethoscope://main'
           }

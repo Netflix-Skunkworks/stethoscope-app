@@ -1,26 +1,37 @@
-const macFriendlyName = require('../../sources/macmodels')
+import kmd from '../../src/lib/kmd'
+import macFriendlyName from '../../sources/macmodels'
 
 const MacDevice = {
-  friendlyName (root, args, { kmdResponse }) {
-    const hardwareModel = kmdResponse.system.hardwareVersion
+  async friendlyName (root, args, context) {
+    const result = await kmd('hardware', context)
+    const hardwareModel = result.system.hardwareVersion
     return macFriendlyName(hardwareModel)
   },
 
-  disks (root, args, { kmdResponse }) {
-    const encrypted = kmdResponse.disks.fileVaultEnabled === 'true'
-    return kmdResponse.disks.volumes.map(disk => {
-      return {
-        name: disk.label,
+  async disks (root, args, context) {
+    const fileVault = await kmd('file-vault', context)
+    const result = await kmd('disks', context)
+    const encrypted = fileVault.fileVaultEnabled === 'true'
+    return result.disks.map((disk, i) => {
+      const res = {
+        encrypted: disk.encrypted,
         label: disk.label,
-        uuid: disk.uuid,
-        encrypted,
+        name: disk.label,
+        uuid: disk.uuid
       }
+
+      if (i === 0) {
+        res.encrypted = encrypted
+      }
+
+      return res
     })
   },
 
-  applications (root, args, { kmdResponse }) {
+  async applications (root, args, context) {
+    // const result = await kmd('apps', context)
     return []
   }
 }
 
-module.exports = MacDevice
+export default MacDevice

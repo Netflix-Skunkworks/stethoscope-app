@@ -1,30 +1,36 @@
-const path = require('path')
-const fs = require('fs')
-const os = require('os')
-const extend = require('extend')
-const { readFileSync } = fs
+import { compile, setKmdEnv, run } from 'kmd-script/src'
+import { graphiqlExpress } from 'graphql-server-express'
+import { graphql } from 'graphql'
+import { makeExecutableSchema } from 'graphql-tools'
+import { performance } from 'perf_hooks'
+import { PORT } from './src/constants'
+import kmd from './src/lib/kmd'
+import { Server } from 'http'
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import express from 'express'
+import extend from 'extend'
+import { readFileSync } from 'fs'
+import glob from 'fast-glob'
+import helmet from 'helmet'
+import path from 'path'
+import pkg from './package.json'
+import Resolvers from './resolvers/'
+import socketio from 'socket.io'
+import spacesToCamelCase from './src/lib/spacesToCamelCase'
+import yaml from 'js-yaml'
 
-const express = require('express')
-const { PORT } = require('./src/constants')
-const helmet = require('helmet')
-const cors = require('cors')
-const bodyParser = require('body-parser')
-const yaml = require('js-yaml')
-const { compile, run, setKmdEnv } = require('kmd-script/src')
-const glob = require('fast-glob')
-const pkg = require('./package.json')
-const { performance } = require('perf_hooks')
-
-const { graphql } = require('graphql')
-const { makeExecutableSchema } = require('graphql-tools')
-const Resolvers = require('./resolvers/')
-const Schema = fs.readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
-const spacesToCamelCase = require('./src/lib/spacesToCamelCase')
+const Schema = readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
-
 const app = express()
-const http = require('http').Server(app)
-const io = require('socket.io')(http, { wsEngine: 'ws' })
+const server = new Server(app)
+const io = socketio(server, { wsEngine: 'ws' })
+
+function matchHost (origin) {
+  return label => {
+    return new RegExp(label.pattern).test(origin)
+  }
+}
 
 setKmdEnv({
   NODE_ENV: process.env.STETHOSCOPE_ENV,
@@ -36,7 +42,9 @@ function precompile () {
   const searchPath = path.resolve(__dirname, `./sources/${process.platform}/*.sh`)
   return glob(searchPath)
     .then(files =>
-      files.map(file => compile(readFileSync(file, 'utf8')))
+      files.map(file =>
+        compile(readFileSync(file, 'utf8'))
+      )
     )
 }
 
@@ -44,12 +52,12 @@ function precompile () {
 // sessionId is used as a key
 const alertCache = new Map()
 
-module.exports = async function startServer (env, log, language = 'en-US', appActions) {
+export default async function startServer (env, log, language = 'en-US', appActions) {
   log.info('starting express server')
   const checks = await precompile()
   const find = filePath => IS_DEV ? filePath : path.join(__dirname, filePath)
 
-  const settingsHandle = fs.readFileSync(find('./practices/config.yaml'), 'utf8')
+  const settingsHandle = readFileSync(find('./practices/config.yaml'), 'utf8')
   const defaultConfig = yaml.safeLoad(settingsHandle)
 
   app.use(helmet())
@@ -57,17 +65,17 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
   app.use(bodyParser.json())
 
   const schema = makeExecutableSchema({
-    typeDefs: Schema,
-    resolvers: Resolvers
+    resolvers: Resolvers,
+    typeDefs: Schema
   })
 
-  let { allowHosts = [], hostLabels = [] } = defaultConfig
+  const { allowHosts = [], hostLabels = [] } = defaultConfig
 
   // wide open in dev, limited to hosts specified in './practices/config.yaml' in production
   const corsOptions = {
     origin (origin, callback) {
-      if (IS_DEV) return callback(null, true)
-      if (allowHosts.includes(origin)) return callback(null, true)
+      if (IS_DEV) { return callback(null, true) }
+      if (allowHosts.includes(origin)) { return callback(null, true) }
       if (hostLabels.length) {
         const isAllowed = hostLabels
           .map(({ pattern }) => new RegExp(pattern))
@@ -93,16 +101,10 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
   }
 
   if (IS_DEV) {
-    const { graphiqlExpress } = require('graphql-server-express')
     app.use('/graphiql', cors(corsOptions), graphiqlExpress({ endpointURL: '/scan' }))
   }
 
-  // this doesn't change per request, capture it prior to scan
-  const context = {
-    platform: process.platform || os.platform()
-  }
-
-  app.get('/debugger', cors(corsOptions), (req, res) => {
+  app.get('/debugger', cors(corsOptions), async (req, res) => {
     let promise = Promise.resolve()
 
     if (req.get('host') !== '127.0.0.1:37370') {
@@ -111,28 +113,35 @@ module.exports = async function startServer (env, log, language = 'en-US', appAc
     }
 
     promise.then(async () => {
-      const file = fs.readFileSync(log.getLogFile())
-      const checkData = await Promise.all(checks.map(async script => {
+      const file = readFileSync(log.getLogFile())
+      const promises = Object.entries(checks).map(async ([name, script]) => {
         try { return await run(script) } catch (e) { return '' }
-      }))
-      const noColor = String(file).replace(/\[[\d]+m?:?/g, '')
-      const out = `Stethoscope version: ${pkg.version}
-LOGS
-==============================
-${noColor}
-DEVICE DATA
-==============================
-${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
-
-      res.send(out)
+      })
+      const checkData = await Promise.all(promises)
+      // format response
+      const sep = `\n${'='.repeat(20)}\n`
+      const noColor = String(file).replace(/\[[\d]+m?:?/g, '') + '\n'
+      const str = JSON.stringify(extend(true, {}, ...checkData), null, 3)
+      const version = `Stethoscope version: ${pkg.version}`
+      res.send(`${version}\nLOGS${sep}${noColor}DEVICE DATA${sep}${str}`)
     }).catch(() => {
       res.status(403).send('ACCESS DENIED')
     })
   })
 
+  app.get('/raw', cors(corsOptions), async (req, res) => {
+    const promises = Object.entries(checks).map(async ([name, script]) => {
+      try { return await run(script) } catch (e) { return '' }
+    })
+    const checkData = await Promise.all(promises)
+    res.json(extend(true, {}, ...checkData))
+  })
+
   app.use(['/scan', '/graphql'], cors(corsOptions), async (req, res) => {
     // set upper boundary on scan time (45 seconds)
-    req.setTimeout(45000)
+    req.setTimeout(45000, () => {
+      log.error('Request timed out')
+    })
 
     // allow GET/POST requests and determine what property to use
     const key = req.method === 'POST' ? 'body' : 'query'
@@ -142,32 +151,25 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
 
     // Try to find the host label to display in app ("Last scanned by X")
     if (isRemote) {
-      const matchHost = ({ pattern }) => (new RegExp(pattern)).test(origin)
-      const label = hostLabels.find(matchHost)
+      const match = matchHost(origin)
+      const label = hostLabels.find(match)
       if (label) {
         remoteLabel = label.name
       }
     }
 
-    let { query, variables: policy, sessionId = false } = req[key]
+    const { query, sessionId = false } = req[key]
+    let { variables: policy } = req[key]
     // native notifications are only shown for external requests and
     // are throttled by the users's session id
-    let showNotification = sessionId && !alertCache.has(sessionId)
+    const showNotification = sessionId && !alertCache.has(sessionId)
     const start = performance.now()
-    // TODO each of these checks should be individually executed
-    // by relecvant resolvers. Since it is currently super fast, there is no
-    // real performance penalty for running all checks on each request
-    // this would require loading the script files differently so the resolvers
-    // could execute the appropriate pre-compiled scripts
-    const checkData = await Promise.all(checks.map(async script => {
-      try { return await run(script) } catch (e) { return '' }
-    }))
-    // perf data
-    const total = performance.now() - start
-    context.kmdResponse = extend(true, {}, ...checkData)
+    const context = {}
+    const device = await kmd('os', context)
+
     // AWS workspace override
-    if (context.kmdResponse.system.platform.includes('Server 2016 Datacenter')) {
-      context.kmdResponse.system.platform = 'awsWorkspace'
+    if (device.system.platform.includes('Server 2016 Datacenter')) {
+      device.system.platform = 'awsWorkspace'
     }
     // throttle native push notifications to user by session id
     if (sessionId && !alertCache.has(sessionId)) {
@@ -188,6 +190,7 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
     }
 
     graphql(schema, query, null, context, policy).then(result => {
+      const total = performance.now() - start
       const { data = {}, errors } = result
       let scanResult = { noResults: true }
 
@@ -205,7 +208,7 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
 
       // inform UI that scan is complete
       io.sockets.emit('scan:complete', scanResult)
-      if (!result.extensions) result.extensions = {}
+      if (!result.extensions) { result.extensions = {} }
       result.extensions.timing = { total }
       res.json(result)
     }).catch(err => {
@@ -215,24 +218,36 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
   })
 
   app.get('/config', serveConfig('config'))
-  app.get('/policy', serveConfig('policy', false, spacesToCamelCase))
+  app.get('/policy', serveConfig('policy', { transform: spacesToCamelCase }))
   // default to English if system language isn't supported
-  app.get('/instructions', serveConfig(`instructions.${language}`, `instructions.en`))
+  app.get('/instructions', serveConfig(`instructions.${language}`, {
+    fallback: `instructions.en`
+  }))
 
   // serves up YAML files
-  function serveConfig (filename, fallbackPath = false, transform = d => d) {
-    return [ cors(policyRequestOptions), (req, res) => {
-      const path = find(`./practices/${filename}.yaml`)
-      try {
-        const response = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
-        res.json(transform(response))
-      } catch (e) {
-        if (fallbackPath) {
-          const response = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+  function serveConfig (filename, options) {
+    let fallback = false
+    let transform = x => x
+    if (options) {
+      if (options.fallback) { fallback = options.fallback }
+      if (options.transform) { transform = options.transform }
+    }
+
+    return [
+      cors(policyRequestOptions),
+      (req, res) => {
+        const filePath = find(`./practices/${filename}.yaml`)
+        try {
+          const response = yaml.safeLoad(readFileSync(filePath, 'utf8'))
           res.json(transform(response))
+        } catch (e) {
+          if (fallback && typeof fallback === 'string') {
+            const response = yaml.safeLoad(readFileSync(fallback, 'utf8'))
+            res.json(transform(response))
+          }
         }
       }
-    } ]
+    ]
   }
 
   // handles all other routes
@@ -241,32 +256,27 @@ ${JSON.stringify(extend(true, {}, ...checkData), null, 3)}`
   // error handler
   app.use((err, req, res, next) => {
     res.status(500).format({
-      'text/plain': () => {
-        res.send(err.message)
-      },
-      'text/html': () => {
-        res.send(`<p>Error: ${err.message}</p>`)
-      },
       'application/json': () => {
         res.send({ error: err.message })
       },
       'default': () => {
-        // log the request and respond with 406
-        res.status(406).send('Not Acceptable')
+        res.send(err.message)
       }
     })
     log.error(`server: ${err.message}`)
   })
 
-  const serverInstance = http.listen(PORT, '127.0.0.1', () => {
+  const serverInstance = server.listen(PORT, '127.0.0.1', () => {
     console.log(`GraphQL server listening on ${PORT}`)
-    IS_DEV && console.log(`Explore the schema: http://127.0.0.1:${PORT}/graphiql`)
+    if (IS_DEV) {
+      console.log(`Explore the schema: http://127.0.0.1:${PORT}/graphiql`)
+    }
     serverInstance.emit('server:ready')
   })
 
   return serverInstance
 }
 
-process.on('unhandledRejection', error => {
-  console.log('unhandledRejection', error.message, error.reason, error.stack)
+process.on('unhandledRejection', reason => {
+  console.log('unhandledRejection', reason.message, reason.reason, reason.stack)
 })
