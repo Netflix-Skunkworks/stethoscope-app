@@ -21,7 +21,7 @@ const tryConnection = () => {
       console.log(`yarn react:start - react ready on http://127.0.0.1:${port}`)
       console.log('yarn electron:start')
       startedElectron = true
-      const appServer = spawn('yarn', ['electron'], {
+      const appServer = spawn('yarn', ['dev:electron'], {
         cwd: __dirname
       })
       appServer.stdout.on('data', data => console.log(data.toString()))

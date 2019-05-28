@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from 'graphql'
-import semver from '../src/lib/patchedSemver'
+import semver from '../lib/patchedSemver'
 
 const Semver = new GraphQLScalarType({
   name: 'Semver',

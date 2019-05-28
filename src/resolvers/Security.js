@@ -1,7 +1,7 @@
-import semver from '../src/lib/patchedSemver'
-import pkg from '../package.json'
-import { NUDGE, UNSUPPORTED } from '../src/constants'
-import kmd from '../src/lib/kmd'
+import semver from '../lib/patchedSemver'
+import pkg from '../../package.json'
+import { NUDGE, UNSUPPORTED } from '../constants'
+import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
 
 export default {

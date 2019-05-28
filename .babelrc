@@ -1,5 +1,6 @@
 {
   "presets": [
+    "@babel/preset-react",
     [
       "@babel/preset-env", {
         "targets": {
@@ -7,5 +8,31 @@
         }
       }
     ]
+  ],
+  "env": {
+    "production": {
+      "presets": [["minify", { "builtIns": false }]]
+    }
+  },
+  "plugins": ["@babel/plugin-proposal-class-properties"],
+  "include": [
+    "./server.js",
+    "./resolvers/",
+    "./practices/",
+    "./sources/",
+    "./src"
+  ],
+  "ignore": [
+    "./node_modules/",
+    "./.git/"
+  ],
+  "exclude": [
+    "./.git/",
+    "./bitlocker-status/",
+    "./build/",
+    "./dist/",
+    "./docs/",
+    "./public/",
+    "./report/"
   ]
 }

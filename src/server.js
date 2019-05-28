@@ -3,8 +3,8 @@ import { graphiqlExpress } from 'graphql-server-express'
 import { graphql } from 'graphql'
 import { makeExecutableSchema } from 'graphql-tools'
 import { performance } from 'perf_hooks'
-import { PORT } from './src/constants'
-import kmd from './src/lib/kmd'
+import { PORT } from './constants'
+import kmd from './lib/kmd'
 import { Server } from 'http'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -14,13 +14,13 @@ import { readFileSync } from 'fs'
 import glob from 'fast-glob'
 import helmet from 'helmet'
 import path from 'path'
-import pkg from './package.json'
+import pkg from '../package.json'
 import Resolvers from './resolvers/'
 import socketio from 'socket.io'
-import spacesToCamelCase from './src/lib/spacesToCamelCase'
+import spacesToCamelCase from './lib/spacesToCamelCase'
 import yaml from 'js-yaml'
 
-const Schema = readFileSync(path.join(__dirname, './schema.graphql'), 'utf8')
+const Schema = readFileSync(path.join(__dirname, '../schema.graphql'), 'utf8')
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 const app = express()
 const server = new Server(app)
@@ -55,8 +55,7 @@ const alertCache = new Map()
 export default async function startServer (env, log, language = 'en-US', appActions) {
   log.info('starting express server')
   const checks = await precompile()
-  const find = filePath => IS_DEV ? filePath : path.join(__dirname, filePath)
-
+  const find = filePath => path.join(__dirname, filePath)
   const settingsHandle = readFileSync(find('./practices/config.yaml'), 'utf8')
   const defaultConfig = yaml.safeLoad(settingsHandle)
 

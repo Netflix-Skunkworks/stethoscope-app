@@ -1,4 +1,4 @@
-import kmd from '../../src/lib/kmd'
+import kmd from '../../lib/kmd'
 import macFriendlyName from '../../sources/macmodels'
 
 const MacDevice = {

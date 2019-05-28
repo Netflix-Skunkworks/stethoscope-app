@@ -1,2 +1,2 @@
-react: yarn react:start
-electron: yarn electron:start
+react: yarn dev:react-start
+electron: yarn dev:electron-start

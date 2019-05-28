@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync } from 'fs'
-import pkg from './package.json'
-import moment from 'moment'
+const { readFileSync, writeFileSync } = require('fs')
+const pkg = require('./package.json')
+const moment = require('moment')
 
 const { build: { publish = [{ url: 'https://test/url/' }] } } = pkg
 const [{ url }] = publish

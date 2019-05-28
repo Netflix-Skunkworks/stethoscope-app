@@ -1,8 +1,8 @@
-import pkg from '../package.json'
-import NetworkInterface from '../src/lib/NetworkInterface'
+import pkg from '../../package.json'
+import NetworkInterface from '../lib/NetworkInterface'
 import Security from './Security'
-import kmd from '../src/lib/kmd'
-import { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } from '../src/constants'
+import kmd from '../lib/kmd'
+import { ON, OFF, UNKNOWN, UNSUPPORTED, NUDGE, PASS, FAIL } from '../constants'
 import { PlatformDevice } from './platform/'
 
 const securityToDeviceStatus = status => {

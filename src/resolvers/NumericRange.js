@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from 'graphql'
-import semver from '../src/lib/patchedSemver'
+import semver from '../lib/patchedSemver'
 
 // NumericRange is an alias for the Semver scalar type
 export default new GraphQLScalarType({

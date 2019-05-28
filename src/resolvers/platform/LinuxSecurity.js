@@ -1,6 +1,6 @@
-import { UNKNOWN } from '../../src/constants'
+import { UNKNOWN } from '../../constants'
 import semver from 'semver'
-import kmd from '../../src/lib/kmd'
+import kmd from '../../lib/kmd'
 
 export default {
   async firewall (root, args, context) {

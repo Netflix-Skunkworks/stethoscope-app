@@ -13,7 +13,7 @@ setKmdEnv({
 })
 
 export async function precompile () {
-  const searchPath = path.resolve(__dirname, `../../sources/${process.platform}/*.sh`)
+  const searchPath = path.resolve(__dirname, `../sources/${process.platform}/*.sh`)
   const files = await glob(searchPath)
 
   return files.reduce((out, file) => {
@@ -26,7 +26,7 @@ export async function precompile () {
 }
 
 export async function compileAndRun (kmd) {
-  const filePath = path.resolve(__dirname, `../../sources/${process.platform}/${kmd}.sh`)
+  const filePath = path.resolve(__dirname, `../sources/${process.platform}/${kmd}.sh`)
   try {
     const fn = compile(readFileSync(filePath, 'utf8'))
     const results = await run(fn)

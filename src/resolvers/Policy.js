@@ -1,5 +1,5 @@
 import Security from './Security'
-import { PASS, FAIL, NUDGE, SUGGESTED, NEVER } from '../src/constants'
+import { PASS, FAIL, NUDGE, SUGGESTED, NEVER } from '../constants'
 
 export default {
   async validate (root, args, context) {

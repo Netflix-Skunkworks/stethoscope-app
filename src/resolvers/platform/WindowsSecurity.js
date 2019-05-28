@@ -1,7 +1,7 @@
-import semver from '../../src/lib/patchedSemver'
+import semver from '../../lib/patchedSemver'
 import Device from '../platform/WindowsDevice'
-import kmd from '../../src/lib/kmd'
-import { UNKNOWN } from '../../src/constants'
+import kmd from '../../lib/kmd'
+import { UNKNOWN } from '../../constants'
 
 export default {
   async automaticUpdates (root, args, context) {

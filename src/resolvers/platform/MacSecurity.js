@@ -1,5 +1,5 @@
-import { NUDGE } from '../../src/constants'
-import kmd from '../../src/lib/kmd'
+import { NUDGE } from '../../constants'
+import kmd from '../../lib/kmd'
 
 const MacSecurity = {
   async automaticAppUpdates (root, args, context) {
