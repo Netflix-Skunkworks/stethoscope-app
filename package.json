@@ -17,7 +17,7 @@
     ]
   },
   "scripts": {
-    "start": "cross-env FORCE_COLOR=true nf start -p 12000",
+    "start": "yarn babel && cross-env FORCE_COLOR=true nf start -p 12000",
     "dev:electron": "cross-env STETHOSCOPE_ENV=development electron -r @babel/register .",
     "dev:electron-start": "node src/start-react",
     "dev:react-start": "react-scripts start",
