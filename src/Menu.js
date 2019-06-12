@@ -1,3 +1,4 @@
+/* global fetch */
 import { Menu, shell, clipboard } from 'electron'
 import pkg from '../package.json'
 import config from './config.json'
@@ -76,7 +77,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
     }, {
       label: 'Copy Debug Info',
       click () {
-        window.fetch(`http://127.0.0.1:37370/debugger`, {
+        fetch(`http://127.0.0.1:37370/debugger`, {
           headers: {
             Origin: 'stethoscope://main'
           }

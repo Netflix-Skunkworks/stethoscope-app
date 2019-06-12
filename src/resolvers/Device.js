@@ -36,8 +36,9 @@ const Device = {
     return result.system.hostname
   },
 
-  platform (root, args, context) {
-    return (context && context.platform) || process.platform
+  platform (root, args, context = {}) {
+    const { platform = process.platform } = context
+    return platform
   },
 
   async platformName (root, args, context) {

@@ -26,7 +26,6 @@ import serializeError from 'serialize-error'
 import initProtocols from './lib/protocolHandlers'
 import loadReactDevTools from './lib/loadReactDevTools'
 import iconFinder from './lib/findIcon'
-import * as scripts from './lib/scripts'
 import startGraphQLServer from './server'
 import { IS_MAC, IS_WIN } from './lib/platform'
 import AutoLauncher from './AutoLauncher'
@@ -36,8 +35,6 @@ const env = process.env.STETHOSCOPE_ENV || 'production'
 const findIcon = iconFinder(env)
 const IS_DEV = env === 'development'
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
-
-scripts.init()
 
 let mainWindow
 let tray
