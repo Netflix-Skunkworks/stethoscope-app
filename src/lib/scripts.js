@@ -27,10 +27,10 @@ export async function precompile () {
   }, {})
 }
 
-export async function compileAndRun (kmd) {
+export async function compileAndRun (kmd, variables = {}) {
   const filePath = path.resolve(__dirname, `../sources/${process.platform}/${kmd}.sh`)
   try {
-    const fn = compile(readFileSync(filePath, 'utf8'))
+    const fn = compile(readFileSync(filePath, 'utf8'), variables)
     const results = await run(fn)
     return results
   } catch (e) {
@@ -39,6 +39,9 @@ export async function compileAndRun (kmd) {
   }
 }
 
+/**
+ * @deprecated
+ */
 export async function runAll () {
   const promises = Object.entries(checks).map(async ([name, script]) => {
     try { return await run(script) } catch (e) { return '' }
@@ -47,11 +50,17 @@ export async function runAll () {
   return extend(true, {}, ...checkData)
 }
 
+/**
+ * @deprecated
+ */
 export async function init () {
   checks = await precompile()
   return checks
 }
 
+/**
+ * @deprecated
+ */
 export async function evaluate (scriptName) {
   try {
     return await run(checks[scriptName])

@@ -101,6 +101,21 @@ type Application {
   installFrom: String
 }
 
+input ApplicationPaths {
+  darwin: String # "/Applications"
+  win32: String # "\Program Files"
+  linux: String # "/usr/share"
+}
+
+input ApplicationRequirement {
+  name: String! # e.g. Slack.app
+  paths: ApplicationPaths
+  version: Semver
+  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  description: String
+  installFrom: String
+}
+
 type Extension {
   name: String!
   path: String!
@@ -126,7 +141,7 @@ input DevicePolicy {
   # remote login status
   remoteLogin: RequirementOption
   # require applications to be installed
-  applications: [AppRequirement]
+  applications: [ApplicationRequirement]
   # add extensions
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
@@ -222,6 +237,9 @@ type Disk {
 type ApplicationFeatureState {
   name: String
   status: FeatureState
+  version: String
+  installed: Boolean
+  state: String
 }
 
 # a platform string requirement defines a target string value for specific platforms
