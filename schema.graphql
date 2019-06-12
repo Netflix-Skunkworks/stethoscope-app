@@ -83,13 +83,22 @@ type SecurityInfo {
   # Windows
   domainFirewall: FeatureState
 }
+#
+# type Application {
+#   name: String!
+#   displayName: String
+#   version: String!
+#   lastOpenedTime: String
+#   installDate: String
+# }
 
 type Application {
-  name: String!
-  displayName: String
-  version: String!
-  lastOpenedTime: String
-  installDate: String
+  name: String! # e.g. Slack.app
+  path: String # ~/Applications
+  version: Semver
+  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  description: String
+  installFrom: String
 }
 
 type Extension {
@@ -117,11 +126,7 @@ input DevicePolicy {
   # remote login status
   remoteLogin: RequirementOption
   # require applications to be installed
-  requiredApplications: [AppRequirement]
-  # ban applications from being installed on user's machine
-  bannedApplications: [AppRequirement]
-  # placeholder for suggested applications
-  suggestedApplications: [AppRequirement]
+  applications: [AppRequirement]
   # add extensions
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
@@ -162,12 +167,8 @@ type PolicyResult {
   screenIdle: FeatureState
   # remote login setting
   remoteLogin: FeatureState
-  # whether or not all requiredApplications are installed
-  requiredApplications: [ApplicationFeatureState]
-  # whether or not any bannedApplications are installed
-  bannedApplications: [ApplicationFeatureState]
-  # placeholder for suggested applications
-  suggestedApplications: [ApplicationFeatureState]
+  # whether or not applications requirements are satisfied
+  applications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
 }
@@ -180,9 +181,7 @@ type Security {
   screenLock(requirement: RequirementOption!): Boolean!
   screenIdle(requirement: NumericRange!): Boolean!
   remoteLogin(requirement: RequirementOption!): Boolean!
-  requiredApplications(requirement: RequirementOption!): [Boolean!]!
-  bannedApplications(requirement: RequirementOption!): [Boolean!]!
-  suggestedApplications(requirement: RequirementOption!): [Boolean!]!
+  applications(requirement: RequirementOption!): [Boolean!]!
   stethoscopeVersion(requirement: Semver!): Boolean!
   automaticUpdates(requirment: RequirementOption!): Boolean!
   automaticOsUpdates(requirement: RequirementOption!): Boolean!

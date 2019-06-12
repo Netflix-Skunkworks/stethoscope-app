@@ -18,7 +18,7 @@ import './App.css'
 const socket = openSocket(HOST)
 
 let platform = MAC
-let shell; let ipcRenderer; let log; let remote; let settings;
+let shell; let ipcRenderer; let log; let remote; let settings
 // CRA doesn't like importing native node modules, have to use window.require AFAICT
 try {
   const os = window.require('os')
@@ -131,7 +131,7 @@ class App extends Component {
 
   onScanError = ({ error }) => {
     this.errorThrown = true
-    log.error("Scan error", error)
+    log.error('Scan error', error)
     throw new Error(error)
   }
 

@@ -1,5 +1,5 @@
 /* global fetch */
-const { HOST } = require('../constants')
+import { HOST } from '../constants'
 
 const handleValidate = (result, partitions, device, practices, platform) => {
   const { status, ...rest } = result
@@ -67,17 +67,7 @@ export default class Stethoscope {
           remoteLogin
           stethoscopeVersion
 
-          requiredApplications {
-            name
-            status
-          }
-
-          bannedApplications {
-            name
-            status
-          }
-
-          suggestedApplications {
+          applications {
             name
             status
           }
@@ -139,7 +129,7 @@ export default class Stethoscope {
         }
       })
       .then(({ errors, data = {}, extensions = {} }) => {
-        const { timing = { total: 0 }} = extensions
+        const { timing = { total: 0 } } = extensions
         const { policy, device } = data
         if (errors) {
           reject({ errors })

@@ -1,7 +1,6 @@
-const { dialog } = require('electron')
-const electronUpdater = require('electron-updater')
+import { dialog } from 'electron'
+import { autoUpdater } from 'electron-updater'
 
-let updater
 let attemptingUpdate = false
 let isFirstLaunch
 const eventRegistration = {}
@@ -9,8 +8,8 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-module.exports = function (env, mainWindow, log = console, server) {
-  const { autoUpdater } = electronUpdater
+export default function updater (env, mainWindow, log = console, server) {
+  let updater
   autoUpdater.autoDownload = false
 
   const isDev = env === 'development'

@@ -5,17 +5,17 @@
  * to trigger actions
  * (e.g. app://some-app opens some-app)
  */
-const { protocol } = require('electron')
-const os = require('os')
-const log = require('./logger')
-const applescript = require('./applescript')
-const { shell } = require('electron')
-const { MAC, WIN } = require('./platform')
+import { protocol, shell } from 'electron'
+import os from 'os'
+import log from './logger'
+import applescript from './applescript'
+import { MAC, WIN } from './platform'
+import updateInit from '../updater'
+import powershell from './powershell'
 const env = process.env.STETHOSCOPE_ENV || 'production'
 
-module.exports = function initProtocols (mainWindow) {
-  const { checkForUpdates } = require('../updater')(env, mainWindow)
-  const powershell = require('./powershell')
+export default function initProtocols (mainWindow) {
+  const { checkForUpdates } = updateInit(env, mainWindow)
 
   // used in instructions.yaml
   protocol.registerHttpProtocol('app', (request, cb) => {

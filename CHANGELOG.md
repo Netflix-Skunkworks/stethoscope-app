@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.0)
+
+
+
+----
+
 ## [3.0.6](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.0.6)
 
 ### Fixed

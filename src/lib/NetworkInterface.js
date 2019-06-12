@@ -1,4 +1,4 @@
-class NetworkInterface {
+export default class NetworkInterface {
   static isLocal (mac = '') {
     const [ octet ] = mac.split(':')
     return Number(parseInt(octet, 16)) & 0b10
@@ -11,8 +11,6 @@ class NetworkInterface {
     return mac.startsWith('00:00:00')
   }
 }
-
-module.exports = NetworkInterface
 
 if (require.main === module) {
   const testMac = '0e:a9:04:7d:0d:d5'

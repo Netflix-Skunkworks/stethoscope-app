@@ -1,13 +1,13 @@
-const settings = require('electron-settings')
-const AutoLaunch = require('auto-launch')
-const config = require('./config.json')
-const os = require('os');
+import settings from 'electron-settings'
+import AutoLaunch from 'auto-launch'
+import config from './config.json'
+import os from 'os'
 
-class AutoLauncher {
-  constructor () {
+export default class AutoLauncher {
+  constructor (appName) {
     const autoLaunchOpts = {
-      name: 'Stethoscope',
-      isHidden: true
+      isHidden: true,
+      name: appName || 'Stethoscope'
     }
     if (os.platform() === 'linux' && process.env.APPIMAGE) {
       autoLaunchOpts.path = process.env.APPIMAGE
@@ -41,5 +41,3 @@ class AutoLauncher {
     settings.set('autoLaunch', 'true')
   }
 }
-
-module.exports = AutoLauncher

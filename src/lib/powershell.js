@@ -1,6 +1,5 @@
-const { UNKNOWN } = require('../constants')
-const Shell = require('node-powershell')
-const log = require('./logger')
+import Shell from 'node-powershell'
+import log from './logger'
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 /*
   NOTE: Don't call node-powershell directly, use this `execPowershell` interface instead
@@ -27,7 +26,4 @@ const openPreferences = pane => {
 
 const run = cmd => execPowershell(cmd)
 
-module.exports = {
-  run,
-  openPreferences
-}
+export { run, openPreferences }

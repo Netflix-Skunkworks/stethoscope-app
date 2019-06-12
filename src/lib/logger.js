@@ -1,8 +1,8 @@
-const { app } = require('electron')
-const winston = require('winston')
-const path = require('path')
-const moment = require('moment')
-const chalk = require('chalk')
+import { app } from 'electron'
+import winston from 'winston'
+import path from 'path'
+import moment from 'moment'
+import chalk from 'chalk'
 require('winston-daily-rotate-file')
 const IS_DEV = process.env.STETHOSCOPE_ENV === 'development'
 
@@ -38,7 +38,7 @@ if (!global.log) {
     ]
   })
 
-  log.getLogFile = function() {
+  log.getLogFile = function () {
     return path.join(
       path.resolve(userDataPath),
       filename.replace('%DATE%', moment().format('YYYY-MM-DD'))
@@ -46,7 +46,7 @@ if (!global.log) {
   }
 
   // support multiple arguments to winston logger
-  const wrapper = ( original, level ) => {
+  const wrapper = (original, level) => {
     return (...args) => original(args.map(o => {
       let color = false
       let transform = s => s
@@ -65,12 +65,12 @@ if (!global.log) {
 
   // log all levels in DEV, to default file logger AND console
   if (IS_DEV) {
-    logLevels.forEach(level =>
+    logLevels.forEach(level => {
       log[level] = wrapper(log[level], level)
-    )
+    })
     log.add(new winston.transports.Console({
       format: winston.format.simple()
-    }));
+    }))
   } else {
     // only error/warn should be logged in prod
     logLevels.forEach(level => {
@@ -86,4 +86,4 @@ if (!global.log) {
 }
 
 // make the winston logger available to the renderer
-module.exports = log
+export default log

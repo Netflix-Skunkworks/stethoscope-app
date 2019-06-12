@@ -236,7 +236,7 @@ practices:
 
         {{requirement "osVersion" "win32"}}
 
-  requiredApplications:
+  applications:
     title: >
       {{#if passing}}
         Required applications are installed

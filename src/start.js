@@ -14,24 +14,26 @@
  *    - 'app:loaded' - Notify when client side app is loaded
  *    - 'download:completed' - update has finished downloading
  */
-const { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } = require('electron')
-const path = require('path')
-const url = require('url')
-const log = require('./lib/logger')
-const initMenu = require('./Menu')
-const config = require('./config.json')
-const { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } = require('./constants')
-const settings = require('electron-settings')
-const serializeError = require('serialize-error')
-const initProtocols = require('./lib/protocolHandlers')
-const env = process.env.STETHOSCOPE_ENV || 'production'
-const loadReactDevTools = require('./lib/loadReactDevTools')
-const findIcon = require('./lib/findIcon')(env)
-const startGraphQLServer = require('../server')
-const IS_DEV = env === 'development'
-const { IS_MAC, IS_WIN } = require('./lib/platform')
-const AutoLauncher = require('./AutoLauncher')
+import path from 'path'
+import { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } from 'electron'
+import url from 'url'
+import log from './lib/logger'
+import initMenu from './Menu'
+import config from './config.json'
+import { MINIMUM_AUTOSCAN_INTERVAL_SECONDS } from './constants'
+import settings from 'electron-settings'
+import serializeError from 'serialize-error'
+import initProtocols from './lib/protocolHandlers'
+import loadReactDevTools from './lib/loadReactDevTools'
+import iconFinder from './lib/findIcon'
+import startGraphQLServer from './server'
+import { IS_MAC, IS_WIN } from './lib/platform'
+import AutoLauncher from './AutoLauncher'
+import updateInit from './updater'
 
+const env = process.env.STETHOSCOPE_ENV || 'production'
+const findIcon = iconFinder(env)
+const IS_DEV = env === 'development'
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
@@ -40,7 +42,6 @@ let appStartTime = Date.now()
 let server
 let updater
 let launchIntoUpdater = false
-let launchIntoDebugger = false
 let deeplinkingUrl
 let isLaunching = true
 let isFirstLaunch = false
@@ -60,6 +61,7 @@ const windowPrefs = {
   autoHideMenuBar: true,
   skipTaskbar: true,
   webPreferences: {
+    nodeIntegration: true,
     webSecurity: false,
     sandbox: false
   }
@@ -96,28 +98,6 @@ async function createWindow () {
     settings.set('userHasLaunchedApp', true)
   }
 
-  // determine if app is already running
-  const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-      }
-    }
-
-    if (IS_WIN) deeplinkingUrl = commandLine.slice(1)
-
-    if (String(deeplinkingUrl).indexOf('update') > -1) {
-      updater.checkForUpdates(env, mainWindow, log).catch(err => {
-        log.error(`error checking for update: ${err}`)
-      })
-    }
-  })
-
-  if (shouldQuit) {
-    return app.quit()
-  }
-
   // wait for process to load before hiding in dock, prevents the app
   // from flashing into view and then hiding
   if (!IS_DEV && IS_MAC) setImmediate(() => app.dock.hide())
@@ -135,7 +115,7 @@ async function createWindow () {
   }
 
   // required at run time so dependencies can be injected
-  updater = require('./updater')(env, mainWindow, log, server)
+  updater = updateInit(env, mainWindow, log, server)
 
   if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
@@ -182,7 +162,7 @@ async function createWindow () {
       updater.checkForUpdates()
     },
     enableDebugger: enableAppDebugger,
-    requestLogPermission(origin) {
+    requestLogPermission (origin) {
       return new Promise((resolve, reject) => {
         dialog.showMessageBox({
           type: 'info',
@@ -193,7 +173,7 @@ async function createWindow () {
           if (buttonIndex === 0) {
             resolve()
           } else {
-            reject()
+            reject(new Error('Access denied'))
           }
         })
       })
@@ -282,39 +262,61 @@ async function createWindow () {
 
 global.app = app
 
-function enableAppDebugger() {
+function enableAppDebugger () {
   if (mainWindow) {
     mainWindow.webContents.openDevTools()
     mainWindow.setResizable(true)
   }
 }
 
-// wrap ready callback in 0-delay setTimeout to reduce serious jank
-// issues on Windows
-app.on('ready', () => setTimeout(() => {
-  createWindow()
-  initProtocols(mainWindow)
+const gotTheLock = app.requestSingleInstanceLock()
 
-  // override internal request origin to give express CORS policy something to check
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    const { requestHeaders } = details
-    const base = 'stethoscope://main'
-    Object.assign(requestHeaders, {
-      Origin: base,
-      Referrer: base
-    })
-    const args = { cancel: false, requestHeaders }
-    callback(args)
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (IS_WIN) deeplinkingUrl = commandLine.slice(1)
+
+    if (String(deeplinkingUrl).indexOf('update') > -1) {
+      updater.checkForUpdates(env, mainWindow, log).catch(err => {
+        log.error(`error checking for update: ${err}`)
+      })
+    }
+
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
   })
 
-  if (launchIntoUpdater) {
-    // triggered via stethoscope://update app link
-    log.info(`Launching into updater: ${launchIntoUpdater}`)
-    updater.checkForUpdates(env, mainWindow).catch(err =>
-      log.error(`start:launch:check for updates exception${err}`)
-    )
-  }
-}, 0))
+  // wrap ready callback in 0-delay setTimeout to reduce serious jank
+  // issues on Windows
+  app.on('ready', () => setTimeout(() => {
+    createWindow()
+    initProtocols(mainWindow)
+
+    // override internal request origin to give express CORS policy something to check
+    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+      const { requestHeaders } = details
+      const base = 'stethoscope://main'
+      Object.assign(requestHeaders, {
+        Origin: base,
+        Referrer: base
+      })
+      const args = { cancel: false, requestHeaders }
+      callback(args)
+    })
+
+    if (launchIntoUpdater) {
+      // triggered via stethoscope://update app link
+      log.info(`Launching into updater: ${launchIntoUpdater}`)
+      updater.checkForUpdates(env, mainWindow).catch(err =>
+        log.error(`start:launch:check for updates exception${err}`)
+      )
+    }
+  }, 0))
+}
 
 app.on('before-quit', () => {
   let appCloseTime = Date.now()
@@ -370,3 +372,5 @@ process.on('uncaughtException', err => {
   log.error(err.stack)
   process.exit(1)
 })
+
+export {}

@@ -71,17 +71,7 @@ describe('GraphQL', () => {
           remoteLogin
           stethoscopeVersion
 
-          requiredApplications {
-            name
-            status
-          }
-
-          bannedApplications {
-            name
-            status
-          }
-
-          suggestedApplications {
+          applications {
             name
             status
           }

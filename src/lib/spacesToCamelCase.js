@@ -6,7 +6,7 @@ function capitalize (str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-module.exports = function spacesToCamelCase (initialPolicy) {
+export default function spacesToCamelCase (initialPolicy) {
   return Object.keys(initialPolicy).reduce((p, key) => {
     let policyKey = key
     const keyWords = policyKey.toLowerCase().split(' ')

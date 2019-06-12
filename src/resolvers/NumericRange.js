@@ -1,9 +1,8 @@
-const { GraphQLScalarType } = require('graphql')
-const semver = require('../src/lib/patchedSemver')
+import { GraphQLScalarType } from 'graphql'
+import semver from '../lib/patchedSemver'
 
 // NumericRange is an alias for the Semver scalar type
-
-const NumericRange = new GraphQLScalarType({
+export default new GraphQLScalarType({
   name: 'NumericRange',
   description: 'Number or formatted number range string',
   serialize (value) {
@@ -25,5 +24,3 @@ const NumericRange = new GraphQLScalarType({
     throw new Error(`${ast.value} is not a valid NumericRange string`)
   }
 })
-
-module.exports = NumericRange

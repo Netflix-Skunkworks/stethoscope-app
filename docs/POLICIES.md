@@ -74,7 +74,7 @@ Scans return a JSON object with an overall status and individual practice status
         "screenLock": "PASS",
         "remoteLogin": "PASS",
         "stethoscopeVersion": "PASS",
-        "requiredApplications": [
+        "applications": [
           {
             "name": "Google Chrome",
             "status": "PASS"
@@ -207,7 +207,7 @@ Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 }
 ```
 
-### `requiredApplications`
+### `applications`
 
 Application requirements have their own GraphQL schema:
 
