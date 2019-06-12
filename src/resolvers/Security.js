@@ -1,6 +1,6 @@
 import semver from '../lib/patchedSemver'
 import pkg from '../../package.json'
-import { NUDGE, UNSUPPORTED } from '../constants'
+import { NUDGE, UNSUPPORTED, ALWAYS, NEVER, INVALID_INSTALL_STATE, INVALID_VERSION, VALID } from '../constants'
 import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
 
@@ -144,7 +144,34 @@ export default {
 
   async applications (root, args, context) {
     if ('applications' in PlatformSecurity) {
-      return PlatformSecurity.suggestedApplications(root, args, context)
+      const results = await PlatformSecurity.applications(root, args, context)
+
+      return results.map((data, idx) => {
+        const config = args.applications[idx]
+        const installed = Boolean(data.version)
+        const validVersion = config.installed === ALWAYS && config.version ? semver.satisfies(semver.coerce(data.version), config.version) : true
+
+        let validInstall
+        switch (config.installed) {
+          case ALWAYS:
+            validInstall = installed
+            break
+          case NEVER:
+            validInstall = !installed
+            break
+          default:
+            validInstall = true
+            break
+        }
+
+        return {
+          name: data.name,
+          version: installed ? data.version : undefined,
+          installed,
+          passing: validInstall && validVersion,
+          state: !validInstall ? INVALID_INSTALL_STATE : !validVersion ? INVALID_VERSION : VALID
+        }
+      })
     }
 
     return UNSUPPORTED
