@@ -70,6 +70,9 @@ export default class Stethoscope {
           applications {
             name
             status
+            version
+            installed
+            state
           }
         }
       }
