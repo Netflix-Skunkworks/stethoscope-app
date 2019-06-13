@@ -60,7 +60,7 @@ class Device extends Component {
     )
   }
 
-  applicationStateMessage = ({ state, version, installed, policy = {} }) => {
+  renderApplicationStateMessage = ({ state, version, installed, policy = {} }) => {
     if (state === 'INVALID_INSTALL_STATE' && !installed) {
       const installPrompt = policy.installFrom ? (
         <p>
@@ -136,7 +136,7 @@ class Device extends Component {
                     </div>
                     <div>
                       {description ? <p>{description}</p> : null}
-                      {this.applicationStateMessage(data)}
+                      {this.renderApplicationStateMessage(data)}
                       {index !== results.length - 1 ? <hr /> : null}
                     </div>
                   </li>
