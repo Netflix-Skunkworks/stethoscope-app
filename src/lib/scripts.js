@@ -4,10 +4,12 @@ import glob from 'fast-glob'
 import extend from 'extend'
 import { readFileSync } from 'fs'
 
+const development = process.env.STETHOSCOPE_ENV === 'development'
+
 let checks = false
 
 setKmdEnv({
-  FILE_BASE_PATH: process.resourcesPath + path.sep,
+  FILE_BASE_PATH: !development ? process.resourcesPath + path.sep : process.cwd(),
   NODE_ENV: process.env.STETHOSCOPE_ENV,
   NODE_PATH: process.execPath
 })
