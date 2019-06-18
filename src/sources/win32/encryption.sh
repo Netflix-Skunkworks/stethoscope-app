@@ -1,4 +1,4 @@
-pathResolve bitlocker-status\\bitlocker-status.exe
+pathResolve \\bitlocker-status\\bitlocker-status.exe
 save path
 template '{path}'
 exec

@@ -21,7 +21,11 @@ const tryConnection = () => {
       console.log(`yarn react:start - react ready on http://127.0.0.1:${port}`)
       console.log('yarn electron:start')
       startedElectron = true
-      const appServer = spawn('yarn', ['dev:electron'], {
+      let cmd = 'yarn'
+      if (process.platform === 'win32') {
+        cmd = 'yarn.cmd'
+      }
+      const appServer = spawn(cmd, ['dev:electron'], {
         cwd: __dirname
       })
       appServer.stdout.on('data', data => console.log(data.toString()))

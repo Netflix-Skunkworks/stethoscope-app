@@ -38,7 +38,7 @@
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js",
     "babel": "run-s babel:clean babel:compile",
     "babel:clean": "rimraf compiled",
-    "babel:compile": "BABEL_ENV=production babel src/ --out-dir compiled/ --copy-files"
+    "babel:compile": "cross-env BABEL_ENV=production babel src/ --out-dir compiled/ --copy-files"
   },
   "dependencies": {
     "@babel/register": "^7.4.4",
