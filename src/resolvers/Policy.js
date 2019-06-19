@@ -19,9 +19,12 @@ export default {
       // this handles multiplicable items like applications, etc.
       if (Array.isArray(passing)) {
         // convert verification result to PASS|FAIL
-        response[verification] = passing.map(({ name, passing }) => {
+        response[verification] = passing.map(({ name, version, installed, state, passing }) => {
           return {
             name,
+            version,
+            installed,
+            state,
             status: passing ? PASS : FAIL
           }
         })

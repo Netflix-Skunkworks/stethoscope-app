@@ -239,15 +239,15 @@ practices:
   applications:
     title: >
       {{#if passing}}
-        Required applications are installed
+        Applications are following requirements
       {{else}}
-        Missing required applications
+        Applications are not following requirements
       {{/if}}
     description: >
-      Certain applications have been designated as necessary by your organization.
+      Certain applications have been designated as required or prohibited by your organization. Required applications may also have acceptable versions.
     directions:
       darwin: |
-        1. Please install the following applications:
+        See the following requirements:
 
       win32: |
-        1. Please install the following applications
+        See the following requirements:

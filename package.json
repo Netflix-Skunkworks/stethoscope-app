@@ -2,7 +2,7 @@
   "name": "Stethoscope",
   "version": "3.0.6",
   "private": true,
-  "homepage": "./",
+  "homepage": "https://stethoscope.app",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "repository": {
@@ -14,7 +14,8 @@
     "parser": "babel-eslint",
     "ignore": [
       "registerServiceWorker.js"
-    ]
+    ],
+    "globals": [ "jest", "it", "expect", "describe" ]
   },
   "scripts": {
     "start": "yarn babel && cross-env FORCE_COLOR=true nf start -p 12000",
@@ -33,7 +34,7 @@
     "build:windows": "run-s prebuild 'build:electron -w'",
     "build:linux": "run-s prebuild 'electron-builder -l' postbuild",
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js",
     "babel": "run-s babel:clean babel:compile",
@@ -55,13 +56,13 @@
     "extend": "^3.0.2",
     "fast-glob": "^2.2.6",
     "generic-pool": "^3.4.2",
-    "graphql": "^0.13.2",
+    "graphql": "^14.3.1",
     "graphql-server-express": "^1.2.0",
     "graphql-tools": "^2.12.0",
     "handlebars": "^4.0.11",
     "helmet": "^3.9.0",
     "js-yaml": "^3.10.0",
-    "kmd-script": "^0.0.10",
+    "kmd-script": "^0.0.11",
     "moment": "^2.19.3",
     "node-powershell": "^3.3.1",
     "react": "^16.2.0",
