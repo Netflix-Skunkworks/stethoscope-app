@@ -1,5 +1,6 @@
 import { NUDGE, DEFAULT_DARWIN_APP_PATH } from '../../constants'
 import kmd from '../../lib/kmd'
+import os from 'os';
 
 const MacSecurity = {
   async automaticAppUpdates (root, args, context) {
@@ -36,7 +37,7 @@ const MacSecurity = {
     const requests = args.applications.map(({name, paths = {}}) => {
       const variables = {
         NAME: name,
-        PATH: paths.darwin || DEFAULT_DARWIN_APP_PATH
+        PATH: (paths.darwin || DEFAULT_DARWIN_APP_PATH).replace(/^~/, os.homedir())
       }
       return kmd('app', context, variables);
     });

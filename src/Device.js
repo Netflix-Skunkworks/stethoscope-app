@@ -66,7 +66,7 @@ class Device extends Component {
         <p>
           {' '}
           Install from{' '}
-          <a href={policy.installFrom} target='_blank'>
+          <a href={policy.installFrom} target='_blank' rel="noopener noreferrer">
             here
           </a>
         </p>
