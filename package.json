@@ -2,7 +2,7 @@
   "name": "Stethoscope",
   "version": "3.0.6",
   "private": true,
-  "homepage": "http://stethoscope.app",
+  "homepage": "https://stethoscope.app",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "repository": {
@@ -14,7 +14,8 @@
     "parser": "babel-eslint",
     "ignore": [
       "registerServiceWorker.js"
-    ]
+    ],
+    "globals": [ "jest", "it", "expect", "describe" ]
   },
   "scripts": {
     "start": "yarn babel && cross-env FORCE_COLOR=true nf start -p 12000",

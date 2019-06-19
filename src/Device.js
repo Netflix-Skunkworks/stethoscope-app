@@ -66,7 +66,7 @@ class Device extends Component {
         <p>
           {' '}
           Install from{' '}
-          <a href={policy.installFrom} target='_blank' rel="noopener noreferrer">
+          <a href={policy.installFrom} target='_blank' rel='noopener noreferrer'>
             here
           </a>
         </p>
@@ -134,11 +134,9 @@ class Device extends Component {
                         <ActionIcon className='action-icon' width='15px' height='15px' {...iconProps} /> {name}
                       </strong>{' '}
                     </div>
-                    <div>
-                      {description ? <p>{description}</p> : null}
-                      {this.renderApplicationStateMessage(data)}
-                      {index !== results.length - 1 ? <hr /> : null}
-                    </div>
+                    {description ? <p>{description}</p> : null}
+                    {this.renderApplicationStateMessage(data)}
+                    {index !== results.length - 1 ? <hr /> : null}
                   </li>
                 )
               })}

@@ -231,6 +231,7 @@ a.btn:hover {
   border-top: 1px solid #efefef;
   margin: 1em 0;
   padding: 0;
+  width: 100%;
 }
 .result-heading {
   display: flex;
