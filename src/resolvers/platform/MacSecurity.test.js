@@ -31,7 +31,6 @@ describe('appplications', () => {
 
   it('should set a default path when not present', async () => {
     const name = 'Super Cool App'
-    const path = 'super/cool/app'
     await MacSecurity.applications(
       null,
       {
