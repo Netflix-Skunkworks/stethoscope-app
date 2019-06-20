@@ -11,7 +11,7 @@ import log from './logger'
 import applescript from './applescript'
 import { MAC, WIN } from './platform'
 import updateInit from '../updater'
-import powershell from './powershell'
+import * as powershell from './powershell'
 const env = process.env.STETHOSCOPE_ENV || 'production'
 
 export default function initProtocols (mainWindow) {
