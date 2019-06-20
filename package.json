@@ -2,7 +2,7 @@
   "name": "Stethoscope",
   "version": "3.0.6",
   "private": true,
-  "homepage": "https://stethoscope.app",
+  "homepage": "./",
   "author": "Netflix",
   "description": "Local Stethoscope app",
   "repository": {
