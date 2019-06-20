@@ -25,10 +25,6 @@ const app = new Application({
   path: paths[process.platform]
 })
 
-async function wait(seconds) {
-  return new Promise(resolve => setTimeout(() => resolve(), seconds * 1000))
-}
-
 async function scan (origin) {
   const { stdout } = await exec(`curl -H "Origin: ${origin}" --verbose 'http://127.0.0.1:37370/graphql?query=query%20ValidateDevice($policy:%20DevicePolicy!)%20%7B%0A%20%20policy%20%7B%0A%20%20%20%20validate(policy:%20$policy)%20%7B%0A%20%20%20%20%20%20status%0A%20%20%20%20%20%20osVersion%0A%20%20%20%20%20%20firewall%0A%20%20%20%20%20%20diskEncryption%0A%20%20%20%20%20%20automaticUpdates%0A%20%20%20%20%20%20screenLock%0A%20%20%20%20%20%20remoteLogin%0A%20%20%20%20%20%20stethoscopeVersion%0A%20%20%20%20%7D%0A%20%20%7D%0A%20%20%0A%20%20device%20%7B%0A%20%20%20%20deviceId%0A%20%20%20%20deviceName%0A%20%20%20%20platform%0A%20%20%20%20platformName%0A%20%20%20%20friendlyName%0A%20%20%20%20osVersion%0A%20%20%20%20osName%0A%20%20%20%20osBuild%0A%20%20%20%20firmwareVersion%0A%20%20%20%20hardwareModel%0A%20%20%20%20hardwareSerial%0A%20%20%20%20stethoscopeVersion%0A%20%20%20%20ipAddresses%20%7B%0A%20%20%20%20%20%20interface%0A%20%20%20%20%20%20address%0A%20%20%20%20%20%20mask%0A%20%20%20%20%20%20broadcast%0A%20%20%20%20%7D%0A%20%20%20%20macAddresses%20%7B%0A%20%20%20%20%20%20interface%0A%20%20%20%20%20%20type%0A%20%20%20%20%20%20mac%0A%20%20%20%20%20%20physicalAdapter%0A%20%20%20%20%20%20lastChange%0A%20%20%20%20%7D%0A%20%20%20%20security%20%7B%0A%20%20%20%20%20%20firewall%0A%20%20%20%20%20%20automaticUpdates%0A%20%20%20%20%20%20diskEncryption%0A%20%20%20%20%20%20screenLock%0A%20%20%20%20%20%20remoteLogin%0A%20%20%20%20%20%20automaticAppUpdates%0A%20%20%20%20%20%20automaticSecurityUpdates%0A%20%20%20%20%20%20automaticOsUpdates%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A&variables=%7B%0A%20%20%22policy%22:%20%7B%0A%20%20%20%20%22stethoscopeVersion%22:%20%22%3E=1.0.0%22,%0A%20%20%20%20%22osVersion%22:%20%7B%0A%20%20%20%20%20%20%22darwin%22:%20%7B%0A%20%20%20%20%20%20%20%20%22ok%22:%20%22%3E=10.13.4%22,%0A%20%20%20%20%20%20%20%20%22nudge%22:%20%22%3E=10.12.6%22%0A%20%20%20%20%20%20%7D,%0A%20%20%20%20%20%20%22win32%22:%20%7B%0A%20%20%20%20%20%20%20%20%22ok%22:%20%22%3E=10.0.16299%22,%0A%20%20%20%20%20%20%20%20%22nudge%22:%20%22%3E=10.0.15063%22%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D,%0A%20%20%20%20%22firewall%22:%20%22ALWAYS%22,%0A%20%20%20%20%22diskEncryption%22:%20%22ALWAYS%22,%0A%20%20%20%20%22automaticUpdates%22:%20%22SUGGESTED%22,%0A%20%20%20%20%22screenLock%22:%20%22IF_SUPPORTED%22,%0A%20%20%20%20%22remoteLogin%22:%20%22NEVER%22%0A%20%20%7D%0A%7D&sessionId=034fad3d-9352-f41f-848b-76794010fc25&operationName=ValidateDevice'`)
 
@@ -71,8 +67,6 @@ async function main () {
     const isVisible = await app.browserWindow.isVisible()
     assert.strict.equal(isVisible, true)
     console.log(chalk.green('✓'), 'app is visible')
-
-    await wait(2)
 
     const title = await app.client.getTitle()
     assert.strict.equal(title, `Stethoscope (v${pkg.version})`)
