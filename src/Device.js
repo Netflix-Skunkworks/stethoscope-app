@@ -1,15 +1,16 @@
 import React, { Component, Fragment } from 'react'
 import Accessible from './Accessible'
 import Action from './Action'
-import ActionIcon from './ActionIcon'
+import ActionIcon, { VARIANTS } from './ActionIcon'
 import semver from './lib/patchedSemver'
+import { INVALID_INSTALL_STATE, INVALID_VERSION, SUGGESTED_INSTALL, SUGGESTED_UPGRADE, PASS } from './constants'
 import './Device.css'
 
 const deviceMessages = {
   ok (msg) {
     return (
       <span>
-        <ActionIcon className='action-icon' width='35px' height='35px' name='checkmark' color='#bbd8ca' />
+        <ActionIcon className='action-icon' size='35px' variant={VARIANTS.PASS} />
         <span>{msg}</span>
       </span>
     )
@@ -41,7 +42,7 @@ class Device extends Component {
 
   renderAppVersionSuggestion = (installed, suggested) => {
     return (
-      <table style={{ width: 'auto' }}>
+      <table style={{ width: 'auto', marginTop: '10px' }}>
         <tbody>
           <tr>
             <td>Suggested version:</td>
@@ -61,26 +62,27 @@ class Device extends Component {
   }
 
   renderApplicationStateMessage = ({ state, version, installed, policy = {} }) => {
-    if (state === 'INVALID_INSTALL_STATE' && !installed) {
-      const installPrompt = policy.installFrom ? (
-        <p>
-          {' '}
-          Install from{' '}
-          <a href={policy.installFrom} target='_blank' rel='noopener noreferrer'>
-            here
-          </a>
-        </p>
-      ) : null
+    const installPrompt = policy.installFrom ? (
+      <p>
+        Install from{' '}
+        <a href={policy.installFrom} target='_blank' rel='noopener noreferrer'>
+          here
+        </a>
+      </p>
+    ) : null
+    if (state === INVALID_INSTALL_STATE && !installed) {
       return <p>You must have this application installed.{installPrompt}</p>
-    } else if (state === 'INVALID_INSTALL_STATE' && installed) {
+    } else if (state === INVALID_INSTALL_STATE && installed) {
       return <p>You must not have this application installed</p>
-    } else if (state === 'INVALID_VERSION') {
+    } else if (state === INVALID_VERSION || state === SUGGESTED_UPGRADE) {
       return (
         <Fragment>
-          <p>You need to update this application.</p>{' '}
           {this.renderAppVersionSuggestion(version, semver.coerce(policy.version))}
+          {installPrompt && <p>{installPrompt}</p>}
         </Fragment>
       )
+    } else if (state === SUGGESTED_INSTALL) {
+      return <p>It is suggested that this applicaiton is installed</p>
     }
     return null
   }
@@ -122,16 +124,19 @@ class Device extends Component {
           <Action {...actionProps} key={`action-container-${action.name}`}>
             <ul className='result-list' key={`action-ul-${action.name}`}>
               {results.map((data, index) => {
-                const { name, status, policy = {} } = data
+                const { name, status, state, policy = {} } = data
                 const { description } = policy
-                const iconProps =
-                  status === 'PASS' ? { name: 'checkmark', color: '#bbd8ca' } : { name: 'blocked', color: '#a94442' }
+                let iconVariant = status === PASS ? VARIANTS.PASS : VARIANTS.BLOCK
+
+                if (state === SUGGESTED_INSTALL || state === SUGGESTED_UPGRADE) {
+                  iconVariant = VARIANTS.SUGGEST
+                }
 
                 return (
                   <li className='result-list-item' key={`action-li-${name}`}>
                     <div className='result-heading'>
                       <strong>
-                        <ActionIcon className='action-icon' width='15px' height='15px' {...iconProps} /> {name}
+                        <ActionIcon className='action-icon' size='15px' variant={iconVariant} /> {name}
                       </strong>{' '}
                     </div>
                     {description ? <p>{description}</p> : null}
