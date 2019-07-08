@@ -373,4 +373,10 @@ process.on('uncaughtException', err => {
   process.exit(1)
 })
 
+app.on('window-all-closed', () => {
+  if (!IS_MAC) {
+    app.quit()
+  }
+})
+
 export {}
