@@ -19,7 +19,8 @@ policy.stethoscopeVersion = `>=${pkg.version}`
 
 const paths = {
   darwin: 'dist/mac/Stethoscope.app/Contents/MacOS/Stethoscope',
-  win32: 'dist/win-unpacked/Stethoscope.exe'
+  win32: 'dist/win-unpacked/Stethoscope.exe',
+  linux: 'dist/linux-unpacked/stethoscope'
 }
 const app = new Application({
   path: paths[process.platform]
