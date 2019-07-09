@@ -33,7 +33,7 @@
     "build:mac": "run-s prebuild 'build:electron -m' postbuild",
     "build:windows": "npm run prebuild && npm run build:electron -w",
     "build:linux": "run-s prebuild 'electron-builder -l' postbuild",
-    "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
+    "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -c.appId=${APP_BUNDLE_ID}",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js",
@@ -88,7 +88,8 @@
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "electron": "^5.0.1",
-    "electron-builder": "20.40.2",
+    "electron-builder": "20.43.0",
+    "electron-notarize": "^0.1.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint-plugin-standard": "^4.0.0",
@@ -139,7 +140,11 @@
       "schema.graphql"
     ],
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "gatekeeperAssess": false,
+      "hardenedRuntime" : true,
+      "entitlements":"entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist"
     },
     "win": {
       "target": "nsis",
@@ -172,6 +177,7 @@
           "stethoscope"
         ]
       }
-    ]
+    ],
+    "afterSign": "scripts/notarize.js"
   }
 }

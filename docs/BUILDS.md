@@ -14,16 +14,25 @@ yarn build:windows
 
 The build process copies assets from the `public/` directory into `build/` via `react-scripts`, `electron-builder` picks up assets from the `build/` directory to bundle into native applications.
 
-## Signing Builds (Mac)
+## Signing and Notarizing Builds (Mac)
 
 1. Register as an Apple developer
 2. Purchase a code-signing certificate and download the PFX bundle
 3. Install your code signing certificate to the Mac certificate store
-4. Sign the app by running:
+4. Generate an app-specific password for the Apple ID that will be used to [notarize](https://developer.apple.com/news/?id=06032019i) the app. (so don’t have use your regular password!)
+5. Add the following environment variables by running:
 
-```bash
-yarn build:mac
-```
+    ```
+    export APP_BUNDLE_ID="com.example-company.stethoscope-local"
+    export APPLE_ID="my-apple-id-email@example.com"
+    export APPLE_ID_PASS="The app-specific password"
+    ```
+
+6. Sign and notarize the app by running:
+
+    ```bash
+    yarn build:mac
+    ```
 
 ## Signing Builds (Windows)
 
