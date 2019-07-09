@@ -1,6 +1,6 @@
 #!/usr/bin/env kmd
 
-exec cat /sys/devices/virtual/dmi/id/board_vendor /sys/devices/virtual/dmi/id/board_name
+exec cat /sys/devices/virtual/dmi/id/board_vendor /sys/devices/virtual/dmi/id/product_name
 save output
 extract (.+)\n
 defaultTo Unavailable
