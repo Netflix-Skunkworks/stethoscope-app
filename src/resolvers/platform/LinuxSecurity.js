@@ -17,7 +17,7 @@ export default {
 
   async remoteLogin (root, args, context) {
     const result = await kmd('remote-login', context)
-    return !!result.remoteLogin
+    return result.remoteLogin !== 'false'
   },
 
   async automaticUpdates (root, args, context) {
