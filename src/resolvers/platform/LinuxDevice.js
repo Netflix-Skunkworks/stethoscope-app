@@ -1,9 +1,11 @@
 import kmd from '../../lib/kmd'
+import linuxFriendlyName from './LinuxDeviceName'
 
 export default {
   async friendlyName (root, args, context) {
     const result = await kmd('hardware', context)
-    return result.system.hardwareVersion
+    const hardwareModel = result.system.hardwareVersion
+    return linuxFriendlyName(hardwareModel)
   },
   async disks (root, args, context) {
     const result = await kmd('disks', context)
