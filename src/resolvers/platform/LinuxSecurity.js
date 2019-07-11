@@ -9,9 +9,7 @@ export default {
   },
 
   async diskEncryption (root, args, context) {
-    const result = await kmd('disks', context)
-    const encryption = await kmd('encryption', context)
-    result.disks.encryption = encryption.disks.encryption
+    const result = await kmd('encryption', context)
     return result.disks.encryption === 'true'
   },
 
