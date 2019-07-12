@@ -32,7 +32,7 @@
     "build:all": "electron-builder -mwl",
     "build:mac": "run-s prebuild 'build:electron -m' postbuild",
     "build:windows": "npm run prebuild && npm run build:electron -w",
-    "_electron-builder-linux": "electron-builder -l",
+    "_electron-builder-linux": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -l",
     "build:linux": "run-s prebuild _electron-builder-linux postbuild",
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
