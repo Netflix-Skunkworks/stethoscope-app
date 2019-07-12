@@ -245,3 +245,17 @@ input AppRequirement {
   }]
 }
 ```
+
+### `openWifiConnections`
+
+Checks if there are old wifi connections cached locally. This practice uses the `RequirementOption` enum to specify the requirement.
+
+Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
+
+**Example Usage:**
+
+```json
+{
+  "openWifiConnections": "SUGGESTED"
+}
+```
