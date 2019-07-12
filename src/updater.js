@@ -32,8 +32,8 @@ export default function updater (env, mainWindow, log = console, server) {
     'update-available': () => {
       dialog.showMessageBox({
         type: 'info',
-        title: 'Found Updates',
-        message: 'New version available, do you want update now?',
+        title: 'Stethoscope: Found Updates',
+        message: 'A new version of Stethoscope is available, do you want update now?',
         buttons: ['Yes', 'No']
       }, (buttonIndex) => {
         if (buttonIndex === 0) {
