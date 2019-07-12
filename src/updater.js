@@ -1,5 +1,6 @@
 import { dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
+import config from './config'
 
 let attemptingUpdate = false
 let isFirstLaunch
@@ -11,6 +12,9 @@ const eventRegistration = {}
 export default function updater (env, mainWindow, log = console, server) {
   let updater
   autoUpdater.autoDownload = false
+  if (config.allowPrerelease) {
+    autoUpdater.allowPrerelease = true
+  }
 
   const isDev = env === 'development'
 

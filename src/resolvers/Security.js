@@ -3,6 +3,7 @@ import pkg from '../../package.json'
 import { NUDGE, UNSUPPORTED, ALWAYS, NEVER, INVALID_INSTALL_STATE, INVALID_VERSION, VALID } from '../constants'
 import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
+import config from '../config'
 
 export default {
   async automaticAppUpdates (root, args, context) {
@@ -70,6 +71,9 @@ export default {
   },
 
   async stethoscopeVersion (root, args, context) {
+    if (config.allowPrerelease) {
+      return semver.satisfies(pkg.version, args.stethoscopeVersion, { includePrerelease: true })
+    }
     return semver.satisfies(pkg.version, args.stethoscopeVersion)
   },
 
