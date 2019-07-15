@@ -1,6 +1,5 @@
 #!/usr/bin/env kmd
-exec defaults read /Library/Preferences/SystemConfiguration/com.apple.airport.preferences
-extract .*Open.*
+exec cat /Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist
 extract Open
 
 defaultTo Closed
