@@ -71,10 +71,7 @@ export default {
   },
 
   async stethoscopeVersion (root, args, context) {
-    if (config.allowPrerelease) {
-      return semver.satisfies(pkg.version, args.stethoscopeVersion, { includePrerelease: true })
-    }
-    return semver.satisfies(pkg.version, args.stethoscopeVersion)
+    return semver.satisfies(pkg.version, args.stethoscopeVersion, { includePrerelease: config.allowPrerelease })
   },
 
   async screenLock (root, args, context) {
