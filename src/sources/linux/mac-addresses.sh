@@ -1,13 +1,13 @@
 #!/usr/bin/env kmd
-exec ifconfig
+exec ip --oneline link show up
 trim
-split \n\n
+lines
   save _line
-  extract (\w+):\s
+  extract \d+:\s(\w+):\s
   save device
 
   load _line
-  extract .*(..:..:..:..:..:..)
+  extract link/ether\s(..:..:..:..:..:..)\s
   save addr
 
   remove _line

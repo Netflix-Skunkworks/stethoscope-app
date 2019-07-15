@@ -3,6 +3,7 @@ import pkg from '../../package.json'
 import { NUDGE, UNSUPPORTED, ALWAYS, NEVER, INVALID_INSTALL_STATE, INVALID_VERSION, VALID } from '../constants'
 import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
+import config from '../config'
 
 export default {
   async automaticAppUpdates (root, args, context) {
@@ -70,7 +71,7 @@ export default {
   },
 
   async stethoscopeVersion (root, args, context) {
-    return semver.satisfies(pkg.version, args.stethoscopeVersion)
+    return semver.satisfies(pkg.version, args.stethoscopeVersion, { includePrerelease: config.allowPrerelease })
   },
 
   async screenLock (root, args, context) {
@@ -174,6 +175,13 @@ export default {
       })
     }
 
+    return UNSUPPORTED
+  },
+
+  async openWifiConnections (root, args, context) {
+    if ('openWifiConnections' in PlatformSecurity) {
+      return PlatformSecurity.openWifiConnections(root, args, context)
+    }
     return UNSUPPORTED
   }
 }

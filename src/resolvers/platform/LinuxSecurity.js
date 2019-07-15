@@ -9,13 +9,13 @@ export default {
   },
 
   async diskEncryption (root, args, context) {
-    const result = await kmd('disks', context)
+    const result = await kmd('encryption', context)
     return result.disks.encryption === 'true'
   },
 
   async remoteLogin (root, args, context) {
     const result = await kmd('remote-login', context)
-    return !!result.remoteLogin
+    return result.remoteLogin !== 'false'
   },
 
   async automaticUpdates (root, args, context) {

@@ -146,6 +146,7 @@ input DevicePolicy {
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
   windowsMaxScreenLockTimeout: Int
+  openWifiConnections: RequirementOption
 }
 
 # Defines a requirement for an installed application
@@ -186,6 +187,8 @@ type PolicyResult {
   applications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
+  # Open Wi-Fi
+  openWifiConnections: FeatureState
 }
 
 type Security {
@@ -207,6 +210,7 @@ type Security {
   publicFirewall(requirement: RequirementOption!): Boolean!
   privateFirewall(requirement: RequirementOption!): Boolean!
   domainFirewall(requirement: RequirementOption!): Boolean!
+  openWifiConnections(requirement: RequirementOption!): Boolean!
 }
 
 type IpAddress {

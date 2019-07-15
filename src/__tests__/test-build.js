@@ -18,8 +18,9 @@ const policy = yaml.safeLoad(policyHandle)
 policy.stethoscopeVersion = `>=${pkg.version}`
 
 const paths = {
-  darwin: 'dist/mac/Stethoscope.app/Contents/MacOS/Stethoscope',
-  win32: 'dist/win-unpacked/Stethoscope.exe'
+  darwin: `dist/mac/${pkg.name}.app/Contents/MacOS/${pkg.name}`,
+  win32: `dist/win-unpacked/${pkg.name}.exe`,
+  linux: `dist/linux-unpacked/${pkg.name.toLowerCase()}`
 }
 const app = new Application({
   path: paths[process.platform]
