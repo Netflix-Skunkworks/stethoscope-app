@@ -1,6 +1,6 @@
 import { NUDGE, DEFAULT_DARWIN_APP_PATH } from '../../constants'
 import kmd from '../../lib/kmd'
-import os from 'os';
+import os from 'os'
 
 const MacSecurity = {
   async automaticAppUpdates (root, args, context) {
@@ -34,15 +34,15 @@ const MacSecurity = {
   },
 
   async applications (root, args, context) {
-    const requests = args.applications.map(({name, paths = {}}) => {
+    const requests = args.applications.map(({ name, paths = {} }) => {
       const variables = {
         NAME: name,
         PATH: (paths.darwin || DEFAULT_DARWIN_APP_PATH).replace(/^~/, os.homedir())
       }
-      return kmd('app', context, variables);
-    });
-    const results = await Promise.all(requests);
-    return results;
+      return kmd('app', context, variables)
+    })
+    const results = await Promise.all(requests)
+    return results
   },
 
   async automaticUpdates (root, args, context) {
@@ -97,6 +97,11 @@ const MacSecurity = {
   async firewall (root, args, context) {
     const result = await kmd('firewall', context)
     return parseInt(result.firewallEnabled, 10) > 0
+  },
+
+  async openWifiConnections (root, args, context) {
+    const result = await kmd('openWifiConnections', context)
+    return result.wifiConnections === 'Closed'
   }
 
   // await kmd('app', context)

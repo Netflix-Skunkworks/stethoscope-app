@@ -175,5 +175,12 @@ export default {
     }
 
     return UNSUPPORTED
+  },
+
+  async openWifiConnections (root, args, context) {
+    if ('openWifiConnections' in PlatformSecurity) {
+      return PlatformSecurity.openWifiConnections(root, args, context)
+    }
+    return UNSUPPORTED
   }
 }
