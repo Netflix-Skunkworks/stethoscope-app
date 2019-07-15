@@ -42,8 +42,8 @@ if (process.env.APP_BUNDLE_ID) {
   pkg.build.appId = process.env.APP_BUNDLE_ID
 }
 if (process.env.APP_VERSION_SUFFIX) {
-  const baseVersion = semver(pkg.version, { includePrerelease: true })
-  pkg.version = `${baseVersion.major}.${baseVersion.minor}.${baseVersion.patch}${process.env.APP_VERSION_SUFFIX}`
+  const currentVersion = semver(pkg.version)
+  pkg.version = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}${process.env.APP_VERSION_SUFFIX}`
 }
 writeToFile('../package.json', pkg)
 
