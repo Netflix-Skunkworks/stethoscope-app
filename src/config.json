@@ -9,5 +9,6 @@
     }]
   },
   "rescanIntervalSeconds": 604800, 
-  "autoLaunchPrompt": true
+  "autoLaunchPrompt": true,
+  "allowPrerelease": false
 }
