@@ -21,7 +21,7 @@ const openApp = async function (appName) {
   return execString(script)
 }
 
-export {
+export default {
   openPreferences,
   openApp
 }
