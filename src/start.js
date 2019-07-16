@@ -78,7 +78,7 @@ const BASE_URL = process.env.ELECTRON_START_URL || url.format({
 let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
-const focusOrCreateWindow = () => {
+const focusOrCreateWindow = (mainWindow) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
@@ -89,6 +89,7 @@ const focusOrCreateWindow = () => {
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
     mainWindow.loadURL(BASE_URL)
   }
+  return mainWindow;
 }
 
 async function createWindow () {
@@ -115,7 +116,7 @@ async function createWindow () {
   }
 
   // required at run time so dependencies can be injected
-  updater = updateInit(env, mainWindow, log, server)
+  updater = updateInit(env, mainWindow, log, server, focusOrCreateWindow)
 
   if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
@@ -145,7 +146,7 @@ async function createWindow () {
   if (tray) tray.destroy()
 
   tray = new Tray(statusImages.PASS)
-  tray.on('click', focusOrCreateWindow)
+  tray.on('click', () => focusOrCreateWindow(mainWindow))
 
   tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
 
