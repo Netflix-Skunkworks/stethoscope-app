@@ -67,6 +67,7 @@
     "js-yaml": "^3.10.0",
     "kmd-script": "^0.0.11",
     "moment": "^2.19.3",
+    "node-fetch": "^2.6.0",
     "node-powershell": "^3.3.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
