@@ -26,7 +26,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
           label: 'Open Window',
           accelerator: 'CmdOrCtrl+N',
           click () {
-            focusOrCreateWindow()
+            mainWindow = focusOrCreateWindow(mainWindow)
           }
         }
       ]

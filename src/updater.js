@@ -9,7 +9,7 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-export default function updater (env, mainWindow, log = console, server) {
+export default function updater (env, mainWindow, log = console, server, focusOrCreateWindow) {
   let updater
   autoUpdater.autoDownload = false
   if (config.allowPrerelease) {
@@ -42,6 +42,7 @@ export default function updater (env, mainWindow, log = console, server) {
       }, (buttonIndex) => {
         if (buttonIndex === 0) {
           if (!isDev) {
+            mainWindow = focusOrCreateWindow(mainWindow)
             autoUpdater.downloadUpdate()
           } else {
             if (updater) updater.enabled = true
