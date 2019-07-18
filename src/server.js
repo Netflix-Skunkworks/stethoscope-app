@@ -80,8 +80,11 @@ export default async function startServer (env, log, language = 'en-US', appActi
           .map(({ pattern }) => new RegExp(pattern))
           .some(regex => regex.test(origin))
 
+        log.error(`Unauthorized request from ${origin}`)
         return callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
       }
+
+      log.error(`Unauthorized request from ${origin}`)
       callback(new Error(`Unauthorized request from ${origin}`), false)
     },
     methods: 'GET,OPTIONS,HEAD,POST'
@@ -94,6 +97,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
       if (origin && allowed.some(hostname => origin.startsWith(hostname))) {
         callback(null, true)
       } else {
+        log.error(`Unauthorized request from ${origin}`)
         callback(new Error(`Unauthorized request from ${origin}`), false)
       }
     }
@@ -240,6 +244,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
           const response = yaml.safeLoad(readFileSync(filePath, 'utf8'))
           res.json(transform(response))
         } catch (e) {
+          log.error(`Failed to load and transform ${filePath}`)
           if (fallback && typeof fallback === 'string') {
             const response = yaml.safeLoad(readFileSync(fallback, 'utf8'))
             res.json(transform(response))

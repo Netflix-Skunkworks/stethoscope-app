@@ -222,6 +222,7 @@ class App extends Component {
         fetch(`${HOST}/${item}`)
           .then(async res => {
             if (!res.ok) {
+              log.error(`Unable to locate ${item}`)
               const response = await res.json()
               throw new Error(response.error || `Unable to locate ${item}`)
             }
