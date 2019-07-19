@@ -236,17 +236,19 @@ export default async function startServer (env, log, language = 'en-US', appActi
       if (options.transform) { transform = options.transform }
     }
 
+    const getFilePath = name => find(`./practices/${name}.yaml`)
+
     return [
       cors(policyRequestOptions),
       (req, res) => {
-        const filePath = find(`./practices/${filename}.yaml`)
+        const filePath = getFilePath(filename)
         try {
           const response = yaml.safeLoad(readFileSync(filePath, 'utf8'))
           res.json(transform(response))
         } catch (e) {
           log.error(`Failed to load and transform ${filePath}`)
           if (fallback && typeof fallback === 'string') {
-            const response = yaml.safeLoad(readFileSync(fallback, 'utf8'))
+            const response = yaml.safeLoad(readFileSync(getFilePath(fallback), 'utf8'))
             res.json(transform(response))
           }
         }
