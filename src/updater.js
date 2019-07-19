@@ -17,7 +17,6 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   }
 
   const isDev = env === 'development'
-  const productName = process.env.npm_package_build_productName;
 
   const eventHandlers = {
     'error': error => {
@@ -37,8 +36,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     'update-available': () => {
       dialog.showMessageBox({
         type: 'info',
-        title: `${productName} Update Available`,
-        message: `A new version of ${productName} is available, would you like to download and update now?`,
+        title: 'Stethoscope Update Available',
+        message: 'A new version of Stethoscope is available, would you like to download and update now?',
         buttons: ['Yes', 'No'],
         defaultId: 0
       }, (buttonIndex) => {
@@ -51,7 +50,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
             attemptingUpdate = false
             updater = null
             dialog.showMessageBox({
-              title: `Downloading ${productName}`,
+              title: 'Downloading Stethoscope',
               message: 'App cannot be updated in dev mode'
             })
           }
@@ -63,8 +62,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       if (isFirstLaunch) return
 
       dialog.showMessageBox({
-        title: `No ${productName} Updates`,
-        message: `You already have the latest version of ${productName}.`
+        title: 'No Stethoscope Updates',
+        message: 'You already have the latest version of Stethoscope.'
       })
 
       attemptingUpdate = false
@@ -73,8 +72,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     },
     'update-downloaded': () => {
       dialog.showMessageBox({
-        title: `Install ${productName} Updates`,
-        message: `Updates downloaded, ${productName} will quit and relaunch.`
+        title: 'Install Stethoscope Updates',
+        message: 'Updates downloaded, Stethoscope will quit and relaunch.'
       }, () => {
         if (!isDev) {
           if (server && server.listening) {
