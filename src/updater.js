@@ -37,7 +37,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       dialog.showMessageBox({
         type: 'info',
         title: 'Stethoscope: Found Updates',
-        message: 'A new version of Stethoscope is available, do you want update now?',
+        message: 'A new version of Stethoscope is available, do you want to update now?',
         buttons: ['Yes', 'No']
       }, (buttonIndex) => {
         if (buttonIndex === 0) {

@@ -2,9 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.1)
+
+### Fixed
+- Doesn't kill the application when the main window is closed on Mac
+- Copy Debug Info was crashing the app
+- Loading the app with a non-english system language failed to load the english fallback instructions
+- Clicking on the appstore link was crashing the app
+- Linux build and stability improvements
+- Allow auto-updates when the main window is closed
+
+### Added
+- Open WiFi network scanning
+- Better language for auto update messaging
+- Pre-release support and more configurable builds
+- More debugger information
+
+----
+
 ## [3.1.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.0)
 
+### Fixed
+- Some compilation and stability issues for Windows
 
+### Added
+- Application query logic for Mac
+
+### Removed
+- A number of unused dependencies
+- Unused babel TS loader
+
+### Changed
+- Added ES6 support for all JS files through babel compilation
 
 ----
 
