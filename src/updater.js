@@ -17,6 +17,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   }
 
   const isDev = env === 'development'
+  const productName = process.env.npm_package_build_productName;
 
   const eventHandlers = {
     'error': error => {
@@ -36,9 +37,10 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     'update-available': () => {
       dialog.showMessageBox({
         type: 'info',
-        title: 'Stethoscope: Found Updates',
-        message: 'A new version of Stethoscope is available, do you want to update now?',
-        buttons: ['Yes', 'No']
+        title: `${productName} Update Available`,
+        message: `A new version of ${productName} is available, would you like to download and update now?`,
+        buttons: ['Yes', 'No'],
+        defaultId: 0
       }, (buttonIndex) => {
         if (buttonIndex === 0) {
           if (!isDev) {
@@ -49,7 +51,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
             attemptingUpdate = false
             updater = null
             dialog.showMessageBox({
-              title: 'Downloading',
+              title: `Downloading ${productName}`,
               message: 'App cannot be updated in dev mode'
             })
           }
@@ -61,8 +63,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       if (isFirstLaunch) return
 
       dialog.showMessageBox({
-        title: 'No Updates',
-        message: 'You already have the latest version.'
+        title: `No ${productName} Updates`,
+        message: `You already have the latest version of ${productName}.`
       })
 
       attemptingUpdate = false
@@ -71,8 +73,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     },
     'update-downloaded': () => {
       dialog.showMessageBox({
-        title: 'Install Updates',
-        message: 'Updates downloaded, Stethoscope will quit and relaunch.'
+        title: `Install ${productName} Updates`,
+        message: `Updates downloaded, ${productName} will quit and relaunch.`
       }, () => {
         if (!isDev) {
           if (server && server.listening) {
