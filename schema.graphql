@@ -96,7 +96,7 @@ type Application {
   name: String! # e.g. Slack.app
   path: String # ~/Applications
   version: Semver
-  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
   installFrom: String
 }
@@ -111,7 +111,7 @@ input ApplicationRequirement {
   name: String! # e.g. Slack.app
   paths: ApplicationPaths
   version: Semver
-  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
   installFrom: String
 }

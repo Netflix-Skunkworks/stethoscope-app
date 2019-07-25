@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
-import ActionIcon from './ActionIcon'
+import ActionIcon, {VARIANTS, VARIANT_COLORS} from './ActionIcon'
 import semver from './lib/patchedSemver'
 import showdown from 'showdown'
 import Handlebars from 'handlebars/dist/handlebars.min.js'
@@ -18,30 +18,13 @@ class Action extends Component {
     this.registerHelpers(props)
   }
 
-  hoverText (type) {
-    var hoverTextLabels = {
-      critical: 'Highly recommended action',
-      suggested: 'Suggested action',
-      done: 'Completed action'
-    }
-    return hoverTextLabels[type]
-  }
-
-  iconName (type) {
-    if (type === 'critical' || type === 'suggested') {
-      return 'blocked'
-    } else if (type === 'done') {
-      return 'checkmark'
-    }
-  }
-
-  iconColor (type) {
+  getIconVariant (type) {
     if (type === 'critical') {
-      return '#a94442'
+      return VARIANTS.BLOCK
     } else if (type === 'done') {
-      return '#bbd8ca'
+      return VARIANTS.PASS
     } else if (type === 'suggested') {
-      return '#bfa058'
+      return VARIANTS.SUGGEST
     }
   }
 
@@ -63,13 +46,9 @@ class Action extends Component {
           <div className='subtask'>
             <ActionIcon
               className='action-icon'
-              name={this.iconName(status)}
-              color={this.iconColor(status)}
-              title={this.hoverText(status)}
-              width='18px'
-              height='18px'
+              variant={this.getIconVariant(status)}
             />
-            <strong style={{ color: this.iconColor(status) }}>{msg}</strong>
+            <strong style={{ color: VARIANT_COLORS[this.getIconVariant(status)] }}>{msg}</strong>
           </div>
         )
       )
@@ -194,11 +173,7 @@ class Action extends Component {
         <span className='title' onClick={this.toggleDescription}>
           <ActionIcon
             className='action-icon'
-            name={this.iconName(type)}
-            color={this.iconColor(type)}
-            title={this.hoverText(type)}
-            width='18px'
-            height='18px'
+            variant={this.getIconVariant(type)}
           />
           {this.parseTitle()}
         </span>

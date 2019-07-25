@@ -1,6 +1,18 @@
 import semver from '../lib/patchedSemver'
 import pkg from '../../package.json'
-import { NUDGE, UNSUPPORTED, ALWAYS, NEVER, INVALID_INSTALL_STATE, INVALID_VERSION, VALID } from '../constants'
+import {
+  NUDGE,
+  UNSUPPORTED,
+  ALWAYS,
+  NEVER,
+  SUGGESTED,
+  IF_SUPPORTED,
+  INVALID_INSTALL_STATE,
+  INVALID_VERSION,
+  VALID,
+  SUGGESTED_INSTALL,
+  SUGGESTED_UPGRADE
+} from '../constants'
 import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
 import config from '../config'
@@ -150,27 +162,53 @@ export default {
       return results.map((data, idx) => {
         const config = args.applications[idx]
         const installed = Boolean(data.version)
-        const validVersion = config.installed === ALWAYS && config.version ? semver.satisfies(semver.coerce(data.version), config.version) : true
+        const versionSatisfied = config.version ? semver.satisfies(semver.coerce(data.version), config.version) : true;
 
         let validInstall
-        switch (config.installed) {
+        switch (config.assertion) {
           case ALWAYS:
             validInstall = installed
             break
           case NEVER:
             validInstall = !installed
             break
+          case SUGGESTED:
+          case IF_SUPPORTED:
           default:
             validInstall = true
             break
+        }
+
+        let validVersion
+        switch (config.assertion) {
+          case ALWAYS:
+            validVersion = versionSatisfied
+            break
+          case NEVER:
+            validVersion = !installed
+            break
+          case IF_SUPPORTED:
+            validVersion = installed ? versionSatisfied : true
+            break
+          case SUGGESTED:
+          default:
+            validVersion = true
+            break
+        }
+
+        let state
+        if (config.assertion === SUGGESTED) {
+          state = !installed ? SUGGESTED_INSTALL : !versionSatisfied ? SUGGESTED_UPGRADE : VALID
+        } else {
+          state = !validInstall ? INVALID_INSTALL_STATE : !validVersion ? INVALID_VERSION : VALID
         }
 
         return {
           name: data.name,
           version: installed ? data.version : undefined,
           installed,
-          passing: validInstall && validVersion,
-          state: !validInstall ? INVALID_INSTALL_STATE : !validVersion ? INVALID_VERSION : VALID
+          passing: state === VALID,
+          state
         }
       })
     }
