@@ -81,7 +81,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
           .some(regex => regex.test(origin))
 
         if (isAllowed) {
-          return callback(null)
+          return callback(null, true)
         }
       }
 
