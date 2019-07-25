@@ -80,8 +80,9 @@ export default async function startServer (env, log, language = 'en-US', appActi
           .map(({ pattern }) => new RegExp(pattern))
           .some(regex => regex.test(origin))
 
-        log.error(`Unauthorized request from ${origin}`)
-        return callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
+        if (isAllowed) {
+          return callback(null, true)
+        }
       }
 
       log.error(`Unauthorized request from ${origin}`)
