@@ -1,5 +1,5 @@
 import { Menu, shell, clipboard } from 'electron'
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'
 import pkg from '../package.json'
 import config from './config.json'
 import AutoLauncher from './AutoLauncher'

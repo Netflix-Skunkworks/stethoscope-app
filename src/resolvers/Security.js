@@ -170,7 +170,7 @@ export default {
       return results.map((data, idx) => {
         const config = args.applications[idx]
         const installed = Boolean(data.version)
-        const versionSatisfied = config.version ? semver.satisfies(semver.coerce(data.version), config.version) : true;
+        const versionSatisfied = config.version ? semver.satisfies(semver.coerce(data.version), config.version) : true
 
         let validInstall
         switch (config.assertion) {

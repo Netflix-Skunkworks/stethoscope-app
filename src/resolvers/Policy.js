@@ -1,7 +1,5 @@
 import Security from './Security'
-import { PASS, FAIL, NUDGE, SUGGESTED, NEVER,
-  SUGGESTED_INSTALL,
-  SUGGESTED_UPGRADE } from '../constants'
+import { PASS, FAIL, NUDGE, SUGGESTED, NEVER } from '../constants'
 
 export default {
   async validate (root, args, context) {
@@ -22,8 +20,8 @@ export default {
       if (Array.isArray(passing)) {
         // convert verification result to PASS|FAIL
         response[verification] = passing.map(({ name, version, installed, state, passing }, index) => {
-          const policyType = requirement[index].assertion;
-          const failStatus = policyType === SUGGESTED ? NUDGE : FAIL;
+          const policyType = requirement[index].assertion
+          const failStatus = policyType === SUGGESTED ? NUDGE : FAIL
           return {
             name,
             version,

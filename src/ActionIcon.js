@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-const DEFAULT_SIZE = '20px';
+const DEFAULT_SIZE = '20px'
 
 const LABELS = {
   BLOCK: 'Highly recommended action',
@@ -11,7 +11,7 @@ const LABELS = {
 export const VARIANT_COLORS = {
   PASS: '#bbd8ca',
   BLOCK: '#a94442',
-  SUGGEST: '#bfa058',
+  SUGGEST: '#bfa058'
 }
 
 export const VARIANTS = {
@@ -27,8 +27,8 @@ export default class ActionIcon extends Component {
     const {
       color,
       variant = VARIANTS.PASS,
-      size = DEFAULT_SIZE,
-    } = props;
+      size = DEFAULT_SIZE
+    } = props
 
     const styleProps = {
       color: color || VARIANT_COLORS[variant],
@@ -48,11 +48,10 @@ export default class ActionIcon extends Component {
   }
 
   render () {
-
     const {
       variant = VARIANTS.PASS,
-      title,
-    } = this.props;
+      title
+    } = this.props
 
     return (
       <span className='action-icon' title={title || LABELS[variant]}>

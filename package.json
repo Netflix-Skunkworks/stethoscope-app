@@ -15,7 +15,14 @@
     "ignore": [
       "registerServiceWorker.js"
     ],
-    "globals": [ "jest", "it", "expect", "describe", "beforeEach", "afterEach" ]
+    "globals": [
+      "jest",
+      "it",
+      "expect",
+      "describe",
+      "beforeEach",
+      "afterEach"
+    ]
   },
   "scripts": {
     "start": "yarn babel && cross-env FORCE_COLOR=true nf start -p 12000",

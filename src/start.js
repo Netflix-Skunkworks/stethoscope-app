@@ -89,7 +89,7 @@ const focusOrCreateWindow = (mainWindow) => {
     initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
     mainWindow.loadURL(BASE_URL)
   }
-  return mainWindow;
+  return mainWindow
 }
 
 async function createWindow () {

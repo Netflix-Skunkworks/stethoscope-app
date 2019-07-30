@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
-import ActionIcon, {VARIANTS, VARIANT_COLORS} from './ActionIcon'
+import ActionIcon, { VARIANTS, VARIANT_COLORS } from './ActionIcon'
 import semver from './lib/patchedSemver'
 import showdown from 'showdown'
 import Handlebars from 'handlebars/dist/handlebars.min.js'
