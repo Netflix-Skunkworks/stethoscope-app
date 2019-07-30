@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.2)
+
+### Fixed
+- Error on new macs >=10.14.6 where system update settings files do not exist until preferences are changed. This was causing the app to hang when the scan request failed.
+
+### Added
+- Support for SUGGESTED and IF_SUPPORTED application policies and appropriate UI messaging
+- Better logging for CORS failures
+
+----
+
 ## [3.1.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.1)
 
 ### Fixed
