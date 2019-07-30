@@ -24,8 +24,8 @@ const MacSecurity = {
   },
 
   async automaticOsUpdates (root, args, context) {
-    const result = await kmd('com.apple.commerce', context)
-    return result.updates.restartRequired !== '0'
+    const result = await kmd('com.apple.SoftwareUpdate', context)
+    return result.updates.automaticallyInstallMacOSUpdates !== '0'
   },
 
   async automaticCheckEnabled (root, args, context) {

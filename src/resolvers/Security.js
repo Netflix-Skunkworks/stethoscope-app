@@ -42,6 +42,14 @@ export default {
     return UNSUPPORTED
   },
 
+  async automaticCheckEnabled (root, args, context) {
+    if ('automaticCheckEnabled' in PlatformSecurity) {
+      return PlatformSecurity.automaticCheckEnabled(root, args, context)
+    }
+
+    return UNSUPPORTED
+  },
+
   async automaticSecurityUpdates (root, args, context) {
     if ('automaticSecurityUpdates' in PlatformSecurity) {
       return PlatformSecurity.automaticSecurityUpdates(root, args, context)
