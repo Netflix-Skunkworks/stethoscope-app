@@ -132,12 +132,12 @@ practices:
         {{/if}}
         1. Click "Automatically check for updates"
         {{#unless passing}}
-        1. Make sure the following are checked:
+          1. Make sure the following are checked:
 
-        - {{{statusIcon automaticUpdates 'Automatically check for updates'}}}
-          - {{{statusIcon automaticDownloadUpdates 'Download newly available updates in the background'}}}
-          - {{{statusIcon automaticAppUpdates 'Install app updates'}}}
+          - {{{statusIcon automaticCheckEnabled 'Automatically check for updates'}}}
+          - {{{statusIcon automaticDownloadUpdates 'Download new updates when available'}}}
           - {{{statusIcon automaticOsUpdates 'Install macOS updates'}}}
+          - {{{statusIcon automaticAppUpdates 'Install app updates from the App Store'}}}
           - {{{statusIcon automaticSecurityUpdates 'Install system data files and \*security updates\*'}}}
         {{/unless}}
 

@@ -125,6 +125,7 @@ describe('GraphQL', () => {
           automaticOsUpdates
           automaticDownloadUpdates
           automaticConfigDataInstall
+          automaticCheckEnabled
         }
       }
     }`

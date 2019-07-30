@@ -174,6 +174,11 @@ const Device = {
         return securityToDeviceStatus(status)
       },
 
+      async automaticCheckEnabled () {
+        const status = await Security.automaticCheckEnabled(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
       async diskEncryption () {
         const status = await Security.diskEncryption(root, args, context)
         return securityToDeviceStatus(status)
