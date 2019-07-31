@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.3](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.3)
+
+### Fixed
+- Auto update settings were defaulting to fail when they should have been defaulting to pass. Auto update is on by default, and until the preferences are changed, the settings don't exist.
+
+----
+
 ## [3.1.2](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.2)
 
 ### Fixed
