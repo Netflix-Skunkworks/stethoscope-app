@@ -132,12 +132,6 @@
     "directories": {
       "buildResources": "public"
     },
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://s3-us-west-2.amazonaws.com/nflx-stethoscope-public-securityprod-us-west-2"
-      }
-    ],
     "files": [
       "bitlocker-status/*",
       "build/**",
