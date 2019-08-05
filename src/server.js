@@ -1,6 +1,7 @@
 import { compile, setKmdEnv, run } from 'kmd-script/src'
 import { graphiqlExpress } from 'graphql-server-express'
 import { graphql } from 'graphql'
+import noCache from 'nocache'
 import { makeExecutableSchema } from 'graphql-tools'
 import { performance } from 'perf_hooks'
 import { PORT } from './constants'
@@ -60,6 +61,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
   const defaultConfig = yaml.safeLoad(settingsHandle)
 
   app.use(helmet())
+  app.use(noCache())
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
 
