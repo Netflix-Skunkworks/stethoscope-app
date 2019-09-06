@@ -146,7 +146,9 @@ async function createWindow () {
   if (tray) tray.destroy()
 
   tray = new Tray(statusImages.PASS)
-  tray.on('click', () => focusOrCreateWindow(mainWindow))
+  tray.on('click', () => {
+    mainWindow = focusOrCreateWindow(mainWindow);
+  })
 
   tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
 
