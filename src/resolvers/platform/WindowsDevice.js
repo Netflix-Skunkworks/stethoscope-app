@@ -8,9 +8,5 @@ export default {
 
   async disks (root, args, context) {
     return null
-  },
-
-  async applications (root, args, context) {
-    return null
   }
 }

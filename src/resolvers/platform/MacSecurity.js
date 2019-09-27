@@ -104,51 +104,6 @@ const MacSecurity = {
     return result.wifiConnections === 'Closed'
   }
 
-  // await kmd('app', context)
-  //  async applications (root, args, context) {
-  //   const apps = await Device.applications(root, args, context)
-  //   const { version: osVersion } = context.kmdResponse.system
-  //   const { applications = [] } = args
-  //
-  //   return applications.filter((app) => {
-  //     const { platform = false } = app
-  //     // if a platform is required
-  //     if (platform) {
-  //       if (platform[context.platform]) {
-  //         return patchedSemver.satisfies(osVersion, platform[context.platform])
-  //       },
-  //       return platform.all
-  //     },
-  //     // no platform specified - default to ALL
-  //     return true
-  //   }).map(({
-  //     exactMatch = false,
-  //     name,
-  //     version,
-  //     platform,
-  //     // ignored for now
-  //     includePackages
-  //   }) => {
-  //     let userApp
-  //
-  //     if (!exactMatch) {
-  //       userApp = apps.find((app: IApp) => (new RegExp(name, 'ig')).test(app.name))
-  //     } else {
-  //       userApp = apps.find((app: IApp) => app.name === name)
-  //     },
-  //
-  //     // app isn't installed - fail
-  //     if (!userApp) {
-  //       return { name, passing: false, reason: 'NOT_INSTALLED' },
-  //     },
-  //     // app is out of date - fail
-  //     if (version && !patchedSemver.satisfies(userApp.version, version)) {
-  //       return { name, passing: false, reason: 'OUT_OF_DATE' },
-  //     },
-  //
-  //     return { name, passing: true },
-  //   })
-  // },
 }
 
 export default MacSecurity
