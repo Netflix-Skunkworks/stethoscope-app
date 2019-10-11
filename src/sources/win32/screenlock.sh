@@ -8,11 +8,13 @@ exec
 save _output
 extract AC.*0x([0-9a-fA-F]{8,8})
 parseInt 16
+defaultTo 0
 save chargingTimeout
 
 load _output
 extract DC.*0x([0-9a-fA-F]{8,8})
 parseInt 16
+defaultTo 0
 save batteryTimeout
 
 remove _output
