@@ -1,5 +1,5 @@
 #/usr/bin/env kmd
-exec reg query 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
+exec reg query '%REGISTRY_PATH%'
 trim
 lines
   save _line
@@ -12,17 +12,17 @@ lines
   save name
   save displayName
 
-  load output
+  load _output
   extract Publisher\s+[A-Z\s_]+\s+(.*)
   save publisher
 
-  load output
+  load _output
   extract InstallDate\s+[A-Z\s_]+\s+(.*)
   parseDate YYYYMMDD
   save installDate
 
-  load output
-  extract DisplayVersion\s+[A-Z\s_]+\s+(\d+\.\d+\.\d+)
+  load _output
+  extract DisplayVersion\s+[A-Z\s_]+\s+(.*)
   save version
 
   remove _output

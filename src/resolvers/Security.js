@@ -216,6 +216,7 @@ export default {
           version: installed ? data.version : undefined,
           installed,
           passing: state === VALID,
+          reason: data.reason,
           state
         }
       })

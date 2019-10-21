@@ -1,7 +1,7 @@
 import semver from '../../lib/patchedSemver'
 import Device from '../platform/WindowsDevice'
 import kmd from '../../lib/kmd'
-import { UNKNOWN } from '../../constants'
+import { UNKNOWN, DEFAULT_WIN32_APP_REGISTRY_PATH } from '../../constants'
 
 export default {
   async automaticUpdates (root, args, context) {
@@ -62,7 +62,24 @@ export default {
 
   async applications (root, args, context) {
     const device = await kmd('os', context)
-    const apps = await Device.applications(root, args, context)
+
+    // gather set of optional registry path overrides from policy
+    const overrides = new Set()
+    args.applications.map(({ paths = {} }) => {
+        overrides.add(paths.win32 || DEFAULT_WIN32_APP_REGISTRY_PATH)
+    })
+
+    const registry_paths = Array.from(overrides)
+
+    let apps = []
+    for (const path of registry_paths) {
+      const variables = {
+        REGISTRY_PATH: path
+      }
+      const discovered = await kmd('apps', context, variables)
+      apps = apps.concat(discovered.apps)
+    }
+
     const { version: osVersion } = device.system
     const { applications = [] } = args
     const devicePlatform = process.platform
@@ -82,9 +99,7 @@ export default {
       exactMatch = false,
       name,
       version,
-      platform,
-      // ignored for now
-      includePackages
+      platform
     }) => {
       let userApp = false
 
@@ -94,14 +109,14 @@ export default {
         userApp = apps.find((app) => app.name === name)
       }
 
-      // app isn't installed - fail
-      if (!userApp) return { name, passing: false, reason: 'NOT_INSTALLED' }
-      // app is out of date - fail
+      // app isn't installed
+      if (!userApp) return { name, reason: 'NOT_INSTALLED' }
+      // app is out of date
       if (version && !semver.satisfies(userApp.version, version)) {
-        return { name, passing: false, reason: 'OUT_OF_DATE' }
+        return { name, version: userApp.version, reason: 'OUT_OF_DATE' }
       }
 
-      return { name, passing: true }
+      return { name, version: userApp.version }
     })
   }
 }
