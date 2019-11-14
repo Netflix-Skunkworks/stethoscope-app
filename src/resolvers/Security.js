@@ -165,9 +165,9 @@ export default {
     return UNSUPPORTED
   },
 
-  async applications (root, args, context) {
+  async applications (root, args, context, osPlatform, osVersion) {
     if ('applications' in PlatformSecurity) {
-      const platformApps = await applicationPlatformFilter(args.applications, context)
+      const platformApps = await applicationPlatformFilter(args.applications, context, osPlatform, osVersion)
 
       const results = await PlatformSecurity.applications(root, platformApps, context)
 

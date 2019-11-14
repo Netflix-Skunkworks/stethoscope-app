@@ -60,53 +60,32 @@ export default {
     return result.firewalls.every(fw => fw.status === 'ON')
   },
 
-  async applications (root, args, context) {
-    const device = await kmd('os', context)
-
+  async applications (root, appsToValidate, context) {
     // gather set of optional registry path overrides from policy
-    const overrides = new Set()
-    args.applications.map(({ paths = {} }) => {
-        overrides.add(paths.win32 || DEFAULT_WIN32_APP_REGISTRY_PATH)
+    const registryPathOverrides = new Set()
+    appsToValidate.map(({ paths = {} }) => {
+      registryPathOverrides.add(paths.win32 || DEFAULT_WIN32_APP_REGISTRY_PATH)
     })
 
-    const registry_paths = Array.from(overrides)
+    const paths = Array.from(registryPathOverrides)
 
-    let apps = []
-    for (const path of registry_paths) {
-      const variables = {
-        REGISTRY_PATH: path
-      }
-      const discovered = await kmd('apps', context, variables)
-      apps = apps.concat(discovered.apps)
+    let foundApps = []
+    for (const path of paths) {
+      const appsAtRegPath = await kmd('apps', context, { REGISTRY_PATH: path })
+      foundApps = foundApps.concat(appsAtRegPath.apps)
     }
 
-    const { version: osVersion } = device.system
-    const { applications = [] } = args
-    const devicePlatform = process.platform
-
-    return applications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[devicePlatform]) {
-          return semver.satisfies(osVersion, platform[devicePlatform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
+    return appsToValidate.map(({
       exactMatch = false,
       name,
-      version,
-      platform
+      version
     }) => {
       let userApp = false
 
       if (!exactMatch) {
-        userApp = apps.find((app) => (new RegExp(name, 'ig')).test(app.name))
+        userApp = foundApps.find((app) => (new RegExp(name, 'ig')).test(app.name))
       } else {
-        userApp = apps.find((app) => app.name === name)
+        userApp = foundApps.find((app) => app.name === name)
       }
 
       // app isn't installed

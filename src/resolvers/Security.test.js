@@ -23,12 +23,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: ALWAYS,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.15'
     )
     expect(result).toEqual([
       {
@@ -49,12 +54,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: ALWAYS,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.15'
     )
     expect(result).toEqual([
       {
@@ -75,12 +85,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              linux: ">=14.04"
+            },
             assertion: ALWAYS,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'linux',
+      '14.04'
     )
     expect(result).toEqual([
       {
@@ -101,12 +116,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              linux: ">=14.04"
+            },
             assertion: NEVER,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'linux',
+      '14.04'
     )
     expect(result).toEqual([
       {
@@ -127,12 +147,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              linux: ">=14.04"
+            },
             assertion: NEVER,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'linux',
+      '14.04.1'
     )
     expect(result).toEqual([
       {
@@ -153,12 +178,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              win32: ">=10.0"
+            },
             assertion: SUGGESTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'win32',
+      '10.0'
     )
     expect(result).toEqual([
       {
@@ -179,12 +209,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              win32: ">=10.0"
+            },
             assertion: SUGGESTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'win32',
+      '10.0'
     )
     expect(result).toEqual([
       {
@@ -205,12 +240,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: SUGGESTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.15'
     )
     expect(result).toEqual([
       {
@@ -231,12 +271,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.15'
     )
     expect(result).toEqual([
       {
@@ -257,11 +302,16 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: IF_SUPPORTED
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.13.5'
     )
     expect(result).toEqual([
       {
@@ -282,12 +332,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.15'
     )
     expect(result).toEqual([
       {
@@ -308,12 +363,17 @@ describe('applications', () => {
       {
         applications: [
           {
+            platform: {
+              darwin: ">=10.12"
+            },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'
           }
         ]
       },
-      {}
+      {},
+      'darwin',
+      '10.14.6'
     )
     expect(result).toEqual([
       {

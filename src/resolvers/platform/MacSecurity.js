@@ -33,16 +33,15 @@ const MacSecurity = {
     return result.updates.automaticCheckEnabled !== '0'
   },
 
-  async applications (root, apps, context) {
-    const requests = apps.map(({ name, paths = {} }) => {
+  async applications (root, appsToValidate, context) {
+    const requests = appsToValidate.map(({ name, paths = {} }) => {
       const variables = {
         NAME: name,
         PATH: (paths.darwin || DEFAULT_DARWIN_APP_PATH).replace(/^~/, os.homedir())
       }
       return kmd('app', context, variables)
     })
-    const results = await Promise.all(requests)
-    return results
+    return Promise.all(requests)
   },
 
   async automaticUpdates (root, args, context) {
