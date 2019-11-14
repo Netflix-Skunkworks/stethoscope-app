@@ -33,8 +33,8 @@ const MacSecurity = {
     return result.updates.automaticCheckEnabled !== '0'
   },
 
-  async applications (root, args, context) {
-    const requests = args.applications.map(({ name, paths = {} }) => {
+  async applications (root, apps, context) {
+    const requests = apps.map(({ name, paths = {} }) => {
       const variables = {
         NAME: name,
         PATH: (paths.darwin || DEFAULT_DARWIN_APP_PATH).replace(/^~/, os.homedir())

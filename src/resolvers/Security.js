@@ -16,6 +16,8 @@ import {
 import kmd from '../lib/kmd'
 import { PlatformSecurity } from './platform/'
 import config from '../config'
+import applicationPlatformFilter from '../lib/applicationPlatformFilter'
+
 
 export default {
   async automaticAppUpdates (root, args, context) {
@@ -165,7 +167,9 @@ export default {
 
   async applications (root, args, context) {
     if ('applications' in PlatformSecurity) {
-      const results = await PlatformSecurity.applications(root, args, context)
+      const platformApps = await applicationPlatformFilter(args.applications, context)
+
+      const results = await PlatformSecurity.applications(root, platformApps, context)
 
       return results.map((data, idx) => {
         const config = args.applications[idx]
