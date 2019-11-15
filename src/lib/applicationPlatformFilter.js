@@ -8,6 +8,9 @@ export default async function applicationPlatformFilter(applications = [], conte
   const osVersion = version || (await kmd('os', context)).system.version
 
   return applications.filter((app) => {
+    if (!app.platform || app.platform.all) {
+      return true
+    }
     const platformStringRequirement = app.platform[osPlatform]
     return platformStringRequirement && semver.satisfies(osVersion, platformStringRequirement)
   })

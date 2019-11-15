@@ -249,7 +249,7 @@ input PlatformStringRequirement {
   ubuntu: Semver
   linux: Semver
   awsWorkspace: Semver
-  all: Semver
+  all: Boolean
 }
 
 input PlatformBracketRequirement {
