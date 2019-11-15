@@ -1,6 +1,7 @@
 import { UNKNOWN } from '../../constants'
 import semver from 'semver'
 import kmd from '../../lib/kmd'
+import sanitizeDebianVersionString from '../../lib/sanitizeDebianVersionString'
 
 export default {
   async firewall (root, args, context) {
@@ -52,7 +53,7 @@ async applications (root, appsToValidate, context) {
     return appsToValidate.map(({
       exactMatch = false,
       name,
-      version
+      version: versionRequirement
     }) => {
       let userApp = false
 
@@ -64,8 +65,15 @@ async applications (root, appsToValidate, context) {
 
       // app isn't installed
       if (!userApp) return { name, reason: 'NOT_INSTALLED' }
+
+      // try to massage Debian package versions into something semver-compatible
+      // NOTE: this is a "best effort" attempt--do not be surprised if comparing the
+      // Debian 'upstream-version' portion of the package version to a semver requirement
+      // string does something other than what you expect
+      const sanitizedAppVersion = sanitizeDebianVersionString(userApp.version)
+
       // app is out of date
-      if (version && !semver.satisfies(userApp.version, version)) {
+      if (versionRequirement && !semver.satisfies(sanitizedAppVersion, versionRequirement)) {
         return { name, version: userApp.version, reason: 'OUT_OF_DATE' }
       }
 
