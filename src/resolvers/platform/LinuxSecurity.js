@@ -43,5 +43,33 @@ export default {
     const delayOk = semver.satisfies(semver.coerce(lockDelay), screenIdle)
     const idleOk = idleActivationEnabled === 'true'
     return delayOk && idleOk
+  },
+
+async applications (root, appsToValidate, context) {
+
+    const foundApps = (await kmd('apps', context)).apps
+
+    return appsToValidate.map(({
+      exactMatch = false,
+      name,
+      version
+    }) => {
+      let userApp = false
+
+      if (!exactMatch) {
+        userApp = foundApps.find((app) => (new RegExp(name, 'ig')).test(app.name))
+      } else {
+        userApp = foundApps.find((app) => app.name === name)
+      }
+
+      // app isn't installed
+      if (!userApp) return { name, reason: 'NOT_INSTALLED' }
+      // app is out of date
+      if (version && !semver.satisfies(userApp.version, version)) {
+        return { name, version: userApp.version, reason: 'OUT_OF_DATE' }
+      }
+
+      return { name, version: userApp.version }
+    })
   }
 }
