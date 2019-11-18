@@ -85,18 +85,10 @@ type SecurityInfo {
   # Windows
   domainFirewall: FeatureState
 }
-#
-# type Application {
-#   name: String!
-#   displayName: String
-#   version: String!
-#   lastOpenedTime: String
-#   installDate: String
-# }
 
 type Application {
   name: String! # e.g. Slack.app
-  path: String # ~/Applications
+  path: String # ~/Applications for Mac, or Win32 Registry path for Windows
   version: Semver
   assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
@@ -105,13 +97,14 @@ type Application {
 
 input ApplicationPaths {
   darwin: String # "/Applications"
-  win32: String # "\Program Files"
+  win32: String # "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall"
   linux: String # "/usr/share"
 }
 
 input ApplicationRequirement {
   name: String! # e.g. Slack.app
   paths: ApplicationPaths
+  platform: PlatformStringRequirement
   version: Semver
   assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
@@ -256,7 +249,7 @@ input PlatformStringRequirement {
   ubuntu: Semver
   linux: Semver
   awsWorkspace: Semver
-  all: Semver
+  all: Boolean
 }
 
 input PlatformBracketRequirement {
