@@ -11,6 +11,10 @@ lines
   save uuid
 
   load _line
+  extract LABEL="([\w\s\d-]*)"\s
+  save label
+
+  load _line
   extract FSTYPE="([\w-]+)"\s
   save type
 
