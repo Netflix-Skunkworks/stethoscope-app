@@ -57,7 +57,7 @@ export default class Accessible extends React.Component {
     const child = React.Children.only(children)
 
     // prefix additional props with `aria-${key}`
-    for (let key in ariaProps) {
+    for (const key in ariaProps) {
       if (!key.startsWith('aria-')) {
         accessibleProps[`aria-${key}`] = ariaProps[key]
       } else {

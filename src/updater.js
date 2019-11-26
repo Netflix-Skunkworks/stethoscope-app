@@ -19,7 +19,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   const isDev = env === 'development'
 
   const eventHandlers = {
-    'error': error => {
+    error: error => {
       // first launch, don't show network errors
       if (isFirstLaunch) return
 
@@ -94,7 +94,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     }
   }
 
-  for (let eventName in eventHandlers) {
+  for (const eventName in eventHandlers) {
     // prevent from being registered multiple times
     if (!(eventName in eventRegistration)) {
       eventRegistration[eventName] = true

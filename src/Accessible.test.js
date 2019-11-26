@@ -5,7 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { mount } from 'enzyme'
 import Accessible from './Accessible'
-import TestRenderer from 'react-test-renderer';
+import TestRenderer from 'react-test-renderer'
 
 it('renders without crashing', () => {
   const div = document.createElement('div')

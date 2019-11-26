@@ -24,7 +24,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: ALWAYS,
             version: '>=1.0.0'
@@ -55,7 +55,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: ALWAYS,
             version: '>=1.0.0'
@@ -86,7 +86,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              linux: ">=14.04"
+              linux: '>=14.04'
             },
             assertion: ALWAYS,
             version: '>=1.0.0'
@@ -117,7 +117,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              linux: ">=14.04"
+              linux: '>=14.04'
             },
             assertion: NEVER,
             version: '>=1.0.0'
@@ -148,7 +148,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              linux: ">=14.04"
+              linux: '>=14.04'
             },
             assertion: NEVER,
             version: '>=1.0.0'
@@ -179,7 +179,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              win32: ">=10.0"
+              win32: '>=10.0'
             },
             assertion: SUGGESTED,
             version: '>=1.0.0'
@@ -210,7 +210,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              win32: ">=10.0"
+              win32: '>=10.0'
             },
             assertion: SUGGESTED,
             version: '>=1.0.0'
@@ -241,7 +241,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: SUGGESTED,
             version: '>=1.0.0'
@@ -272,7 +272,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'
@@ -303,7 +303,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: IF_SUPPORTED
           }
@@ -333,7 +333,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'
@@ -364,7 +364,7 @@ describe('applications', () => {
         applications: [
           {
             platform: {
-              darwin: ">=10.12"
+              darwin: '>=10.12'
             },
             assertion: IF_SUPPORTED,
             version: '>=1.0.0'

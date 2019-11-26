@@ -38,7 +38,7 @@ const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
 let tray
-let appStartTime = Date.now()
+const appStartTime = Date.now()
 let server
 let updater
 let launchIntoUpdater = false
@@ -147,7 +147,7 @@ async function createWindow () {
 
   tray = new Tray(statusImages.PASS)
   tray.on('click', () => {
-    mainWindow = focusOrCreateWindow(mainWindow);
+    mainWindow = focusOrCreateWindow(mainWindow)
   })
 
   tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
@@ -184,7 +184,7 @@ async function createWindow () {
   }
 
   // used to select the appropriate instructions file
-  const [ language ] = app.getLocale().split('-')
+  const [language] = app.getLocale().split('-')
   // start GraphQL server, close the app if 37370 is already in use
   server = await startGraphQLServer(env, log, language, appHooksForServer)
   server.on('error', error => {
@@ -322,7 +322,7 @@ if (!gotTheLock) {
 }
 
 app.on('before-quit', () => {
-  let appCloseTime = Date.now()
+  const appCloseTime = Date.now()
 
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {

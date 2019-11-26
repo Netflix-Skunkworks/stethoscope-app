@@ -25,12 +25,12 @@ export default class ErrorBoundary extends React.Component {
   render () {
     if (this.state.hasError) {
       return (
-        <React.Fragment>
+        <>
           <h1>Something went wrong.</h1>
           <pre>
             {JSON.stringify(this.state.error, null, 3)}
           </pre>
-        </React.Fragment>
+        </>
       )
     }
     return this.props.children
