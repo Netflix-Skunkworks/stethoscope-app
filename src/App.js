@@ -83,7 +83,7 @@ class App extends Component {
       if (!this.state.scanIsRunning) {
         ipcRenderer.send('scan:init')
         if (Object.keys(this.state.policy).length) {
-          this.scan()
+          this.handleScan()
         } else {
           this.loadPractices()
         }
@@ -236,7 +236,7 @@ class App extends Component {
       Promise.all(promises).then(([config, policy, instructions]) => {
         this.setState({ config, policy, instructions }, () => {
           if (!this.state.scanIsRunning) {
-            this.scan()
+            this.handleScan()
           }
         })
       }).catch(this.handleErrorGraphQL)
@@ -246,14 +246,14 @@ class App extends Component {
   /**
    * Opens a link in the native default browser
    */
-  openExternal = event => {
+  handleOpenExternal = event => {
     event.preventDefault()
     if (event.target.getAttribute('href')) {
       shell.openExternal(event.target.getAttribute('href'))
     }
   }
 
-  onRestartFromLoader = event => {
+  handleRestartFromLoader = event => {
     settings.set('recentHang', settings.get('recentHang', 0) + 1)
     ipcRenderer.send('app:restart')
   }
@@ -261,7 +261,7 @@ class App extends Component {
   /**
    * Performs a scan by passing the current policy to the graphql server
    */
-  scan = () => {
+  handleScan = () => {
     this.setState({ loading: true, scanIsRunning: true }, () => {
       Stethoscope.validate(this.state.policy).then(({ device, result, timing }) => {
         const lastScanTime = Date.now()
@@ -286,7 +286,7 @@ class App extends Component {
     })
   }
 
-  highlightRescanButton = event => this.setState({ highlightRescan: true })
+  handleHighlightRescanButton = event => this.setState({ highlightRescan: true })
 
   render () {
     const {
@@ -331,7 +331,7 @@ class App extends Component {
     if (loading) {
       content = (
         <Loader
-          onRestart={this.onRestartFromLoader}
+          onRestart={this.handleRestartFromLoader}
           recentHang={this.state.recentHang}
           remoteScan={this.state.remoteScan}
           remoteLabel={this.state.scannedBy}
@@ -360,7 +360,7 @@ class App extends Component {
             lastScanTime={lastScanFriendly}
             lastScanDuration={this.state.lastScanDuration}
             scannedBy={scannedBy}
-            onExpandPolicyViolation={this.highlightRescanButton}
+            onExpandPolicyViolation={this.handleHighlightRescanButton}
           />
           <footer className='toolbar toolbar-footer'>
             <div className='buttonRow'>
@@ -368,7 +368,7 @@ class App extends Component {
                 className={classNames('btn btn-default', {
                   'btn-primary': highlightRescan && result.status !== 'PASS'
                 })}
-                onClick={this.scan}
+                onClick={this.handleScan}
               >
                 <span className='icon icon-arrows-ccw' />
                 {instructions.strings.rescanButton}
@@ -377,7 +377,7 @@ class App extends Component {
                 <button
                   className='btn pull-right'
                   href={appConfig.stethoscopeWebURI}
-                  onClick={this.openExternal}
+                  onClick={this.handleOpenExternal}
                 >
                   <span className='icon icon-monitor white' />view all devices
                 </button>

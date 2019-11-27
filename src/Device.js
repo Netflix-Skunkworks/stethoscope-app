@@ -37,7 +37,6 @@ class Device extends Component {
     this.state = {
       showInfo: false
     }
-    this.toggleInfo = this.toggleInfo.bind(this)
   }
 
   renderAppVersionSuggestion = (installed, suggested) => {
@@ -162,7 +161,7 @@ class Device extends Component {
     return d
   }
 
-  toggleInfo () {
+  handleToggleInfo = () => {
     this.setState({
       showInfo: !this.state.showInfo
     })
@@ -222,7 +221,7 @@ class Device extends Component {
               <a
                 href='#toggle'
                 className={`device-info-toggle ${this.state.showInfo ? 'open' : 'closed'}`}
-                onClick={this.toggleInfo}
+                onClick={this.handleToggleInfo}
               >
                 &#9660;
               </a>
