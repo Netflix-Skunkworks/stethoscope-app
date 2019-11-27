@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.4](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.4)
+
+### Added
+- Advanced semver support (e.g. ">10.15 <=10.14.6 || 10.15.1"), allows policies to support multiple major versions
+
+### Fixed
+- Build issues with Catalina - updated electron-builder dependency
+- Updated vulnerable dependencies (react-scripts, webpack-server)
+- Code formatting issues
+
+----
+
 ## [3.1.3](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.3)
 
 ### Fixed
@@ -9,11 +21,7 @@ All notable changes to this project will be documented in this file.
 - Minor regression: DeviceID resolution for Windows and Linux
 - Build fixes for MacOS Catalina
 
-Added:
-- Thrift connection pooling
-- Support for AWS workstations
-- Added Scan duration to UI
-- Automated testing for builds
+### Added:
 - Cross-platform support for applications schema
 
 ----
