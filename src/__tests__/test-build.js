@@ -71,7 +71,7 @@ async function main () {
 
     const title = await app.client.getTitle()
     assert.strict.equal(title, `Stethoscope (v${pkg.version})`)
-    console.log(chalk.green('✓'), `correct version in title`)
+    console.log(chalk.green('✓'), 'correct version in title')
 
     const devToolsOpen = await app.browserWindow.isDevToolsOpened()
     assert.strict.equal(devToolsOpen, false)
@@ -82,14 +82,14 @@ async function main () {
 
     console.log(chalk.yellow('\n============================ REMOTE SCANNING ============================\n'))
 
-    let response = await scan('stethoscope://main')
+    const response = await scan('stethoscope://main')
     if (response !== false) {
       const timing = Math.round(response.extensions.timing.total / 1000 * 100) / 100
       console.log(chalk.green('✓'), `[Remote:Application]\tscan from trusted 'stethoscope://main' successful\t${chalk.yellow(`${timing} seconds`)}`)
     }
 
     if (await scan('https://malicious.ru') === false) {
-      console.log(chalk.green('✓'), `[Remote:Untrusted]\tscan from untrusted 'https://malicious.ru' failed`)
+      console.log(chalk.green('✓'), '[Remote:Untrusted]\tscan from untrusted \'https://malicious.ru\' failed')
     }
 
     if (config.testHosts && Array.isArray(config.testHosts)) {
@@ -103,7 +103,7 @@ async function main () {
     }
 
     const LOAD = 30
-    let timings = []
+    const timings = []
 
     console.log(chalk.yellow('\n============================ LOAD TESTS ============================\n'))
 
@@ -119,7 +119,7 @@ async function main () {
 
     const totalProcessingTime = timings.reduce((p, c) => p + parseFloat(c), 0)
 
-    console.log('\n', chalk.green('✓'), `load test passed\n`)
+    console.log('\n', chalk.green('✓'), 'load test passed\n')
     console.log(chalk.cyan(`Load timing (seconds) for ${LOAD} requests:\n`))
 
     console.log('\t', chalk.cyan('Average:\t'), round(average(timings)))

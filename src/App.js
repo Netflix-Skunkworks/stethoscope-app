@@ -179,7 +179,7 @@ class App extends Component {
     const { data: { policy = {} } } = Object(result)
     const scannedBy = remote ? remoteLabel : 'Stethoscope'
 
-    let newState = {
+    const newState = {
       result: policy.validate,
       loading: false,
       lastScanTime,
@@ -211,6 +211,7 @@ class App extends Component {
     log.error(`App:GraphQL error ${JSON.stringify(serializeError(err))}`)
     this.setState({ error: err, loading: false })
   }
+
   /**
    * loads config, policy, and instructions and initializes a scan
    * using them
@@ -241,6 +242,7 @@ class App extends Component {
       }).catch(this.handleErrorGraphQL)
     })
   }
+
   /**
    * Opens a link in the native default browser
    */
@@ -349,7 +351,8 @@ class App extends Component {
 
       content = (
         <div>
-          <Device {...decoratedDevice}
+          <Device
+            {...decoratedDevice}
             org={instructions.organization}
             scanResult={result}
             strings={instructions.strings}

@@ -5,7 +5,7 @@ import config from './config.json'
 import AutoLauncher from './AutoLauncher'
 
 const toggleAutoLaunchMenus = (autoLaunchOn) => {
-  let autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
+  const autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
   autoLaunchMenuOptions.getMenuItemById('autolaunchOn').checked = autoLaunchOn
   autoLaunchMenuOptions.getMenuItemById('autolaunchOff').checked = !autoLaunchOn
 }
@@ -77,7 +77,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
     }, {
       label: 'Copy Debug Info',
       click () {
-        fetch(`http://127.0.0.1:37370/debugger`, {
+        fetch('http://127.0.0.1:37370/debugger', {
           headers: {
             Origin: 'stethoscope://main'
           }

@@ -3,52 +3,52 @@ import applicationPlatformFilter from './applicationPlatformFilter'
 // validation policy fixture for application checks
 const apps = [
   {
-    name: "CommonApp",
-    description: "App found on all platforms",
+    name: 'CommonApp',
+    description: 'App found on all platforms'
   },
   {
-    name: "CommonAppWithExplicitAll",
-    description: "App found on all platforms",
+    name: 'CommonAppWithExplicitAll',
+    description: 'App found on all platforms',
     platform: {
       all: true
     }
   },
   {
-    name: "PoorlyFilteredApp",
+    name: 'PoorlyFilteredApp',
     description: "Doesn't apply to any platforms",
     platform: {
       all: false
     }
   },
   {
-    name: "Terminal",
-    description: "Terminal.app, present with all MacOS versions",
+    name: 'Terminal',
+    description: 'Terminal.app, present with all MacOS versions',
     platform: {
-      darwin: ">=10.0.0"
+      darwin: '>=10.0.0'
     }
   },
   {
-    name: "TV",
-    description: "TV.app, introduced with MacOS Catalina",
+    name: 'TV',
+    description: 'TV.app, introduced with MacOS Catalina',
     platform: {
-      darwin: ">=10.15.0"
+      darwin: '>=10.15.0'
     },
     paths: {
-      darwin: "/System/Applications"
+      darwin: '/System/Applications'
     }
   },
   {
-    name: "bash",
-    description: "Bourne Again Shell",
+    name: 'bash',
+    description: 'Bourne Again Shell',
     platform: {
-      linux: ">=12.04.0"
+      linux: '>=12.04.0'
     }
   },
   {
-    name: "Notepad.exe",
-    description: "Default Win32 Editor",
+    name: 'Notepad.exe',
+    description: 'Default Win32 Editor',
     platform: {
-      win32: ">=10.0.0"
+      win32: '>=10.0.0'
     }
   }
 ]
@@ -105,8 +105,8 @@ describe('applicationPlatformFilter', () => {
     const macApps = await applicationPlatformFilter(apps, {}, 'darwin', '10.12')
     const linApps = await applicationPlatformFilter(apps, {}, 'linux', '8.04')
     const winApps = await applicationPlatformFilter(apps, {}, 'win32', '6.1')
-    expect(macApps.some(app => app.name == 'PoorlyFilteredApp')).toEqual(false)
-    expect(linApps.some(app => app.name == 'PoorlyFilteredApp')).toEqual(false)
-    expect(winApps.some(app => app.name == 'PoorlyFilteredApp')).toEqual(false)
+    expect(macApps.some(app => app.name === 'PoorlyFilteredApp')).toEqual(false)
+    expect(linApps.some(app => app.name === 'PoorlyFilteredApp')).toEqual(false)
+    expect(winApps.some(app => app.name === 'PoorlyFilteredApp')).toEqual(false)
   })
 })

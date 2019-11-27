@@ -227,7 +227,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
   app.get('/policy', serveConfig('policy', { transform: spacesToCamelCase }))
   // default to English if system language isn't supported
   app.get('/instructions', serveConfig(`instructions.${language}`, {
-    fallback: `instructions.en`
+    fallback: 'instructions.en'
   }))
 
   // serves up YAML files
@@ -268,7 +268,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
       'application/json': () => {
         res.send({ error: err.message })
       },
-      'default': () => {
+      default: () => {
         res.send(err.message)
       }
     })

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 import Accessible from './Accessible'
 import Action from './Action'
 import ActionIcon, { VARIANTS } from './ActionIcon'
@@ -76,10 +76,10 @@ class Device extends Component {
       return <p>You must not have this application installed</p>
     } else if (state === INVALID_VERSION || state === SUGGESTED_UPGRADE) {
       return (
-        <Fragment>
+        <>
           {this.renderAppVersionSuggestion(version, semver.coerce(policy.version))}
           {installPrompt && <p>{installPrompt}</p>}
-        </Fragment>
+        </>
       )
     } else if (state === SUGGESTED_INSTALL) {
       return <p>It is suggested that this applicaiton is installed</p>
@@ -155,7 +155,7 @@ class Device extends Component {
   }
 
   process (device) {
-    let d = Object.assign({}, device)
+    const d = Object.assign({}, device)
     d.friendlyName = d.friendlyName || 'Unknown device'
     d.identifier = d.deviceName || d.hardwareSerial || (d.macAddresses || []).join(' ')
 

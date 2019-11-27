@@ -18,7 +18,6 @@ import { PlatformSecurity } from './platform/'
 import config from '../config'
 import applicationPlatformFilter from '../lib/applicationPlatformFilter'
 
-
 export default {
   async automaticAppUpdates (root, args, context) {
     if ('automaticAppUpdates' in PlatformSecurity) {
