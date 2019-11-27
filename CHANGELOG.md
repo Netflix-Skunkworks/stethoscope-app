@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Auto update settings were defaulting to fail when they should have been defaulting to pass. Auto update is on by default, and until the preferences are changed, the settings don't exist.
+- Minor regression: DeviceID resolution for Windows and Linux
+- Build fixes for MacOS Catalina
+
+Added:
+- Thrift connection pooling
+- Support for AWS workstations
+- Added Scan duration to UI
+- Automated testing for builds
+- Cross-platform support for applications schema
 
 ----
 
