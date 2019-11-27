@@ -3,6 +3,7 @@ import ReactDOMServer from 'react-dom/server'
 import Accessible from './Accessible'
 import ActionIcon, { VARIANTS, VARIANT_COLORS } from './ActionIcon'
 import semver from './lib/patchedSemver'
+import getRecommendedVersion from './lib/getRecommendedVersion'
 import showdown from 'showdown'
 import Handlebars from 'handlebars/dist/handlebars.min.js'
 
@@ -87,7 +88,11 @@ class Action extends Component {
     })
 
     Handlebars.registerHelper('requirement', (key, platform) => {
-      const version = semver.coerce(policy[key][platform].ok)
+      // display the highest minimum version
+      // if advanced semver requirement is passed (e.g. >1.2.3 || < 3.0.0)
+      const { ok } = policy[key][platform]
+      const recommended = getRecommendedVersion(ok)
+
       return new Handlebars.SafeString(
         ReactDOMServer.renderToStaticMarkup(
           <table style={{ width: 'auto' }}>
@@ -95,7 +100,7 @@ class Action extends Component {
               <tr>
                 <td>Suggested version:</td>
                 <td>
-                  <span className='suggested-value'>{String(version)}</span>
+                  <span className='suggested-value'>{String(recommended)}</span>
                 </td>
               </tr>
               <tr>
@@ -146,14 +151,12 @@ class Action extends Component {
             <div className='description'>
               {action.description}
             </div>
-            { action.details &&
-              <pre className='description'>{action.details}</pre>
-            }
-            { action.link &&
-              <a href={action.link} target='_blank' rel='noopener noreferrer'>More info</a>
-            }
+            {action.details &&
+              <pre className='description'>{action.details}</pre>}
+            {action.link &&
+              <a href={action.link} target='_blank' rel='noopener noreferrer'>More info</a>}
           </div>
-          { action.directions && (
+          {action.directions && (
             <div
               className='instructions'
               dangerouslySetInnerHTML={{ __html: this.parseDirections() }}
