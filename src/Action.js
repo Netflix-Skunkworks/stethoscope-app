@@ -29,7 +29,7 @@ class Action extends Component {
     }
   }
 
-  toggleDescription = () => {
+  handleToggleDescription = () => {
     if (!this.state.showDescription && this.props.status === 'FAIL') {
       this.props.onExpandPolicyViolation()
     }
@@ -173,7 +173,7 @@ class Action extends Component {
         key={String(action.title).replace(/[^a-zA-Z]+/g, '')}
         ref={el => { this.el = el }}
       >
-        <span className='title' onClick={this.toggleDescription}>
+        <span className='title' onClick={this.handleToggleDescription}>
           <ActionIcon
             className='action-icon'
             variant={this.getIconVariant(type)}
@@ -181,7 +181,7 @@ class Action extends Component {
           {this.parseTitle()}
         </span>
         <Accessible label='Toggle action description' expanded={this.state.showDescription}>
-          <a href='#toggle' className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.toggleDescription}>&#9660;</a>
+          <a href='#toggle' className={`toggleLink show-description ${this.state.showDescription ? 'open' : 'closed'}`} onClick={this.handleToggleDescription}>&#9660;</a>
         </Accessible>
         {description}
       </li>

@@ -10,7 +10,7 @@ try {
 } catch (e) {}
 
 export default class ErrorMessage extends Component {
-  copyToClipboard = event => {
+  handleCopy = event => {
     clipboard.writeText(this.props.message + '\n' + this.props.stack)
     window.alert('Copied!')
   }
@@ -23,7 +23,7 @@ export default class ErrorMessage extends Component {
         <pre>Stethoscope version: {this.props.version}</pre>
         <pre>{this.props.message + ''}</pre>
         {this.props.showStack ? <pre>{this.props.stack}</pre> : null}
-        <button onClick={this.copyToClipboard}>Copy Error to Clipboard</button>
+        <button onClick={this.handleCopy}>Copy Error to Clipboard</button>
         <button onClick={() => ipcRenderer.send('app:restart')}>Restart App</button>
         <div id='helpBubble'>
           <strong>Need some help?</strong>
