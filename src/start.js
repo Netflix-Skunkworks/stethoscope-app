@@ -63,6 +63,7 @@ const windowPrefs = {
   webPreferences: {
     nodeIntegration: true,
     webSecurity: false,
+    contextIsolation: false,
     sandbox: false
   }
 }
@@ -98,7 +99,6 @@ async function createWindow () {
     isFirstLaunch = true
     settings.set('userHasLaunchedApp', true)
   }
-
   // wait for process to load before hiding in dock, prevents the app
   // from flashing into view and then hiding
   if (!IS_DEV && IS_MAC) setImmediate(() => app.dock.hide())
