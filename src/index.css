@@ -2,11 +2,10 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  border: 1px solid #eee;
-  border-radius: 5px;
   height: 100%;
   background-color: #fff;
   overflow-y: auto;
+  transition: background-color .5s linear;
 }
 
 *:focus {
@@ -167,7 +166,9 @@ nav .right li.close {
   background-color: #FFFFFF;
   border-radius: 3px;
   padding: 20px;
+  transition: background-color .5s linear;
 }
+
 .panel header {
   background-color: #f1f1f1;
   padding: 25px 20px;
@@ -269,3 +270,17 @@ a.nf-button:hover {
 }
 
 ::-webkit-scrollbar { display: none; }
+@media (prefers-color-scheme: dark) {
+  .panel.warning, .panel.critical {
+    color: #fff;
+  }
+  .panel {
+    background-color: #222;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #222;
+  }
+}

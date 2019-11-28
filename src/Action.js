@@ -61,15 +61,9 @@ class Action extends Component {
       return getIcon('suggested', altMessage)
     })
 
-    Handlebars.registerHelper('okIcon', label => {
-      return getIcon('done', label)
-    })
-
-    Handlebars.registerHelper('warnIcon', label => {
-      return getIcon('critical', label)
-    })
-
-    Handlebars.registerHelper('securitySetting', (key) => {
+    Handlebars.registerHelper('okIcon', label => getIcon('done', label))
+    Handlebars.registerHelper('warnIcon', label => getIcon('critical', label))
+    Handlebars.registerHelper('securitySetting', key => {
       return new Handlebars.SafeString(
         ReactDOMServer.renderToStaticMarkup(
           <table style={{ width: 'auto' }}>
@@ -110,11 +104,18 @@ class Action extends Component {
       )
     })
   }
-
-  getPlatformAndVersionSpecificFlags (device) {
+  /**
+   * Provides variables to use in the instructions template. The returned keys
+   * can be used in conditionals in instructions.yml
+   * e.g. {{#if mojaveOrLater}}
+   * @param  {String} platform  destructed off of Device
+   * @param  {String} osVersion destructed off of Device
+   * @return {Object}
+   */
+  getPlatformAndVersionSpecificFlags ({ platform, osVersion }) {
     return {
-      mojave: (
-        device.platform === 'darwin' && semver.satisfies(device.osVersion, '>=10.14.0')
+      mojaveOrLater: (
+        platform === 'darwin' && semver.satisfies(osVersion, '>=10.14.0')
       )
     }
   }
