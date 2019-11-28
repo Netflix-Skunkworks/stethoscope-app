@@ -133,7 +133,7 @@ async function createWindow () {
       message: 'Would you like to automatically launch Stethoscope on start-up?',
       buttons: ['Yes', 'No']
     }, (buttonIndex) => {
-      const autoLauncher = new AutoLauncher(app.getName())
+      const autoLauncher = new AutoLauncher(app.name)
       if (buttonIndex === 0) {
         autoLauncher.enable()
       } else {

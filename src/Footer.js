@@ -4,7 +4,7 @@ import classNames from 'classnames'
 export default function Footer (props) {
   const {
     highlightRescan, result, instructions, webScopeLink,
-    onClick, onScan
+    onClickOpen, onRescan
   } = props
 
   return (
@@ -14,7 +14,7 @@ export default function Footer (props) {
           className={classNames('btn btn-default', {
             'btn-primary': highlightRescan && result.status !== 'PASS'
           })}
-          onClick={onScan}
+          onClick={onRescan}
         >
           <span className='icon icon-arrows-ccw' />
           {instructions.strings.rescanButton}
@@ -23,7 +23,7 @@ export default function Footer (props) {
           <button
             className='btn pull-right'
             href={webScopeLink}
-            onClick={onClick}
+            onClick={onClickOpen}
           >
             <span className='icon icon-monitor white' />view all devices
           </button>

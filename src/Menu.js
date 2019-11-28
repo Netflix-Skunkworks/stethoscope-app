@@ -97,7 +97,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
   contextMenu.push({ role: 'quit', accelerator: 'CmdOrCtrl+Q' })
 
   const applicationMenu = Menu.buildFromTemplate([{
-    label: app.getName(),
+    label: app.name,
     submenu: [{
       label: `Stethoscope version ${pkg.version}`,
       enabled: false
