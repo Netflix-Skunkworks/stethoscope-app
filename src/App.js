@@ -344,7 +344,7 @@ class App extends Component {
             result={result}
             instructions={instructions}
             webScopeLink={appConfig.stethoscopeWebURI}
-            onClick={this.handleOpenExternal}
+            onClickOpen={this.handleOpenExternal}
             onRescan={this.handleScan}
           />
         </div>
