@@ -80,16 +80,15 @@ let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
 const focusOrCreateWindow = (mainWindow) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
+  if (mainWindow) {
     if (mainWindow.isMinimized()) {
-      mainWindow.restore()
+      return mainWindow.restore()
     }
-    mainWindow.focus()
-  } else {
-    mainWindow = new BrowserWindow(windowPrefs)
-    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-    mainWindow.loadURL(BASE_URL)
+    mainWindow.destroy()
   }
+  mainWindow = new BrowserWindow(windowPrefs)
+  initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+  mainWindow.loadURL(BASE_URL)
   return mainWindow
 }
 
