@@ -46,7 +46,6 @@ let launchIntoUpdater = false
 let deeplinkingUrl
 let isLaunching = true
 let isFirstLaunch = false
-
 // icons that are displayed in the Menu bar
 const statusImages = {
   PASS: nativeImage.createFromPath(findIcon('scope-icon-ok2@2x.png')),
@@ -262,8 +261,6 @@ async function createWindow () {
     mainWindow = null
   })
 }
-
-global.app = app
 
 function enableAppDebugger () {
   if (mainWindow) {
