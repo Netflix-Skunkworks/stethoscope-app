@@ -22,8 +22,10 @@ const paths = {
   win32: `dist/win-unpacked/${pkg.name}.exe`,
   linux: `dist/linux-unpacked/${pkg.name.toLowerCase()}`
 }
+
 const app = new Application({
-  path: paths[process.platform]
+  path: paths[process.platform],
+  args: [path.join(__dirname, '..'), 'testMode']
 })
 
 async function scan (origin) {
@@ -77,7 +79,7 @@ async function main () {
     assert.strict.equal(devToolsOpen, false)
     console.log(chalk.green('✓'), 'dev tools are closed')
 
-    await app.client.waitUntilTextExists('.last-updated', 'Last scanned by Stethoscope a few seconds ago', 10000)
+    await app.client.waitUntilTextExists('.last-updated', 'Last scanned by Stethoscope', 10000)
     console.log(chalk.green('✓'), 'app scan successful')
 
     console.log(chalk.yellow('\n============================ REMOTE SCANNING ============================\n'))

@@ -34,6 +34,7 @@ import updateInit from './updater'
 const env = process.env.STETHOSCOPE_ENV || 'production'
 const findIcon = iconFinder(env)
 const IS_DEV = env === 'development'
+const IS_TEST = !!process.argv.find(arg => arg.includes('testMode'))
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
@@ -125,7 +126,7 @@ async function createWindow () {
     isLaunching = false
   }
 
-  if (isFirstLaunch) {
+  if (isFirstLaunch && !IS_TEST) {
     dialog.showMessageBox({
       type: 'info',
       title: 'Auto Launch',
