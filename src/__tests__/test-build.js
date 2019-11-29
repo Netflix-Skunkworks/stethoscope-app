@@ -71,6 +71,11 @@ async function main () {
     assert.strict.equal(isVisible, true)
     console.log(chalk.green('✓'), 'app is visible')
 
+    const audit = await app.client.auditAccessibility()
+    console.log(audit.message)
+    assert.strict.equal(audit.failed, false)
+    console.log(chalk.green('✓'), 'app passes accessibility audit')
+
     const title = await app.client.getTitle()
     assert.strict.equal(title, `Stethoscope (v${pkg.version})`)
     console.log(chalk.green('✓'), 'correct version in title')
