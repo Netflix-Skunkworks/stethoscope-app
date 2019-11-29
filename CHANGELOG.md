@@ -2,15 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.4](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.4)
+## [4.0.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.4)
 
 ### Added
 - Advanced semver support (e.g. ">10.15 <=10.14.6 || 10.15.1"), allows policies to support multiple major versions
+- Dark mode support
+- Accessibility audit unit test
 
 ### Fixed
 - Build issues with Catalina - updated electron-builder dependency
 - Updated vulnerable dependencies (react-scripts, webpack-server)
 - Code formatting issues
+- Loader contrast issues (a11y)
+
+### Changed
+- Moved to electron@7 and spectron@9
 
 ----
 
