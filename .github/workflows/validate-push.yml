@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint code
+      id: stethoscope-linter
+      run: |
+        CI=true npm run lint
+    - name: Run clientside tests
+      id: stethoscope-test-runner
+      run: |
+        CI=true npm run test
