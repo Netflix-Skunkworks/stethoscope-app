@@ -9,15 +9,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
     - name: Install dependencies
       id: stethoscope-install-deps
       run: |
-        npm install
+        yarn install
     - name: Lint code
       id: stethoscope-run-linter
       run: |
-        CI=true npm run lint
+        CI=true yarn lint
     - name: Run clientside tests
       id: stethoscope-run-tests
       run: |
-        CI=true npm run test
+        CI=true yarn test
