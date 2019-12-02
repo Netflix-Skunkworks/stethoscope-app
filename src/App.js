@@ -47,7 +47,7 @@ class App extends Component {
 
   componentWillUnmount = () => this.setState({ scanIsRunning: false })
 
-  async UNSAFE_componentWillMount () { // eslint-disable-line
+  async componentDidMount () {
     // append app version to title
     document.querySelector('title').textContent += ` (v${pkg.version})`
     this.setState({ recentHang: settings.get('recentHang', 0) > 1 })

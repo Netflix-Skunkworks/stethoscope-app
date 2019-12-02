@@ -82,7 +82,8 @@ const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 const focusOrCreateWindow = (mainWindow) => {
   if (mainWindow) {
     if (mainWindow.isMinimized()) {
-      return mainWindow.restore()
+      mainWindow.restore()
+      return mainWindow
     }
     mainWindow.destroy()
   }
