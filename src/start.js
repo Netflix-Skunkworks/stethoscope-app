@@ -15,7 +15,7 @@
  *    - 'download:completed' - update has finished downloading
  */
 import path from 'path'
-import { app, ipcMain, dialog, BrowserWindow, nativeTheme, session, Tray, nativeImage } from 'electron'
+import { app, ipcMain, dialog, BrowserWindow, session, Tray, nativeImage } from 'electron'
 import url from 'url'
 import log from './lib/logger'
 import initMenu from './Menu'
