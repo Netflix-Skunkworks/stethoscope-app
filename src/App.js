@@ -3,37 +3,25 @@ import React, { Component } from 'react'
 import Stethoscope from './lib/Stethoscope'
 import Device from './Device'
 import Loader from './Loader'
+import Footer from './Footer'
+import DownloadProgress from './DownloadProgress'
 import openSocket from 'socket.io-client'
 import moment from 'moment'
-import prettyBytes from './lib/prettyBytes'
 import classNames from 'classnames'
 import serializeError from 'serialize-error'
 import { HOST } from './constants'
-import { MAC } from './lib/platform'
 import appConfig from './config.json'
 import pkg from '../package.json'
 import ErrorMessage from './ErrorMessage'
 import './App.css'
-
 const socket = openSocket(HOST)
-
-let platform = MAC
-let shell; let ipcRenderer; let log; let remote; let settings
-// CRA doesn't like importing native node modules, have to use window.require AFAICT
-try {
-  const os = window.require('os')
-  shell = window.require('electron').shell
-  remote = window.require('electron').remote
-  settings = window.require('electron-settings')
-  log = remote.getGlobal('log')
-  platform = os.platform()
-  ipcRenderer = window.require('electron').ipcRenderer
-} catch (e) {
-  // browser polyfill
-  ipcRenderer = { on () {}, send () {} }
-  log = console
-  console.error(e)
-}
+// CRA doesn't like importing native node modules
+// have to use window.require AFAICT
+const os = window.require('os')
+const { shell, remote, ipcRenderer } = window.require('electron')
+const settings = window.require('electron-settings')
+const log = remote.getGlobal('log')
+const platform = os.platform()
 
 class App extends Component {
   state = {
@@ -42,9 +30,9 @@ class App extends Component {
     result: {},
     instructions: {},
     scanIsRunning: false,
-    loading: false,
+    loading: true,
     lastScanDuration: 0,
-    // determines loading screen language
+    // determines loading screen wording
     remoteScan: false,
     // surface which app performed the most recent scan
     scannedBy: 'Stethoscope',
@@ -57,16 +45,12 @@ class App extends Component {
     highlightRescan: false
   }
 
-  componentWillUnmount () {
-    this.setState({ scanIsRunning: false })
-  }
+  componentWillUnmount = () => this.setState({ scanIsRunning: false })
 
-  async componentWillMount () {
+  async componentDidMount () {
     // append app version to title
     document.querySelector('title').textContent += ` (v${pkg.version})`
-
     this.setState({ recentHang: settings.get('recentHang', 0) > 1 })
-
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
     await this.loadPractices()
@@ -83,7 +67,7 @@ class App extends Component {
       if (!this.state.scanIsRunning) {
         ipcRenderer.send('scan:init')
         if (Object.keys(this.state.policy).length) {
-          this.scan()
+          this.handleScan()
         } else {
           this.loadPractices()
         }
@@ -93,7 +77,6 @@ class App extends Component {
     socket.on('scan:init', this.onScanInit)
     // setup a socket io listener to refresh the app when a scan is performed
     socket.on('scan:complete', this.onScanComplete)
-    // TODO handle errors that happen on local scans
     socket.on('scan:error', this.onScanError)
     // the focus/blur handlers are used to update the last scanned time
     window.addEventListener('focus', () => this.setState({ focused: true }))
@@ -145,9 +128,14 @@ class App extends Component {
   }
 
   onScanComplete = payload => {
+    const { noResults = false } = payload
+    // device only scan with no policy completed
+    if (noResults) {
+      return this.setState({ loading: false, scannedBy: 'Stethoscope' })
+    }
+
     const {
       errors = [],
-      noResults = false,
       remote: remoteScan,
       remoteLabel,
       result,
@@ -156,11 +144,6 @@ class App extends Component {
     } = payload
 
     const lastScanTime = Date.now()
-
-    // device only scan with no policy completed
-    if (noResults) {
-      return this.setState({ loading: false, scannedBy: 'Stethoscope' })
-    }
 
     if (errors && errors.length) {
       log.error(JSON.stringify({
@@ -185,10 +168,6 @@ class App extends Component {
       lastScanTime,
       remoteScan,
       scannedBy
-    }
-
-    if (policy.validate.status !== 'PASS') {
-      // perform action on scan violation
     }
 
     this.setState(newState, () => {
@@ -236,7 +215,7 @@ class App extends Component {
       Promise.all(promises).then(([config, policy, instructions]) => {
         this.setState({ config, policy, instructions }, () => {
           if (!this.state.scanIsRunning) {
-            this.scan()
+            this.handleScan()
           }
         })
       }).catch(this.handleErrorGraphQL)
@@ -246,14 +225,14 @@ class App extends Component {
   /**
    * Opens a link in the native default browser
    */
-  openExternal = event => {
+  handleOpenExternal = event => {
     event.preventDefault()
     if (event.target.getAttribute('href')) {
       shell.openExternal(event.target.getAttribute('href'))
     }
   }
 
-  onRestartFromLoader = event => {
+  handleRestartFromLoader = event => {
     settings.set('recentHang', settings.get('recentHang', 0) + 1)
     ipcRenderer.send('app:restart')
   }
@@ -261,9 +240,10 @@ class App extends Component {
   /**
    * Performs a scan by passing the current policy to the graphql server
    */
-  scan = () => {
+  handleScan = () => {
+    const { policy } = this.state
     this.setState({ loading: true, scanIsRunning: true }, () => {
-      Stethoscope.validate(this.state.policy).then(({ device, result, timing }) => {
+      Stethoscope.validate(policy).then(({ device, result, timing }) => {
         const lastScanTime = Date.now()
         this.setState({
           device,
@@ -286,13 +266,14 @@ class App extends Component {
     })
   }
 
-  highlightRescanButton = event => this.setState({ highlightRescan: true })
+  handleHighlightRescanButton = event => this.setState({ highlightRescan: true })
 
   render () {
     const {
       device, policy, result, downloadProgress,
-      scannedBy, lastScanTime, error,
-      instructions, loading, highlightRescan
+      scannedBy, lastScanTime, lastScanDuration, error,
+      instructions, loading, highlightRescan,
+      recentHang, remoteScan, recentLogs
     } = this.state
 
     const isDev = process.env.STETHOSCOPE_ENV === 'development'
@@ -301,14 +282,7 @@ class App extends Component {
 
     // don't want to render entire app, partition device info, etc. if downloading an update
     if (downloadProgress !== null) {
-      content = (
-        <div className='App'>
-          <div id='downloadProgress'>
-            <p>Downloading update ({prettyBytes(downloadProgress.transferred)} of {prettyBytes(downloadProgress.total)})</p>
-            <progress max='100' value={downloadProgress.percent} />
-          </div>
-        </div>
-      )
+      content = <DownloadProgress progress={downloadProgress} />
     }
 
     const helpOptions = appConfig.menu.help.map(({ label, link }) => (
@@ -331,11 +305,11 @@ class App extends Component {
     if (loading) {
       content = (
         <Loader
-          onRestart={this.onRestartFromLoader}
-          recentHang={this.state.recentHang}
-          remoteScan={this.state.remoteScan}
-          remoteLabel={this.state.scannedBy}
-          recentLogs={this.state.recentLogs}
+          onRestart={this.handleRestartFromLoader}
+          recentHang={recentHang}
+          remoteScan={remoteScan}
+          remoteLabel={scannedBy}
+          recentLogs={recentLogs}
           platform={platform}
           version={pkg.version}
         >
@@ -344,8 +318,11 @@ class App extends Component {
       )
     }
 
+    // if none of the overriding content has been added
+    // assume no errors and loaded state
     if (!content) {
-      const secInfo = Stethoscope.partitionSecurityInfo(policy, result, device, instructions.practices, platform)
+      const args = [policy, result, device, instructions.practices, platform]
+      const secInfo = Stethoscope.partitionSecurityInfo(...args)
       const decoratedDevice = Object.assign({}, device, secInfo, { lastScanTime })
       const lastScanFriendly = moment(lastScanTime).fromNow()
 
@@ -358,38 +335,24 @@ class App extends Component {
             strings={instructions.strings}
             policy={policy}
             lastScanTime={lastScanFriendly}
-            lastScanDuration={this.state.lastScanDuration}
+            lastScanDuration={lastScanDuration}
             scannedBy={scannedBy}
-            onExpandPolicyViolation={this.highlightRescanButton}
+            onExpandPolicyViolation={this.handleHighlightRescanButton}
           />
-          <footer className='toolbar toolbar-footer'>
-            <div className='buttonRow'>
-              <button
-                className={classNames('btn btn-default', {
-                  'btn-primary': highlightRescan && result.status !== 'PASS'
-                })}
-                onClick={this.scan}
-              >
-                <span className='icon icon-arrows-ccw' />
-                {instructions.strings.rescanButton}
-              </button>
-              {appConfig.stethoscopeWebURI && (
-                <button
-                  className='btn pull-right'
-                  href={appConfig.stethoscopeWebURI}
-                  onClick={this.openExternal}
-                >
-                  <span className='icon icon-monitor white' />view all devices
-                </button>
-              )}
-            </div>
-          </footer>
+          <Footer
+            highlightRescan={highlightRescan}
+            result={result}
+            instructions={instructions}
+            webScopeLink={appConfig.stethoscopeWebURI}
+            onClickOpen={this.handleOpenExternal}
+            onRescan={this.handleScan}
+          />
         </div>
       )
     }
 
     return (
-      <div className={`App ${loading ? 'loading' : ''}`}>
+      <div className={classNames('App', { loading })}>
         {content}
       </div>
     )

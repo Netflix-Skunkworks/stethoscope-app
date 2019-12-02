@@ -34,6 +34,7 @@ import updateInit from './updater'
 const env = process.env.STETHOSCOPE_ENV || 'production'
 const findIcon = iconFinder(env)
 const IS_DEV = env === 'development'
+const IS_TEST = !!process.argv.find(arg => arg.includes('testMode'))
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
@@ -45,7 +46,6 @@ let launchIntoUpdater = false
 let deeplinkingUrl
 let isLaunching = true
 let isFirstLaunch = false
-
 // icons that are displayed in the Menu bar
 const statusImages = {
   PASS: nativeImage.createFromPath(findIcon('scope-icon-ok2@2x.png')),
@@ -63,6 +63,7 @@ const windowPrefs = {
   webPreferences: {
     nodeIntegration: true,
     webSecurity: false,
+    contextIsolation: false,
     sandbox: false
   }
 }
@@ -79,16 +80,16 @@ let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
 const focusOrCreateWindow = (mainWindow) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
+  if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
+      return mainWindow
     }
-    mainWindow.focus()
-  } else {
-    mainWindow = new BrowserWindow(windowPrefs)
-    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-    mainWindow.loadURL(BASE_URL)
+    mainWindow.destroy()
   }
+  mainWindow = new BrowserWindow(windowPrefs)
+  initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+  mainWindow.loadURL(BASE_URL)
   return mainWindow
 }
 
@@ -98,7 +99,6 @@ async function createWindow () {
     isFirstLaunch = true
     settings.set('userHasLaunchedApp', true)
   }
-
   // wait for process to load before hiding in dock, prevents the app
   // from flashing into view and then hiding
   if (!IS_DEV && IS_MAC) setImmediate(() => app.dock.hide())
@@ -126,14 +126,14 @@ async function createWindow () {
     isLaunching = false
   }
 
-  if (isFirstLaunch) {
+  if (isFirstLaunch && !IS_TEST) {
     dialog.showMessageBox({
       type: 'info',
       title: 'Auto Launch',
       message: 'Would you like to automatically launch Stethoscope on start-up?',
       buttons: ['Yes', 'No']
     }, (buttonIndex) => {
-      const autoLauncher = new AutoLauncher(app.getName())
+      const autoLauncher = new AutoLauncher(app.name)
       if (buttonIndex === 0) {
         autoLauncher.enable()
       } else {
@@ -262,8 +262,6 @@ async function createWindow () {
     mainWindow = null
   })
 }
-
-global.app = app
 
 function enableAppDebugger () {
   if (mainWindow) {
