@@ -9,11 +9,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+      id: stethoscope-install-deps
+      run: |
+        npm install
     - name: Lint code
-      id: stethoscope-linter
+      id: stethoscope-run-linter
       run: |
         CI=true npm run lint
     - name: Run clientside tests
-      id: stethoscope-test-runner
+      id: stethoscope-run-tests
       run: |
         CI=true npm run test
