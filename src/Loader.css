@@ -128,4 +128,7 @@
   .loader:after {
     background-color: #222;
   }
+  .loader-wrapper {
+    color: white;
+  }
 }
