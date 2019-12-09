@@ -42,7 +42,7 @@
     "build:windows": "run-s prebuild _electron-builder-windows",
     "_electron-builder-linux": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -l",
     "build:linux": "run-s prebuild _electron-builder-linux postbuild",
-    "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -c.appId=${APP_BUNDLE_ID}",
+    "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
     "build:update-config": "node scripts/updateConfigsFromEnvironment.js",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
