@@ -375,7 +375,7 @@ process.on('uncaughtException', err => {
 
 app.on('window-all-closed', () => {
   if (IS_LINUX) {
-    app.quit();
+    app.quit()
   }
 })
 

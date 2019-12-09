@@ -36,7 +36,7 @@
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -c.appId=${APP_BUNDLE_ID}",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
-    "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js",
+    "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js scripts/*.js server.js",
     "babel": "run-s babel:clean babel:compile",
     "babel:clean": "rimraf compiled",
     "babel:compile": "cross-env BABEL_ENV=production babel src/ --out-dir compiled/ --copy-files"
