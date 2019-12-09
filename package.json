@@ -60,6 +60,7 @@
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",
+    "electron-notarize": "^0.2.1",
     "electron-settings": "^3.2.x",
     "electron-updater": "4.0.6",
     "express": "^4.16.2",
@@ -147,8 +148,8 @@
     "mac": {
       "category": "public.app-category.utilities",
       "gatekeeperAssess": false,
-      "hardenedRuntime" : true,
-      "entitlements":"entitlements.mac.plist",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist"
     },
     "win": {
