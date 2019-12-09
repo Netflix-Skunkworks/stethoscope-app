@@ -1,5 +1,6 @@
 #!/usr/bin/env kmd
-exec defaults read /Library/Preferences/com.apple.SoftwareUpdate.plist
+tryExec defaults read /Library/Preferences/com.apple.SoftwareUpdate.plist
+defaultTo
 save output
 extract CriticalUpdateInstall\s+=\s+([\d]+);
 defaultTo 1
@@ -19,6 +20,11 @@ load output
 extract AutomaticDownload\s+=\s+([\d]+);
 defaultTo 1
 save updates.automaticDownload
+
+load output
+extract AutomaticallyInstallMacOSUpdates\s+=\s+([\d]+);
+defaultTo 1
+save updates.automaticallyInstallMacOSUpdates
 
 remove output
 save updates

@@ -1,0 +1,26 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Install dependencies
+      id: stethoscope-install-deps
+      run: |
+        yarn install
+    - name: Lint code
+      id: stethoscope-run-linter
+      run: |
+        CI=true yarn lint
+    - name: Run clientside tests
+      id: stethoscope-run-tests
+      run: |
+        CI=true yarn test

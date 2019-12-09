@@ -11,6 +11,7 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
     <link rel="stylesheet" href="%PUBLIC_URL%/style/source-sans.css">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' http://127.0.0.1:37370 ws://127.0.0.1:37370">
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -23,9 +24,6 @@
     <title>Stethoscope</title>
   </head>
   <body style="-webkit-app-region: drag">
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.

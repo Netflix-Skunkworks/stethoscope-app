@@ -34,18 +34,18 @@ import updateInit from './updater'
 const env = process.env.STETHOSCOPE_ENV || 'production'
 const findIcon = iconFinder(env)
 const IS_DEV = env === 'development'
+const IS_TEST = !!process.argv.find(arg => arg.includes('testMode'))
 const disableAutomaticScanning = settings.get('disableAutomaticScanning')
 
 let mainWindow
 let tray
-let appStartTime = Date.now()
+const appStartTime = Date.now()
 let server
 let updater
 let launchIntoUpdater = false
 let deeplinkingUrl
 let isLaunching = true
 let isFirstLaunch = false
-
 // icons that are displayed in the Menu bar
 const statusImages = {
   PASS: nativeImage.createFromPath(findIcon('scope-icon-ok2@2x.png')),
@@ -63,6 +63,7 @@ const windowPrefs = {
   webPreferences: {
     nodeIntegration: true,
     webSecurity: false,
+    contextIsolation: false,
     sandbox: false
   }
 }
@@ -78,17 +79,18 @@ const BASE_URL = process.env.ELECTRON_START_URL || url.format({
 let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
-const focusOrCreateWindow = () => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
+const focusOrCreateWindow = (mainWindow) => {
+  if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
+      return mainWindow
     }
-    mainWindow.focus()
-  } else {
-    mainWindow = new BrowserWindow(windowPrefs)
-    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-    mainWindow.loadURL(BASE_URL)
+    mainWindow.destroy()
   }
+  mainWindow = new BrowserWindow(windowPrefs)
+  initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+  mainWindow.loadURL(BASE_URL)
+  return mainWindow
 }
 
 async function createWindow () {
@@ -97,7 +99,6 @@ async function createWindow () {
     isFirstLaunch = true
     settings.set('userHasLaunchedApp', true)
   }
-
   // wait for process to load before hiding in dock, prevents the app
   // from flashing into view and then hiding
   if (!IS_DEV && IS_MAC) setImmediate(() => app.dock.hide())
@@ -115,7 +116,7 @@ async function createWindow () {
   }
 
   // required at run time so dependencies can be injected
-  updater = updateInit(env, mainWindow, log, server)
+  updater = updateInit(env, mainWindow, log, server, focusOrCreateWindow)
 
   if (isLaunching) {
     updater.checkForUpdates({}, {}, {}, true)
@@ -125,14 +126,14 @@ async function createWindow () {
     isLaunching = false
   }
 
-  if (isFirstLaunch) {
+  if (isFirstLaunch && !IS_TEST) {
     dialog.showMessageBox({
       type: 'info',
       title: 'Auto Launch',
       message: 'Would you like to automatically launch Stethoscope on start-up?',
       buttons: ['Yes', 'No']
     }, (buttonIndex) => {
-      const autoLauncher = new AutoLauncher(app.getName())
+      const autoLauncher = new AutoLauncher(app.name)
       if (buttonIndex === 0) {
         autoLauncher.enable()
       } else {
@@ -145,7 +146,9 @@ async function createWindow () {
   if (tray) tray.destroy()
 
   tray = new Tray(statusImages.PASS)
-  tray.on('click', focusOrCreateWindow)
+  tray.on('click', () => {
+    mainWindow = focusOrCreateWindow(mainWindow)
+  })
 
   tray.on('right-click', () => tray.popUpContextMenu(initMenu(mainWindow, app, focusOrCreateWindow, updater, log)))
 
@@ -181,7 +184,7 @@ async function createWindow () {
   }
 
   // used to select the appropriate instructions file
-  const [ language ] = app.getLocale().split('-')
+  const [language] = app.getLocale().split('-')
   // start GraphQL server, close the app if 37370 is already in use
   server = await startGraphQLServer(env, log, language, appHooksForServer)
   server.on('error', error => {
@@ -260,8 +263,6 @@ async function createWindow () {
   })
 }
 
-global.app = app
-
 function enableAppDebugger () {
   if (mainWindow) {
     mainWindow.webContents.openDevTools()
@@ -319,7 +320,7 @@ if (!gotTheLock) {
 }
 
 app.on('before-quit', () => {
-  let appCloseTime = Date.now()
+  const appCloseTime = Date.now()
 
   log.debug(`uptime: ${appCloseTime - appStartTime}`)
   if (server && server.listening) {

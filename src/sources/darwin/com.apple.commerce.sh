@@ -1,5 +1,6 @@
 #!/usr/bin/env kmd
-exec defaults read /Library/Preferences/com.apple.commerce.plist
+tryExec defaults read /Library/Preferences/com.apple.commerce.plist
+defaultTo
 save line
 extract AutoUpdateRestartRequired\s+=\s+([\d]+);
 defaultTo 1

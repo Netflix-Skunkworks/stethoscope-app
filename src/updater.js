@@ -1,5 +1,6 @@
 import { dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
+import config from './config'
 
 let attemptingUpdate = false
 let isFirstLaunch
@@ -8,14 +9,17 @@ const eventRegistration = {}
 // NOTE:
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
-export default function updater (env, mainWindow, log = console, server) {
+export default function updater (env, mainWindow, log = console, server, focusOrCreateWindow) {
   let updater
   autoUpdater.autoDownload = false
+  if (config.allowPrerelease) {
+    autoUpdater.allowPrerelease = true
+  }
 
   const isDev = env === 'development'
 
   const eventHandlers = {
-    'error': error => {
+    error: error => {
       // first launch, don't show network errors
       if (isFirstLaunch) return
 
@@ -32,19 +36,21 @@ export default function updater (env, mainWindow, log = console, server) {
     'update-available': () => {
       dialog.showMessageBox({
         type: 'info',
-        title: 'Found Updates',
-        message: 'New version available, do you want update now?',
-        buttons: ['Yes', 'No']
+        title: 'Stethoscope Update Available',
+        message: 'A new version of Stethoscope is available, would you like to download and update now?',
+        buttons: ['Yes', 'No'],
+        defaultId: 0
       }, (buttonIndex) => {
         if (buttonIndex === 0) {
           if (!isDev) {
+            mainWindow = focusOrCreateWindow(mainWindow)
             autoUpdater.downloadUpdate()
           } else {
             if (updater) updater.enabled = true
             attemptingUpdate = false
             updater = null
             dialog.showMessageBox({
-              title: 'Downloading',
+              title: 'Downloading Stethoscope',
               message: 'App cannot be updated in dev mode'
             })
           }
@@ -56,8 +62,8 @@ export default function updater (env, mainWindow, log = console, server) {
       if (isFirstLaunch) return
 
       dialog.showMessageBox({
-        title: 'No Updates',
-        message: 'You already have the latest version.'
+        title: 'No Stethoscope Updates',
+        message: 'You already have the latest version of Stethoscope.'
       })
 
       attemptingUpdate = false
@@ -66,7 +72,7 @@ export default function updater (env, mainWindow, log = console, server) {
     },
     'update-downloaded': () => {
       dialog.showMessageBox({
-        title: 'Install Updates',
+        title: 'Install Stethoscope Updates',
         message: 'Updates downloaded, Stethoscope will quit and relaunch.'
       }, () => {
         if (!isDev) {
@@ -88,7 +94,7 @@ export default function updater (env, mainWindow, log = console, server) {
     }
   }
 
-  for (let eventName in eventHandlers) {
+  for (const eventName in eventHandlers) {
     // prevent from being registered multiple times
     if (!(eventName in eventRegistration)) {
       eventRegistration[eventName] = true

@@ -14,8 +14,8 @@ try {
 } catch (e) {}
 
 // DEV log file names are prefixed with dev-
-let envPrefix = IS_DEV ? 'dev-' : ''
-let maxFiles = IS_DEV ? '1d' : '3d'
+const envPrefix = IS_DEV ? 'dev-' : ''
+const maxFiles = IS_DEV ? '1d' : '3d'
 const logLevels = ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
 const logColors = ['red', 'yellow', 'cyan', 'magenta']
 // logs that will continue to output in prod
@@ -52,7 +52,7 @@ if (!global.log) {
       let transform = s => s
 
       if (IS_DEV) {
-        let index = logLevels.indexOf(level)
+        const index = logLevels.indexOf(level)
         if (index > -1) {
           color = logColors[index]
           transform = s => chalk[color](s)

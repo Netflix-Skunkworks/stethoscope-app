@@ -1,13 +1,17 @@
 {
   "menu": {
-    "help": [{
-      "label": "Email Support",
-      "link": "mailto:support@your-company.com"
-    }, {
-      "label": "Slack Support",
-      "link": "slack://channel?id=YOUR_CHANNEL_ID&team=YOUR_TEAM_ID"
-    }]
+    "help": [
+      {
+        "label": "Email Support",
+        "link": "mailto:support@your-company.com"
+      },
+      {
+        "label": "Slack Support",
+        "link": "slack://channel?id=YOUR_CHANNEL_ID&team=YOUR_TEAM_ID"
+      }
+    ]
   },
-  "rescanIntervalSeconds": 604800, 
-  "autoLaunchPrompt": true
+  "rescanIntervalSeconds": 604800,
+  "autoLaunchPrompt": true,
+  "allowPrerelease": false
 }

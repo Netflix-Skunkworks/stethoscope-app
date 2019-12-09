@@ -61,6 +61,26 @@ yarn build:windows
 signcode -$ commercial -a sha1 -t http://timestamp.digicert.com -i $MAIN_URL -spc $SPC_FILE.spc -v $PVK_FILE.pvk -n \"Stethoscope Installer\" \"dist/Stethoscope Setup $npm_package_version.exe\"
 ```
 
+## Replacing configuration values before build
+
+You can manually change values in `package.json` and `src/config.json` before each build.
+
+Or you can set the following environment variables before build to overwrite the files automatically.
+
+All environment variables are optional and if not present it will use the default values.
+
+## Available environment variables
+
+```
+export APP_NAME=Stethoscope-My-Company
+export APP_PUBLISH_URL="https://some-other-server.example.com/stethoscope/"
+export APP_VERSION_SUFFIX="-my-company.1"
+export APP_BUNDLE_ID=com.example.com.stethoscope-local
+export APP_HELP_SLACK_LINK="slack://channel?team=<my-team>&id=<channel-id>"
+export APP_HELP_EMAIL=support@example.com
+export APP_ALLOW_PRERELEASE_UPDATES=true
+```
+
 # Supporting Automatic Updates
 
 **NOTE: You will need to codesign Mac and Windows builds for automatic updates to work on either platform**

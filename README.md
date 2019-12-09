@@ -1,6 +1,6 @@
 # Stethoscope app
 
-[![Join the chat at https://gitter.im/Netflix-Stethoscope/Lobby](https://badges.gitter.im/Netflix-Stethoscope/Lobby.svg)](https://gitter.im/Netflix-Stethoscope/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Apache 2.0](https://img.shields.io/github/license/Netflix/stethoscope.svg)](http://www.apache.org/licenses/LICENSE-2.0) [![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix-Skunkworks/stethoscope-app.svg)]()
+[![Join the chat at https://gitter.im/Netflix-Stethoscope/Lobby](https://badges.gitter.im/Netflix-Stethoscope/Lobby.svg)](https://gitter.im/Netflix-Stethoscope/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Build status](https://img.shields.io/github/workflow/status/Netflix-Skunkworks/stethoscope-app/CI) [![Apache 2.0](https://img.shields.io/github/license/Netflix/stethoscope.svg)](http://www.apache.org/licenses/LICENSE-2.0) [![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix-Skunkworks/stethoscope-app.svg)]() [![Snyk](https://img.shields.io/snyk/vulnerabilities/github/Netflix-Skunkworks/stethoscope-app)]() [![Dependencies](https://img.shields.io/david/Netflix-Skunkworks/stethoscope-app)]() [![Current Version](https://img.shields.io/github/package-json/v/Netflix-Skunkworks/stethoscope-app)]() [![Current Release](https://img.shields.io/github/v/release/Netflix-Skunkworks/stethoscope-app)]()
 
 The Stethoscope app is a desktop application created by Netflix that checks security-related settings and makes recommendations for improving the configuration of your computer, without requiring central device management or automated reporting.
 
@@ -65,7 +65,7 @@ The app is built with a default policy, which specifies recommended OS versions 
 
 This will work as a standalone checklist, without needing to report any data to a central server. In fact, it doesn’t even require internet connectivity.
 
-You can update the policy guidelines (OS versions, required settings, etc.) in [practices/policy.yaml](practices/policy.yaml), and change the instructions in [practices/instructions.en.yaml](practices/instructions.en.yaml).
+You can update the policy guidelines (OS versions, required settings, etc.) in [src/practices/policy.yaml](src/practices/policy.yaml), and change the instructions in [src/practices/instructions.en.yaml](src/practices/instructions.en.yaml).
 
 Queries from a website provide their own policy and policy variables.
 

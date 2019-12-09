@@ -18,11 +18,14 @@ const policy = yaml.safeLoad(policyHandle)
 policy.stethoscopeVersion = `>=${pkg.version}`
 
 const paths = {
-  darwin: 'dist/mac/Stethoscope.app/Contents/MacOS/Stethoscope',
-  win32: 'dist/win-unpacked/Stethoscope.exe'
+  darwin: `dist/mac/${pkg.name}.app/Contents/MacOS/${pkg.name}`,
+  win32: `dist/win-unpacked/${pkg.name}.exe`,
+  linux: `dist/linux-unpacked/${pkg.name.toLowerCase()}`
 }
+
 const app = new Application({
-  path: paths[process.platform]
+  path: paths[process.platform],
+  args: [path.join(__dirname, '..'), 'testMode']
 })
 
 async function scan (origin) {
@@ -68,27 +71,32 @@ async function main () {
     assert.strict.equal(isVisible, true)
     console.log(chalk.green('✓'), 'app is visible')
 
+    const audit = await app.client.auditAccessibility()
+    console.log(audit.message)
+    assert.strict.equal(audit.failed, false)
+    console.log(chalk.green('✓'), 'app passes accessibility audit')
+
     const title = await app.client.getTitle()
     assert.strict.equal(title, `Stethoscope (v${pkg.version})`)
-    console.log(chalk.green('✓'), `correct version in title`)
+    console.log(chalk.green('✓'), 'correct version in title')
 
     const devToolsOpen = await app.browserWindow.isDevToolsOpened()
     assert.strict.equal(devToolsOpen, false)
     console.log(chalk.green('✓'), 'dev tools are closed')
 
-    await app.client.waitUntilTextExists('.last-updated', 'Last scanned by Stethoscope a few seconds ago', 10000)
+    await app.client.waitUntilTextExists('.last-updated', 'Last scanned by Stethoscope', 10000)
     console.log(chalk.green('✓'), 'app scan successful')
 
     console.log(chalk.yellow('\n============================ REMOTE SCANNING ============================\n'))
 
-    let response = await scan('stethoscope://main')
+    const response = await scan('stethoscope://main')
     if (response !== false) {
       const timing = Math.round(response.extensions.timing.total / 1000 * 100) / 100
       console.log(chalk.green('✓'), `[Remote:Application]\tscan from trusted 'stethoscope://main' successful\t${chalk.yellow(`${timing} seconds`)}`)
     }
 
     if (await scan('https://malicious.ru') === false) {
-      console.log(chalk.green('✓'), `[Remote:Untrusted]\tscan from untrusted 'https://malicious.ru' failed`)
+      console.log(chalk.green('✓'), '[Remote:Untrusted]\tscan from untrusted \'https://malicious.ru\' failed')
     }
 
     if (config.testHosts && Array.isArray(config.testHosts)) {
@@ -102,7 +110,7 @@ async function main () {
     }
 
     const LOAD = 30
-    let timings = []
+    const timings = []
 
     console.log(chalk.yellow('\n============================ LOAD TESTS ============================\n'))
 
@@ -118,7 +126,7 @@ async function main () {
 
     const totalProcessingTime = timings.reduce((p, c) => p + parseFloat(c), 0)
 
-    console.log('\n', chalk.green('✓'), `load test passed\n`)
+    console.log('\n', chalk.green('✓'), 'load test passed\n')
     console.log(chalk.cyan(`Load timing (seconds) for ${LOAD} requests:\n`))
 
     console.log('\t', chalk.cyan('Average:\t'), round(average(timings)))

@@ -1,6 +1,7 @@
 import { compile, setKmdEnv, run } from 'kmd-script/src'
 import { graphiqlExpress } from 'graphql-server-express'
 import { graphql } from 'graphql'
+import noCache from 'nocache'
 import { makeExecutableSchema } from 'graphql-tools'
 import { performance } from 'perf_hooks'
 import { PORT } from './constants'
@@ -60,6 +61,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
   const defaultConfig = yaml.safeLoad(settingsHandle)
 
   app.use(helmet())
+  app.use(noCache())
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
 
@@ -80,8 +82,12 @@ export default async function startServer (env, log, language = 'en-US', appActi
           .map(({ pattern }) => new RegExp(pattern))
           .some(regex => regex.test(origin))
 
-        return callback(isAllowed ? null : new Error(`Unauthorized request from ${origin}`), isAllowed)
+        if (isAllowed) {
+          return callback(null, true)
+        }
       }
+
+      log.error(`Unauthorized request from ${origin}`)
       callback(new Error(`Unauthorized request from ${origin}`), false)
     },
     methods: 'GET,OPTIONS,HEAD,POST'
@@ -94,6 +100,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
       if (origin && allowed.some(hostname => origin.startsWith(hostname))) {
         callback(null, true)
       } else {
+        log.error(`Unauthorized request from ${origin}`)
         callback(new Error(`Unauthorized request from ${origin}`), false)
       }
     }
@@ -220,7 +227,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
   app.get('/policy', serveConfig('policy', { transform: spacesToCamelCase }))
   // default to English if system language isn't supported
   app.get('/instructions', serveConfig(`instructions.${language}`, {
-    fallback: `instructions.en`
+    fallback: 'instructions.en'
   }))
 
   // serves up YAML files
@@ -232,16 +239,19 @@ export default async function startServer (env, log, language = 'en-US', appActi
       if (options.transform) { transform = options.transform }
     }
 
+    const getFilePath = name => find(`./practices/${name}.yaml`)
+
     return [
       cors(policyRequestOptions),
       (req, res) => {
-        const filePath = find(`./practices/${filename}.yaml`)
+        const filePath = getFilePath(filename)
         try {
           const response = yaml.safeLoad(readFileSync(filePath, 'utf8'))
           res.json(transform(response))
         } catch (e) {
+          log.error(`Failed to load and transform ${filePath}`)
           if (fallback && typeof fallback === 'string') {
-            const response = yaml.safeLoad(readFileSync(fallback, 'utf8'))
+            const response = yaml.safeLoad(readFileSync(getFilePath(fallback), 'utf8'))
             res.json(transform(response))
           }
         }
@@ -258,7 +268,7 @@ export default async function startServer (env, log, language = 'en-US', appActi
       'application/json': () => {
         res.send({ error: err.message })
       },
-      'default': () => {
+      default: () => {
         res.send(err.message)
       }
     })

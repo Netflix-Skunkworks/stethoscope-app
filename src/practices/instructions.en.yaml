@@ -125,19 +125,19 @@ practices:
     directions:
       darwin: |
         1. Choose System Preferences from the Apple menu.
-        {{#if mojave}}
+        {{#if mojaveOrLater}}
         1. Click [Software Update](x-apple.systempreferences:com.apple.preferences.softwareupdate)
         {{else}}
         1. Click [App Store](prefs://com.apple.preferences.appstore).
         {{/if}}
         1. Click "Automatically check for updates"
         {{#unless passing}}
-        1. Make sure the following are checked:
+          1. Make sure the following are checked:
 
-        - {{{statusIcon automaticUpdates 'Automatically check for updates'}}}
-          - {{{statusIcon automaticDownloadUpdates 'Download newly available updates in the background'}}}
-          - {{{statusIcon automaticAppUpdates 'Install app updates'}}}
+          - {{{statusIcon automaticCheckEnabled 'Automatically check for updates'}}}
+          - {{{statusIcon automaticDownloadUpdates 'Download new updates when available'}}}
           - {{{statusIcon automaticOsUpdates 'Install macOS updates'}}}
+          - {{{statusIcon automaticAppUpdates 'Install app updates from the App Store'}}}
           - {{{statusIcon automaticSecurityUpdates 'Install system data files and \*security updates\*'}}}
         {{/unless}}
 
@@ -251,3 +251,20 @@ practices:
 
       win32: |
         See the following requirements:
+
+  openWifiConnections:
+    title: >
+      {{#if passing}}
+        There are no open Wi-Fi networks cached locally
+      {{else}}
+        There are open Wi-Fi networks cached locally
+      {{/if}}
+    description: >
+      Unprotected Wi-Fi networks are a common attack vector for man-in-the-middle attacks. If you connect to an unprotected Wi-Fi hotspot once, your computer will then try to connect to any access point with a matching name in the future. An attacker can then simply spoof that network name and proxy all of the network traffic from the computer.
+    directions:
+      darwin: |
+        1. Choose [System Preferences](x-apple.systempreferences:com.apple.systempreferences) from the Apple menu.
+        1. Click Network.
+        1. Click on the Wi-Fi connection in the left pane
+        1. Click on "Advanced..."
+        1. Find and remove the networks that has Security set to "None"

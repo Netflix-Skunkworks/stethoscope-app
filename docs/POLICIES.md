@@ -213,35 +213,79 @@ Application requirements have their own GraphQL schema:
 
 ```graphql
 # Defines a requirement for an installed application
-input AppRequirement {
-  # required application name
-  name: String!
-  # optional application version requirement
-  version: Semver
-  # optional platform if only required for specific OS
+
+input ApplicationRequirement {
+  name: String! # e.g. Slack.app
+  paths: ApplicationPaths
   platform: PlatformStringRequirement
-  # controls whether regex or equality check is performed against application name
-  exactMatch: Boolean
-  # controls whether bin packages are checked (homebrew, chocolatey, etc)
-  includePackages: Boolean
-  # install URL
-  url: String
-  # explanation to show user
+  version: Semver
+  assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
+  installFrom: String
 }
 ```
 
-`name` is the only required property. You can specify requirements as an array of `AppRequirements`.
+`name` is the only required property. If you do not specify a platform filter, or specify `all: true` in your platform filter, the application requirement will be checked for all platforms. Since application package names, locations, and versions vary across platforms, you are advised to scope your application checks to the specific platforms you care about. You can specify requirements as an array of `ApplicationRequirements`. 
+
+**Example Usage:**
+
+```json
+"applications": [
+  {
+    "name": "CommonApp",
+    "description": "Should be checked for on all devices",
+    "assertion": "SUGGESTED"
+  },
+  {
+    "name": "Terminal",
+    "description": "Terminal.app, present with all MacOS versions",
+    "assertion": "ALWAYS",
+    "platform": {
+      "darwin": ">=10.0.0"
+    }
+  },
+  {
+    "name": "TV",
+    "description": "TV.app, introduced with MacOS Catalina",
+    "assertion": "ALWAYS",
+    "platform": {
+      "darwin": ">=10.15.0"
+    },
+    "paths": {
+      "darwin": "/System/Applications"
+    }
+  },
+  {
+    "name": "bash",
+    "description": "Bourne Again Shell",
+    "assertion": "ALWAYS",
+    "platform": {
+      "linux": ">=12.04.0"
+    }
+  },
+  {
+    "name": "Notepad.exe",
+    "description": "Default Win32 Editor",
+    "assertion": "ALWAYS",
+    "platform": {
+      "win32": ">=10.0.0"
+    }
+  }
+]
+```
+
+### `openWifiConnections`
+
+NOTE: Currently supported on MacOS only
+
+Checks if there are old wifi connections cached locally. This practice uses the `RequirementOption` enum to specify the requirement.
+
+Valid values are: `ALWAYS`, `SUGGESTED`, `NEVER`, `IF_SUPPORTED`
 
 **Example Usage:**
 
 ```json
 {
-  "requiredApplications": [{
-    "name": "Google Chrome",
-    "version": ">=68.0.3440",
-    "url": "https://www.google.com/chrome/",
-    "description": "Google Chrome is a secure browser..."
-  }]
+  "openWifiConnections": "SUGGESTED"
 }
 ```

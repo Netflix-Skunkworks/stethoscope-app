@@ -5,6 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { mount } from 'enzyme'
 import Accessible from './Accessible'
+import TestRenderer from 'react-test-renderer'
 
 it('renders without crashing', () => {
   const div = document.createElement('div')
@@ -14,7 +15,7 @@ it('renders without crashing', () => {
 it('crashes if multiple children are passed', (done) => {
   const div = document.createElement('div')
   try {
-    ReactDOM.render(
+    TestRenderer.create(
       <Accessible>
         <div />
         <div />

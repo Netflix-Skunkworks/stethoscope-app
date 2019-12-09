@@ -49,7 +49,7 @@ const Device = {
   async osVersion (root, args, context) {
     const result = await kmd('os', context)
     const version = result.system.version
-    const [ major, minor, patch = 0 ] = String(version).split('.')
+    const [major, minor, patch = 0] = String(version).split('.')
     return `${major}.${minor}.${patch}`
   },
 
@@ -171,6 +171,11 @@ const Device = {
 
       async automaticAppUpdates () {
         const status = await Security.automaticAppUpdates(root, args, context)
+        return securityToDeviceStatus(status)
+      },
+
+      async automaticCheckEnabled () {
+        const status = await Security.automaticCheckEnabled(root, args, context)
         return securityToDeviceStatus(status)
       },
 

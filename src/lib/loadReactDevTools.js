@@ -15,7 +15,7 @@ if (os.platform() === 'win32') {
 export default function loadReactDevTools (BrowserWindow) {
   fs.readdir(basePath, function (err, items) {
     if (!err) {
-      const [ version ] = items
+      const [version] = items
       if (version) {
         BrowserWindow.addDevToolsExtension(`${basePath}${path.sep}${String(version).trim()}`)
         log.info('Added React Dev Tools extension')

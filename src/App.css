@@ -66,6 +66,7 @@ footer {
   background-color: #f3f2f2;
   border-top: 1px solid #e8e8e8;
   width: 100%;
+  transition: background-color .5s linear, border-color .5s linear;
 }
 
 footer button span {
@@ -119,4 +120,12 @@ progress[value]::-webkit-progress-bar {
 progress[value]::-webkit-progress-value {
   background-color: #478cc8;
   transition: width .75s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  footer {
+    color: #ddd;
+    background-color: #222;
+    border-top: 1px solid #333;
+  }
 }

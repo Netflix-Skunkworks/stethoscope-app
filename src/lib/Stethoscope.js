@@ -1,5 +1,5 @@
 /* global fetch */
-import { HOST } from '../constants'
+import { HOST, PASS, FAIL } from '../constants'
 
 const handleValidate = (result, partitions, device, practices, platform) => {
   const { status, ...rest } = result
@@ -9,7 +9,11 @@ const handleValidate = (result, partitions, device, practices, platform) => {
     let itemStatus = rest[key]
     // some policy results are enumerable, reduce them to PASS/FAIL
     if (Array.isArray(itemStatus)) {
-      itemStatus = itemStatus.every(item => item.status === 'PASS') ? 'PASS' : 'FAIL'
+      if (itemStatus.every(item => item.status === PASS)) {
+        itemStatus = PASS
+      } else if (itemStatus.some(item => item.status === FAIL)) {
+        itemStatus = FAIL
+      }
     }
 
     const item = {
@@ -66,6 +70,7 @@ export default class Stethoscope {
           automaticUpdates
           remoteLogin
           stethoscopeVersion
+          openWifiConnections
 
           applications {
             name
@@ -110,6 +115,7 @@ export default class Stethoscope {
           automaticOsUpdates
           automaticDownloadUpdates
           automaticConfigDataInstall
+          automaticCheckEnabled
         }
       }
     }`

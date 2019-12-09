@@ -8,7 +8,7 @@
 .loader-wrapper {
   padding-top: 140px;
   text-align: center;
-  color: #aaa;
+  color: black;
   font-weight: 300;
   font-size: 1.2rem;
 }
@@ -119,4 +119,16 @@
   margin: 10px;
   text-align: left;
   border: 1px solid #efefef;
+}
+
+@media (prefers-color-scheme: dark) {
+  .App.loading,
+  .loader,
+  .loader:before,
+  .loader:after {
+    background-color: #222;
+  }
+  .loader-wrapper {
+    color: white;
+  }
 }

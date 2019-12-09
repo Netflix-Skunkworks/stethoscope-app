@@ -1,7 +1,7 @@
 import semver from '../../lib/patchedSemver'
 import Device from '../platform/WindowsDevice'
 import kmd from '../../lib/kmd'
-import { UNKNOWN } from '../../constants'
+import { UNKNOWN, DEFAULT_WIN32_APP_REGISTRY_PATH } from '../../constants'
 
 export default {
   async automaticUpdates (root, args, context) {
@@ -60,48 +60,42 @@ export default {
     return result.firewalls.every(fw => fw.status === 'ON')
   },
 
-  async applications (root, args, context) {
-    const device = await kmd('os', context)
-    const apps = await Device.applications(root, args, context)
-    const { version: osVersion } = device.system
-    const { applications = [] } = args
-    const devicePlatform = process.platform
+  async applications (root, appsToValidate, context) {
+    // gather set of optional registry path overrides from policy
+    const registryPathOverrides = new Set()
+    appsToValidate.map(({ paths = {} }) => {
+      registryPathOverrides.add(paths.win32 || DEFAULT_WIN32_APP_REGISTRY_PATH)
+    })
 
-    return applications.filter((app) => {
-      const { platform = false } = app
-      // if a platform is required
-      if (platform) {
-        if (platform[devicePlatform]) {
-          return semver.satisfies(osVersion, platform[devicePlatform])
-        }
-        return platform.all
-      }
-      // no platform specified - default to ALL
-      return true
-    }).map(({
+    const paths = Array.from(registryPathOverrides)
+
+    let foundApps = []
+    for (const path of paths) {
+      const appsAtRegPath = await kmd('apps', context, { REGISTRY_PATH: path })
+      foundApps = foundApps.concat(appsAtRegPath.apps)
+    }
+
+    return appsToValidate.map(({
       exactMatch = false,
       name,
-      version,
-      platform,
-      // ignored for now
-      includePackages
+      version
     }) => {
       let userApp = false
 
       if (!exactMatch) {
-        userApp = apps.find((app) => (new RegExp(name, 'ig')).test(app.name))
+        userApp = foundApps.find((app) => (new RegExp(name, 'ig')).test(app.name))
       } else {
-        userApp = apps.find((app) => app.name === name)
+        userApp = foundApps.find((app) => app.name === name)
       }
 
-      // app isn't installed - fail
-      if (!userApp) return { name, passing: false, reason: 'NOT_INSTALLED' }
-      // app is out of date - fail
+      // app isn't installed
+      if (!userApp) return { name, reason: 'NOT_INSTALLED' }
+      // app is out of date
       if (version && !semver.satisfies(userApp.version, version)) {
-        return { name, passing: false, reason: 'OUT_OF_DATE' }
+        return { name, version: userApp.version, reason: 'OUT_OF_DATE' }
       }
 
-      return { name, passing: true }
+      return { name, version: userApp.version }
     })
   }
 }

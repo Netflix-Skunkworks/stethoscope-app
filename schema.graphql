@@ -76,6 +76,8 @@ type SecurityInfo {
   automaticDownloadUpdates: FeatureState
   # whether system config data is set to auto update
   automaticConfigDataInstall: FeatureState
+
+  automaticCheckEnabled: FeatureState
   # Windows
   publicFirewall: FeatureState
   # Windows
@@ -83,35 +85,28 @@ type SecurityInfo {
   # Windows
   domainFirewall: FeatureState
 }
-#
-# type Application {
-#   name: String!
-#   displayName: String
-#   version: String!
-#   lastOpenedTime: String
-#   installDate: String
-# }
 
 type Application {
   name: String! # e.g. Slack.app
-  path: String # ~/Applications
+  path: String # ~/Applications for Mac, or Win32 Registry path for Windows
   version: Semver
-  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
   installFrom: String
 }
 
 input ApplicationPaths {
   darwin: String # "/Applications"
-  win32: String # "\Program Files"
+  win32: String # "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall"
   linux: String # "/usr/share"
 }
 
 input ApplicationRequirement {
   name: String! # e.g. Slack.app
   paths: ApplicationPaths
+  platform: PlatformStringRequirement
   version: Semver
-  installed: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
+  assertion: RequirementOption! # ALWAYS, NEVER, SUGGESTED, etc.
   description: String
   installFrom: String
 }
@@ -146,6 +141,7 @@ input DevicePolicy {
   stethoscopeVersion: Semver
   # [WINDOWS ONLY] optional maximum screenlock timeout (in seconds)
   windowsMaxScreenLockTimeout: Int
+  openWifiConnections: RequirementOption
 }
 
 # Defines a requirement for an installed application
@@ -186,6 +182,8 @@ type PolicyResult {
   applications: [ApplicationFeatureState]
   # stethoscope is up-to-date
   stethoscopeVersion: FeatureState
+  # Open Wi-Fi
+  openWifiConnections: FeatureState
 }
 
 type Security {
@@ -204,9 +202,11 @@ type Security {
   automaticAppUpdates(requirement: RequirementOption!): Boolean!
   automaticDownloadUpdates(requirement: RequirementOption!): Boolean!
   automaticConfigDataInstall(requirement: RequirementOption!): Boolean!
+  automaticCheckEnabled(requirement: RequirementOption!): Boolean!
   publicFirewall(requirement: RequirementOption!): Boolean!
   privateFirewall(requirement: RequirementOption!): Boolean!
   domainFirewall(requirement: RequirementOption!): Boolean!
+  openWifiConnections(requirement: RequirementOption!): Boolean!
 }
 
 type IpAddress {
@@ -249,7 +249,7 @@ input PlatformStringRequirement {
   ubuntu: Semver
   linux: Semver
   awsWorkspace: Semver
-  all: Semver
+  all: Boolean
 }
 
 input PlatformBracketRequirement {

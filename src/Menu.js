@@ -1,11 +1,11 @@
-/* global fetch */
 import { Menu, shell, clipboard } from 'electron'
+import fetch from 'node-fetch'
 import pkg from '../package.json'
 import config from './config.json'
 import AutoLauncher from './AutoLauncher'
 
 const toggleAutoLaunchMenus = (autoLaunchOn) => {
-  let autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
+  const autoLaunchMenuOptions = Menu.getApplicationMenu().getMenuItemById('autolaunch').submenu
   autoLaunchMenuOptions.getMenuItemById('autolaunchOn').checked = autoLaunchOn
   autoLaunchMenuOptions.getMenuItemById('autolaunchOff').checked = !autoLaunchOn
 }
@@ -26,7 +26,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
           label: 'Open Window',
           accelerator: 'CmdOrCtrl+N',
           click () {
-            focusOrCreateWindow()
+            mainWindow = focusOrCreateWindow(mainWindow)
           }
         }
       ]
@@ -77,7 +77,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
     }, {
       label: 'Copy Debug Info',
       click () {
-        fetch(`http://127.0.0.1:37370/debugger`, {
+        fetch('http://127.0.0.1:37370/debugger', {
           headers: {
             Origin: 'stethoscope://main'
           }
@@ -97,7 +97,7 @@ export default function (mainWindow, app, focusOrCreateWindow, updater, log) {
   contextMenu.push({ role: 'quit', accelerator: 'CmdOrCtrl+Q' })
 
   const applicationMenu = Menu.buildFromTemplate([{
-    label: app.getName(),
+    label: app.name,
     submenu: [{
       label: `Stethoscope version ${pkg.version}`,
       enabled: false

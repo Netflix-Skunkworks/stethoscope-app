@@ -6,7 +6,7 @@ import startGraphQLServer from '../../server'
 
 process.env.NODE_ENV = 'test'
 
-let server = startGraphQLServer('test', {
+const server = startGraphQLServer('test', {
   log (...args) { console.log(args) },
   error (...args) { console.error(args) }
 }, {
@@ -20,13 +20,15 @@ describe('GraphQL', () => {
     chai.request(server)
       .get('/scan')
       .set('Origin', 'stethoscope://main')
-      .query({ query: `
+      .query({
+        query: `
         {
           device {
             platform
           }
         }
-      ` })
+      `
+      })
       .end((err, res) => {
         if (err) {
           throw err
@@ -39,22 +41,24 @@ describe('GraphQL', () => {
       })
   })
 
-  it(`Should fail when CORS origin is not authorized`, () => {
+  it('Should fail when CORS origin is not authorized', () => {
     chai.request(server)
       .get('/scan')
       .set('Origin', 'http://foobar.malicious.biz')
-      .query({ query: `
+      .query({
+        query: `
         {
           device {
             platform
           }
         }
-      ` })
+      `
+      })
       .end((err, res) => {
         if (err) {
           throw err
         }
-        expect(res.text).toEqual(`Unauthorized request from http://foobar.malicious.biz`)
+        expect(res.text).toEqual('Unauthorized request from http://foobar.malicious.biz')
       })
   })
 
@@ -125,28 +129,29 @@ describe('GraphQL', () => {
           automaticOsUpdates
           automaticDownloadUpdates
           automaticConfigDataInstall
+          automaticCheckEnabled
         }
       }
     }`
 
     const variables = JSON.stringify({
-      'policy': {
-        'stethoscopeVersion': '>=1.0.4',
-        'osVersion': {
+      policy: {
+        stethoscopeVersion: '>=1.0.4',
+        osVersion: {
           [MAC]: {
-            'ok': '>=10.13.4',
-            'nudge': '>=10.12.6'
+            ok: '>=10.13.4',
+            nudge: '>=10.12.6'
           },
           [WIN]: {
-            'ok': '>=10.0.16299',
-            'nudge': '>=10.0.15063'
+            ok: '>=10.0.16299',
+            nudge: '>=10.0.15063'
           }
         },
-        'firewall': 'ALWAYS',
-        'diskEncryption': 'ALWAYS',
-        'automaticUpdates': 'SUGGESTED',
-        'screenLock': 'IF_SUPPORTED',
-        'remoteLogin': 'NEVER'
+        firewall: 'ALWAYS',
+        diskEncryption: 'ALWAYS',
+        automaticUpdates: 'SUGGESTED',
+        screenLock: 'IF_SUPPORTED',
+        remoteLogin: 'NEVER'
       }
     })
 
@@ -168,13 +173,15 @@ describe('GraphQL', () => {
     chai.request(server)
       .get('/scan')
       .set('Origin', 'stethoscope://main')
-      .query({ query: `
+      .query({
+        query: `
         {
           device {
             friendly_name
           }
         }
-      ` })
+      `
+      })
       .end((err, res) => {
         if (err) {
           throw err
