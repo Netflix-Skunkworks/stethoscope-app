@@ -14,16 +14,40 @@ yarn build:windows
 
 The build process copies assets from the `public/` directory into `build/` via `react-scripts`, `electron-builder` picks up assets from the `build/` directory to bundle into native applications.
 
-## Signing Builds (Mac)
+## Signing and Notarizing Builds (Mac)
+
+By default, Stethoscope builds will **not** notarize your application. If you would like notarized builds, follow the instructions below:
 
 1. Register as an Apple developer
 2. Purchase a code-signing certificate and download the PFX bundle
 3. Install your code signing certificate to the Mac certificate store
-4. Sign the app by running:
+4. Do one of the following:
+  a. Generate an app-specific password for the Apple ID that will be used to [notarize](https://developer.apple.com/news/?id=06032019i) the app. (so you don’t have use your regular password!)
+  b. [Generate a `jwt` from Apple](https://github.com/electron/electron-notarize/blob/master/README.md#notes-on-jwt-authentication)
+5. Add the following environment variables by running:
 
-```bash
-yarn build:mac
-```
+    ```
+    export APP_BUNDLE_ID="com.example-company.stethoscope-local"
+
+    // if using apple id username/password
+    export APPLE_ID="my-apple-id-email@example.com"
+    export APPLE_ID_PASS="The app-specific password"
+
+    // if using a jwt
+    export APPLE_API_KEY='myapikey'
+    export APPLE_API_KEY_ISSUER='myissuer'
+
+    // optional
+    export ASC_PROVIDER='myascprovider'
+    ```
+
+6. Sign and notarize the app by running:
+
+    ```bash
+    yarn build:mac
+    ```
+
+More info about notarizing is available from Apple at [https://developer.apple.com/documentation/xcode/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow](https://developer.apple.com/documentation/xcode/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow)
 
 ## Signing Builds (Windows)
 

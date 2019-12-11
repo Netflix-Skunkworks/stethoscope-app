@@ -43,10 +43,10 @@
     "_electron-builder-linux": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -l",
     "build:linux": "run-s prebuild _electron-builder-linux postbuild",
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
-    "build:update-config": "node scripts/updateConfigsFromEnvironment.js",
+    "build:update-config": "node scripts/maybeUpdateConfigsFromEnvironment.js",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
-    "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js server.js",
+    "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js scripts/*.js server.js",
     "babel": "run-s babel:clean babel:compile",
     "babel:clean": "rimraf compiled",
     "babel:compile": "cross-env BABEL_ENV=production babel src/ --out-dir compiled/ --copy-files"
@@ -60,6 +60,7 @@
     "classnames": "^2.2.5",
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",
+    "electron-notarize": "^0.2.1",
     "electron-settings": "^3.2.x",
     "electron-updater": "4.0.6",
     "express": "^4.16.2",
@@ -118,7 +119,7 @@
     "tap": "^12.1.1",
     "terser": "^3.14.1",
     "tiny-human-time": "^1.2.0",
-    "webpack-dev-server": "3.2.1"
+    "webpack-dev-server": "^3.9.0"
   },
   "browserslist": [
     ">0.2%",
@@ -145,7 +146,11 @@
       "schema.graphql"
     ],
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "gatekeeperAssess": false,
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist"
     },
     "win": {
       "target": "nsis",
@@ -178,6 +183,7 @@
           "stethoscope"
         ]
       }
-    ]
+    ],
+    "afterSign": "scripts/maybeNotarize.js"
   }
 }
