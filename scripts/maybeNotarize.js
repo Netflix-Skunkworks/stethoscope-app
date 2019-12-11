@@ -1,28 +1,27 @@
 const { notarize } = require('electron-notarize')
 const pkg = require('../package.json')
+const {
+  APPLE_API_KEY,
+  APPLE_API_ISSUER,
+  APPLE_ID,
+  APPLE_ID_PASS,
+  APP_BUNDLE_ID,
+  ASC_PROVIDER,
+  CSC_IDENTITY_AUTO_DISCOVERY
+} = process.env
 
-exports.default = async function notarizing (context) {
+exports.default = async function maybeNotarizing (context) {
   const {
     electronPlatformName,
     appOutDir,
     packager: { appInfo: { productFilename }}
   } = context
 
-  if (electronPlatformName !== 'darwin') {
-    return
-  }
-
-  const {
-    APPLE_API_KEY,
-    APPLE_API_ISSUER,
-    APPLE_ID,
-    APPLE_ID_PASS,
-    APP_BUNDLE_ID,
-    ASC_PROVIDER,
-    CSC_IDENTITY_AUTO_DISCOVERY
-  } = process.env
-
-  if (CSC_IDENTITY_AUTO_DISCOVERY === 'false') {
+  const missingCreds = !(APPLE_ID || APPLE_API_KEY)
+  const isMac = electronPlatformName !== 'darwin'
+  const skipDiscover = CSC_IDENTITY_AUTO_DISCOVERY === 'false'
+  // don't attempt to notarize if credentials are missing
+  if (!isMac || missingCreds || skipDiscover) {
     return
   }
 
@@ -49,5 +48,6 @@ exports.default = async function notarizing (context) {
     params.ascProvider = ASC_PROVIDER
   }
 
+  console.log("Notarizing app, coffee time?")
   return notarize(params)
 }

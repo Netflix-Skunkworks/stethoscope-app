@@ -43,7 +43,7 @@
     "_electron-builder-linux": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder -l",
     "build:linux": "run-s prebuild _electron-builder-linux postbuild",
     "build:electron": "cross-env ELECTRON_BUILDER_COMPRESSION_LEVEL=9 electron-builder",
-    "build:update-config": "node scripts/updateConfigsFromEnvironment.js",
+    "build:update-config": "node scripts/maybeUpdateConfigsFromEnvironment.js",
     "test": "react-scripts test --env=jsdom --testPathIgnorePatterns=__tests__",
     "test:spectron": "node src/__tests__/test-build.js",
     "lint": "standard --fix src/*.js src/**/*.js resolvers/*.js sources/*.js scripts/*.js server.js",
@@ -184,6 +184,6 @@
         ]
       }
     ],
-    "afterSign": "scripts/notarize.js"
+    "afterSign": "scripts/maybeNotarize.js"
   }
 }
