@@ -15,18 +15,19 @@ const fs = require('fs')
 const path = require('path')
 const semver = require('semver')
 
-if (!process.env.SKIP_CONFIG_UPDATE) {
-  const writeToFile = (relativeFilePath, data) => {
-    const jsonString = JSON.stringify(data, null, 2)
-    const absolutePath = path.join(__dirname, relativeFilePath)
-    fs.writeFile(absolutePath, jsonString, err => {
-      if (err) {
-        console.log(`Error writing file ${absolutePath}`, err)
-      } else {
-        console.log(`Successfully wrote file ${absolutePath}`)
-      }
-    })
+const writeToFile = (relativeFilePath, data) => {
+  const jsonString = JSON.stringify(data, null, 2)
+  const absolutePath = path.join(__dirname, relativeFilePath)
+  try {
+    fs.writeFileSync(absolutePath, jsonString)
+    console.log(`Successfully wrote file ${absolutePath}`)
+  } catch (err) {
+    console.log(`Error writing file ${absolutePath}`, err)
   }
+}
+
+if (!process.env.SKIP_CONFIG_UPDATE) {
+  console.log('writing config updates')
 
   const pkg = require('../package.json')
   if (process.env.APP_NAME) {
@@ -67,4 +68,6 @@ if (!process.env.SKIP_CONFIG_UPDATE) {
     config.allowPrerelease = true
   }
   writeToFile('../src/config.json', config)
+} else {
+  console.log('skipping config update')
 }

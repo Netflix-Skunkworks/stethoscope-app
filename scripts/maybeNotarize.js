@@ -18,10 +18,11 @@ exports.default = async function maybeNotarizing (context) {
   } = context
 
   const missingCreds = !(APPLE_ID || APPLE_API_KEY)
-  const isMac = electronPlatformName !== 'darwin'
+  const isMac = electronPlatformName === 'darwin'
   const skipDiscover = CSC_IDENTITY_AUTO_DISCOVERY === 'false'
   // don't attempt to notarize if credentials are missing
   if (!isMac || missingCreds || skipDiscover) {
+    console.log('skipping notarization', { isMac, missingCreds, skipDiscover })
     return
   }
 
