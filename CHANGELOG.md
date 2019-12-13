@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.0.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v3.1.4)
+## [4.0.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v4.0.1)
+
+### Added
+- Now supports notarization (thanks to @cfarvidson)
+
+### Changed
+- Removed dark mode support, will add back when there is sufficient time to design the experience and/or demand for support.
+
+## [4.0.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v4.0.0)
 
 ### Added
 - Advanced semver support (e.g. ">10.15 <=10.14.6 || 10.15.1"), allows policies to support multiple major versions
