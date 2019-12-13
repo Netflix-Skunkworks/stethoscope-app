@@ -120,15 +120,3 @@
   text-align: left;
   border: 1px solid #efefef;
 }
-
-@media (prefers-color-scheme: dark) {
-  .App.loading,
-  .loader,
-  .loader:before,
-  .loader:after {
-    background-color: #222;
-  }
-  .loader-wrapper {
-    color: white;
-  }
-}
