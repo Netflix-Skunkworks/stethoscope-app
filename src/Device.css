@@ -264,7 +264,7 @@ a.btn:hover {
   transform: rotate(90deg);
   transition: transform 0.2s ease;
 }
-
+/*
 @media (prefers-color-scheme: dark) {
   a {
     color: #9fbdf3;
@@ -284,9 +284,7 @@ a.btn:hover {
   }
   .device-info-toggle-closed,
   .show-description.closed {
-    -ms-transform: rotate(-90deg); /* IE 9 */
-    -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
     transform: rotate(90deg);
     transition: transform 0.2s ease;
   }
-}
+} */

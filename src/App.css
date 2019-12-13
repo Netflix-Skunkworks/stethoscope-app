@@ -122,10 +122,10 @@ progress[value]::-webkit-progress-value {
   transition: width .75s ease;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   footer {
     color: #ddd;
     background-color: #222;
     border-top: 1px solid #333;
   }
-}
+} */

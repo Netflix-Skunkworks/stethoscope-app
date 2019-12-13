@@ -270,17 +270,15 @@ a.nf-button:hover {
 }
 
 ::-webkit-scrollbar { display: none; }
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .panel.warning, .panel.critical {
     color: #fff;
   }
   .panel {
     background-color: #222;
   }
-}
-
-@media (prefers-color-scheme: dark) {
   body {
     background-color: #222;
   }
 }
+*/
