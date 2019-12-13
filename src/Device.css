@@ -264,29 +264,3 @@ a.btn:hover {
   transform: rotate(90deg);
   transition: transform 0.2s ease;
 }
-
-@media (prefers-color-scheme: dark) {
-  a {
-    color: #9fbdf3;
-  }
-  a.show-description {
-    float: right;
-    text-decoration: none;
-    color: #aaa;
-    transform: rotate(0deg);
-    transition: transform 0.1s ease;
-  }
-  .device-wrapper h4 {
-    color: #efefef;
-  }
-  div.action-list > ul > li  {
-    border-bottom: 1px solid #333;
-  }
-  .device-info-toggle-closed,
-  .show-description.closed {
-    -ms-transform: rotate(-90deg); /* IE 9 */
-    -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
-    transform: rotate(90deg);
-    transition: transform 0.2s ease;
-  }
-}
