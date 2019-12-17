@@ -44,7 +44,9 @@ export default {
 
     const lock = await kmd('screenlock', context)
     const { windowsMaxScreenLockTimeout = 600 } = args
-    const { chargingTimeout, batteryTimeout } = lock
+    const chargingTimeout = parseInt(lock.chargingTimeout, 10)
+    const batteryTimeout = parseInt(lock.batteryTimeout, 10)
+
 
     return (
       // According to Windows: 0 = Never
