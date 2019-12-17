@@ -14,7 +14,7 @@ exports.default = async function maybeNotarizing (context) {
   const {
     electronPlatformName,
     appOutDir,
-    packager: { appInfo: { productFilename }}
+    packager: { appInfo: { productFilename } }
   } = context
 
   const missingCreds = !(APPLE_ID || APPLE_API_KEY)
@@ -49,6 +49,6 @@ exports.default = async function maybeNotarizing (context) {
     params.ascProvider = ASC_PROVIDER
   }
 
-  console.log("Notarizing app, coffee time?")
+  console.log('Notarizing app, coffee time?')
   return notarize(params)
 }

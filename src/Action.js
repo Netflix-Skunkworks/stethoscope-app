@@ -109,6 +109,7 @@ class Action extends Component {
       )
     })
   }
+
   /**
    * Provides variables to use in the instructions template. The returned keys
    * can be used in conditionals in instructions.yml

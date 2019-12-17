@@ -27,7 +27,7 @@ import initProtocols from './lib/protocolHandlers'
 import loadReactDevTools from './lib/loadReactDevTools'
 import iconFinder from './lib/findIcon'
 import startGraphQLServer from './server'
-import { IS_LINUX, IS_MAC, IS_WIN } from './lib/platform'
+import { IS_MAC, IS_WIN } from './lib/platform'
 import AutoLauncher from './AutoLauncher'
 import updateInit from './updater'
 
