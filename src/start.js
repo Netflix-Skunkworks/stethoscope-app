@@ -375,9 +375,7 @@ process.on('uncaughtException', err => {
 })
 
 app.on('window-all-closed', () => {
-  if (IS_LINUX) {
-    app.quit()
-  }
+  // minimize to tray
 })
 
 export {}
