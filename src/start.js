@@ -80,16 +80,17 @@ let enableDebugger = process.argv.find(arg => arg.includes('enableDebugger'))
 const DEBUG_MODE = !!process.env.STETHOSCOPE_DEBUG
 
 const focusOrCreateWindow = (mainWindow) => {
-  if (mainWindow) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore()
       return mainWindow
     }
-    mainWindow.destroy()
+    mainWindow.show()
+  } else {
+    mainWindow = new BrowserWindow(windowPrefs)
+    initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
+    mainWindow.loadURL(BASE_URL)
   }
-  mainWindow = new BrowserWindow(windowPrefs)
-  initMenu(mainWindow, app, focusOrCreateWindow, updater, log)
-  mainWindow.loadURL(BASE_URL)
   return mainWindow
 }
 
@@ -215,7 +216,9 @@ async function createWindow () {
   })
 
   // adjust window height when download begins and ends
-  ipcMain.on('download:start', () => mainWindow.setSize(windowPrefs.width, 110, true))
+  ipcMain.on('download:start', () =>
+    mainWindow && mainWindow.setSize(windowPrefs.width, 110, true)
+  )
 
   // holds the setTimeout handle
   let rescanTimeout
@@ -230,7 +233,11 @@ async function createWindow () {
       clearTimeout(rescanTimeout)
       rescanTimeout = setTimeout(() => {
         if (event && event.sender) {
-          event.sender.send('autoscan:start', { notificationOnViolation: true })
+          try {
+            event.sender.send('autoscan:start', { notificationOnViolation: true })
+          } catch (e) {
+            log.error('start:[WARN] unable to run autoscan', e.message)
+          }
         }
       }, rescanDelay)
     }
@@ -238,7 +245,7 @@ async function createWindow () {
 
   // restore main window after update is downloaded (if arg = { resize: true })
   ipcMain.on('download:complete', (event, arg) => {
-    if (arg && arg.resize) {
+    if (arg && arg.resize && mainWindow) {
       mainWindow.setSize(windowPrefs.width, windowPrefs.height, true)
     }
   })
@@ -258,9 +265,11 @@ async function createWindow () {
     }
   })
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  if (mainWindow) {
+    mainWindow.on('closed', () => {
+      mainWindow = null
+    })
+  }
 }
 
 function enableAppDebugger () {
