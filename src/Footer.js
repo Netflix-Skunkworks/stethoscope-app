@@ -17,7 +17,7 @@ export default function Footer (props) {
           onClick={onRescan}
         >
           <span className='icon icon-arrows-ccw' />
-          {instructions.strings.rescanButton}
+          {instructions && instructions.strings && instructions.strings.rescanButton}
         </button>
         {webScopeLink && (
           <button

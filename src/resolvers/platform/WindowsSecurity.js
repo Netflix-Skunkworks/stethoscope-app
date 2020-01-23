@@ -47,7 +47,6 @@ export default {
     const chargingTimeout = parseInt(lock.chargingTimeout, 10)
     const batteryTimeout = parseInt(lock.batteryTimeout, 10)
 
-
     return (
       // According to Windows: 0 = Never
       chargingTimeout !== 0 &&

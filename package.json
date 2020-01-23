@@ -150,11 +150,15 @@
       "gatekeeperAssess": false,
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
-      "entitlementsInherit": "entitlements.mac.plist"
+      "entitlementsInherit": "entitlements.mac.plist",
+      "extraResources": [
+        "src/practices"
+      ]
     },
     "win": {
       "target": "nsis",
       "extraResources": [
+        "src/practices",
         "bitlocker-status/bitlocker-status.exe",
         "bitlocker-status/bitlocker-status.exe.confg",
         "bitlocker-status/bitlocker-status.pdb",
@@ -173,7 +177,10 @@
     },
     "linux": {
       "target": "AppImage",
-      "category": "System"
+      "category": "System",
+      "extraResources": [
+        "src/practices"
+      ]
     },
     "protocols": [
       {
