@@ -196,15 +196,29 @@ class App extends Component {
    * using them
    */
   loadPractices = () => {
-    this.setState({ loading: true }, () => {
-      const files = ['config', 'policy', 'instructions']
-      const promises = files.map(item =>
-        fetch(`${HOST}/${item}`)
-          .then(async res => {
-            if (!res.ok) {
-              log.error(`Unable to locate ${item}`)
-              const response = await res.json()
-              throw new Error(response.error || `Unable to locate ${item}`)
+    return new Promise((resolve, reject) =>
+      this.setState({ loading: true }, () => {
+        const process = remote.process
+        const dev = process.env.STETHOSCOPE_ENV === 'development'
+        const basePath = `${dev ? '.' : process.resourcesPath}/src/practices`
+        console.log(process.resourcesPath, basePath)
+        glob(`${basePath}/*.yaml`, (err, files) => {
+          if (err || !files.length) {
+            reject(err)
+          }
+          const configs = {}
+          files.forEach(filePath => {
+            const parts = path.parse(filePath)
+            const handle = readFileSync(filePath, 'utf8')
+            console.log(filePath, handle)
+            configs[parts.name.split('.').shift()] = yaml.safeLoad(handle)
+          })
+
+          console.log({ ...configs, loading: false })
+
+          this.setState({ ...configs, loading: false }, () => {
+            if (!this.state.scanIsRunning) {
+              this.handleScan()
             }
             return res
           })
