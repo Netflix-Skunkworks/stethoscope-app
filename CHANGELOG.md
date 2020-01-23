@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.2](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v4.0.2)
+
+Bug fixes
+
+### Changed
+- Config files are loaded directly by React app now, removing XHR requests.
+- Ensure window is not destroyed before autoscanning
+
 ## [4.0.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v4.0.1)
 
 ### Added
