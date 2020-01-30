@@ -1,6 +1,6 @@
 {
   "name": "Stethoscope",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "private": true,
   "homepage": "./",
   "author": "Netflix",
@@ -67,6 +67,7 @@
     "extend": "^3.0.2",
     "fast-glob": "^2.2.6",
     "generic-pool": "^3.4.2",
+    "glob": "^7.1.6",
     "graphql": "^14.3.1",
     "graphql-server-express": "^1.2.0",
     "graphql-tools": "^2.12.0",
