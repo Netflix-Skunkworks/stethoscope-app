@@ -40,8 +40,8 @@ export default function updater (env, mainWindow, log = console, server, focusOr
         message: 'A new version of Stethoscope is available, would you like to download and update now?',
         buttons: ['Yes', 'No'],
         defaultId: 0
-      }, (buttonIndex) => {
-        if (buttonIndex === 0) {
+      }).then(({ response }) => {
+        if (response === 0) {
           if (!isDev) {
             mainWindow = focusOrCreateWindow(mainWindow)
             autoUpdater.downloadUpdate()
@@ -74,7 +74,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       dialog.showMessageBox({
         title: 'Install Stethoscope Updates',
         message: 'Updates downloaded, Stethoscope will quit and relaunch.'
-      }, () => {
+      }).then(() => {
         if (!isDev) {
           if (server && server.listening) {
             server.close()

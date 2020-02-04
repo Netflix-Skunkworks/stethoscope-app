@@ -133,9 +133,9 @@ async function createWindow () {
       title: 'Auto Launch',
       message: 'Would you like to automatically launch Stethoscope on start-up?',
       buttons: ['Yes', 'No']
-    }, (buttonIndex) => {
+    }).then(({ response }) => {
       const autoLauncher = new AutoLauncher(app.name)
-      if (buttonIndex === 0) {
+      if (response === 0) {
         autoLauncher.enable()
       } else {
         autoLauncher.disable()
@@ -173,8 +173,8 @@ async function createWindow () {
           title: 'Allow Access',
           message: `Will you allow your Stethoscope log files to be sent to ${origin}?`,
           buttons: ['Yes', 'No']
-        }, (buttonIndex) => {
-          if (buttonIndex === 0) {
+        }).then(({ response }) => {
+          if (response === 0) {
             resolve()
           } else {
             reject(new Error('Access denied'))
