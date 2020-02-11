@@ -35,7 +35,7 @@ By default, Stethoscope builds will **not** notarize your application. If you wo
 
     // if using a jwt
     export APPLE_API_KEY='myapikey'
-    export APPLE_API_KEY_ISSUER='myissuer'
+    export APPLE_API_ISSUER='myissuer'
 
     // optional
     export ASC_PROVIDER='myascprovider'
