@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v5.0.0)
+
+Fix auto update issue, caused by undocumented changes in Electron
+
+### Changed
+- stethoscope://update deep link now forces update without prompting
+
 ## [4.0.2](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/v4.0.2)
 
 Bug fixes

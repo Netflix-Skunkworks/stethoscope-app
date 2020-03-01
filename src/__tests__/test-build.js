@@ -102,9 +102,11 @@ async function main () {
     if (config.testHosts && Array.isArray(config.testHosts)) {
       for (const { url, label } of config.testHosts) {
         const response = await scan(url)
-        const timing = Math.round(response.extensions.timing.total / 1000 * 100) / 100
         if (response !== false) {
+          const timing = Math.round(response.extensions.timing.total / 1000 * 100) / 100
           console.log(chalk.green('✓'), `[Remote:${label}]\tscan from test URL '${url}' successful\t${chalk.yellow(`${timing} seconds`)}`)
+        } else {
+          console.log(chalk.red('x'), `${url} - ${label} failed`)
         }
       }
     }

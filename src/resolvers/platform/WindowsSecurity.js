@@ -1,5 +1,4 @@
 import semver from '../../lib/patchedSemver'
-import Device from '../platform/WindowsDevice'
 import kmd from '../../lib/kmd'
 import { UNKNOWN, DEFAULT_WIN32_APP_REGISTRY_PATH } from '../../constants'
 
