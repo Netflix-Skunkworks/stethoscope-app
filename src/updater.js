@@ -117,7 +117,9 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   return {
     forceUpdate() {
       forceUpdate = true
-      autoUpdater.checkForUpdates()
+      autoUpdater.checkForUpdates().catch(err => {
+        log.error(`Error updating: ${err.message}`, err)
+      })
     },
     checkForUpdates (menuItem = {}, focusedWindow = {}, event = {}, isLaunch = false) {
       // don't allow multiple concurrent attempts
