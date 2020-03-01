@@ -11,7 +11,6 @@ const eventRegistration = {}
 // The actual updating only happens in prod - electron updates (due to Squirrel)
 // must be signed, so the process always fails in dev
 export default function updater (env, mainWindow, log = console, server, focusOrCreateWindow) {
-  let updater
   autoUpdater.autoDownload = false
   if (config.allowPrerelease) {
     autoUpdater.allowPrerelease = true
@@ -48,9 +47,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
               mainWindow = focusOrCreateWindow(mainWindow)
               autoUpdater.downloadUpdate()
             } else {
-              if (updater) updater.enabled = true
               attemptingUpdate = false
-              updater = null
               dialog.showMessageBox({
                 title: 'Downloading Stethoscope',
                 message: 'App cannot be updated in dev mode'
@@ -73,8 +70,6 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       })
 
       attemptingUpdate = false
-      if (updater) updater.enabled = true
-      updater = null
     },
     'update-downloaded': () => {
       if (!forceUpdate) {
@@ -124,12 +119,6 @@ export default function updater (env, mainWindow, log = console, server, focusOr
     checkForUpdates (menuItem = {}, focusedWindow = {}, event = {}, isLaunch = false) {
       // don't allow multiple concurrent attempts
       attemptingUpdate = true
-
-      if (menuItem) {
-        updater = menuItem
-        if (updater) updater.enabled = false
-      }
-
       isFirstLaunch = isLaunch
 
       return autoUpdater.checkForUpdates().catch(err => {
