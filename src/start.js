@@ -253,15 +253,8 @@ async function createWindow () {
   // wait for app to finish loading before attempting auto update from deep link (stethoscope://update)
   ipcMain.on('app:loaded', () => {
     if (String(deeplinkingUrl).indexOf('update') > -1) {
-      updater.checkForUpdates(env, mainWindow).then(err => {
-        if (err) {
-          log.error(`start:loaded:deeplink error checking for update${err}`)
-        }
-        deeplinkingUrl = ''
-      }).catch(err => {
-        deeplinkingUrl = ''
-        log.error(`start:exception on check for update ${err}`)
-      })
+      updater.forceUpdate()
+      deeplinkingUrl = ''
     }
   })
 

@@ -4,6 +4,7 @@ import config from './config'
 
 let attemptingUpdate = false
 let isFirstLaunch
+let forceUpdate = false
 const eventRegistration = {}
 
 // NOTE:
@@ -34,28 +35,33 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       }
     },
     'update-available': () => {
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Stethoscope Update Available',
-        message: 'A new version of Stethoscope is available, would you like to download and update now?',
-        buttons: ['Yes', 'No'],
-        defaultId: 0
-      }).then(({ response }) => {
-        if (response === 0) {
-          if (!isDev) {
-            mainWindow = focusOrCreateWindow(mainWindow)
-            autoUpdater.downloadUpdate()
-          } else {
-            if (updater) updater.enabled = true
-            attemptingUpdate = false
-            updater = null
-            dialog.showMessageBox({
-              title: 'Downloading Stethoscope',
-              message: 'App cannot be updated in dev mode'
-            })
+      if (!forceUpdate) {
+        dialog.showMessageBox({
+          type: 'info',
+          title: 'Stethoscope Update Available',
+          message: 'A new version of Stethoscope is available, would you like to download and update now?',
+          buttons: ['Yes', 'No'],
+          defaultId: 0
+        }).then(({ response }) => {
+          if (response === 0) {
+            if (!isDev) {
+              mainWindow = focusOrCreateWindow(mainWindow)
+              autoUpdater.downloadUpdate()
+            } else {
+              if (updater) updater.enabled = true
+              attemptingUpdate = false
+              updater = null
+              dialog.showMessageBox({
+                title: 'Downloading Stethoscope',
+                message: 'App cannot be updated in dev mode'
+              })
+            }
           }
-        }
-      })
+        })
+      } else {
+        mainWindow = focusOrCreateWindow(mainWindow)
+        autoUpdater.downloadUpdate()
+      }
     },
     'update-not-available': () => {
       // no need to show the dialog on first launch
@@ -71,18 +77,24 @@ export default function updater (env, mainWindow, log = console, server, focusOr
       updater = null
     },
     'update-downloaded': () => {
-      dialog.showMessageBox({
-        title: 'Install Stethoscope Updates',
-        message: 'Updates downloaded, Stethoscope will quit and relaunch.'
-      }).then(() => {
-        if (!isDev) {
-          if (server && server.listening) {
-            server.close()
+      if (!forceUpdate) {
+        dialog.showMessageBox({
+          title: 'Install Stethoscope Updates',
+          message: 'Updates downloaded, Stethoscope will quit and relaunch.'
+        }).then(() => {
+          if (!isDev) {
+            if (server && server.listening) {
+              server.close()
+            }
+            setImmediate(() => autoUpdater.quitAndInstall())
           }
-          // app.quit()
-          setImmediate(() => autoUpdater.quitAndInstall())
+        })
+      } else {
+        if (server && server.listening) {
+          server.close()
         }
-      })
+        setImmediate(() => autoUpdater.quitAndInstall())
+      }
     },
     // TODO move this to ipc, remove mainWindow dependency
     'download-progress': (progressObj) => {
@@ -103,6 +115,10 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   }
 
   return {
+    forceUpdate() {
+      forceUpdate = true
+      autoUpdater.checkForUpdates()
+    },
     checkForUpdates (menuItem = {}, focusedWindow = {}, event = {}, isLaunch = false) {
       // don't allow multiple concurrent attempts
       attemptingUpdate = true
