@@ -1,4 +1,4 @@
-/* global fetch, Notification */
+/* global Notification */
 import React, { Component } from 'react'
 import Stethoscope from './lib/Stethoscope'
 import Device from './Device'
@@ -13,11 +13,16 @@ import { HOST } from './constants'
 import appConfig from './config.json'
 import pkg from '../package.json'
 import ErrorMessage from './ErrorMessage'
+import yaml from 'js-yaml'
 import './App.css'
 const socket = openSocket(HOST)
+
 // CRA doesn't like importing native node modules
 // have to use window.require AFAICT
 const os = window.require('os')
+const glob = window.require('glob')
+const { readFileSync } = window.require('fs')
+const path = window.require('path')
 const { shell, remote, ipcRenderer } = window.require('electron')
 const settings = window.require('electron-settings')
 const log = remote.getGlobal('log')
@@ -53,7 +58,11 @@ class App extends Component {
     this.setState({ recentHang: settings.get('recentHang', 0) > 1 })
     ipcRenderer.send('scan:init')
     // perform the initial policy load & scan
-    await this.loadPractices()
+    try {
+      await this.loadPractices()
+    } catch (e) {
+      console.error('Unable to load practices')
+    }
     // flag ensures the download:start event isn't sent multiple times
     this.downloadStartSent = false
     // handle context menu
@@ -63,7 +72,8 @@ class App extends Component {
     // handles any errors that occur when updating (restores window size, etc.)
     ipcRenderer.on('download:error', this.onDownloadError)
     // trigger scan from main process
-    ipcRenderer.on('autoscan:start', ({ notificationOnViolation = false }) => {
+    ipcRenderer.on('autoscan:start', (args = {}) => {
+      // const { notificationOnViolation = false } = args
       if (!this.state.scanIsRunning) {
         ipcRenderer.send('scan:init')
         if (Object.keys(this.state.policy).length) {
@@ -196,30 +206,33 @@ class App extends Component {
    * using them
    */
   loadPractices = () => {
-    this.setState({ loading: true }, () => {
-      const files = ['config', 'policy', 'instructions']
-      const promises = files.map(item =>
-        fetch(`${HOST}/${item}`)
-          .then(async res => {
-            if (!res.ok) {
-              log.error(`Unable to locate ${item}`)
-              const response = await res.json()
-              throw new Error(response.error || `Unable to locate ${item}`)
-            }
-            return res
-          })
-          .then(res => res.json())
-          .catch(this.handleErrorYAML)
-      )
+    return new Promise((resolve, reject) =>
+      this.setState({ loading: true }, () => {
+        const process = remote.process
+        const dev = process.env.STETHOSCOPE_ENV === 'development'
+        const basePath = `${dev ? '.' : process.resourcesPath}/src/practices`
 
-      Promise.all(promises).then(([config, policy, instructions]) => {
-        this.setState({ config, policy, instructions }, () => {
-          if (!this.state.scanIsRunning) {
-            this.handleScan()
+        glob(`${basePath}/*.yaml`, (err, files) => {
+          if (err || !files.length) {
+            reject(err)
           }
+          const configs = {}
+          files.forEach(filePath => {
+            const parts = path.parse(filePath)
+            const handle = readFileSync(filePath, 'utf8')
+            configs[parts.name.split('.').shift()] = yaml.safeLoad(handle)
+          })
+
+          this.setState({ ...configs, loading: false }, () => {
+            if (!this.state.scanIsRunning) {
+              this.handleScan()
+            }
+          })
+
+          resolve()
         })
-      }).catch(this.handleErrorGraphQL)
-    })
+      })
+    )
   }
 
   /**
@@ -322,33 +335,37 @@ class App extends Component {
     // assume no errors and loaded state
     if (!content) {
       const args = [policy, result, device, instructions.practices, platform]
-      const secInfo = Stethoscope.partitionSecurityInfo(...args)
-      const decoratedDevice = Object.assign({}, device, secInfo, { lastScanTime })
-      const lastScanFriendly = moment(lastScanTime).fromNow()
+      try {
+        const secInfo = Stethoscope.partitionSecurityInfo(...args)
+        const decoratedDevice = Object.assign({}, device, secInfo, { lastScanTime })
+        const lastScanFriendly = moment(lastScanTime).fromNow()
 
-      content = (
-        <div>
-          <Device
-            {...decoratedDevice}
-            org={instructions.organization}
-            scanResult={result}
-            strings={instructions.strings}
-            policy={policy}
-            lastScanTime={lastScanFriendly}
-            lastScanDuration={lastScanDuration}
-            scannedBy={scannedBy}
-            onExpandPolicyViolation={this.handleHighlightRescanButton}
-          />
-          <Footer
-            highlightRescan={highlightRescan}
-            result={result}
-            instructions={instructions}
-            webScopeLink={appConfig.stethoscopeWebURI}
-            onClickOpen={this.handleOpenExternal}
-            onRescan={this.handleScan}
-          />
-        </div>
-      )
+        content = (
+          <div>
+            <Device
+              {...decoratedDevice}
+              org={instructions.organization}
+              scanResult={result}
+              strings={instructions.strings}
+              policy={policy}
+              lastScanTime={lastScanFriendly}
+              lastScanDuration={lastScanDuration}
+              scannedBy={scannedBy}
+              onExpandPolicyViolation={this.handleHighlightRescanButton}
+            />
+            <Footer
+              highlightRescan={highlightRescan}
+              result={result}
+              instructions={instructions}
+              webScopeLink={appConfig.stethoscopeWebURI}
+              onClickOpen={this.handleOpenExternal}
+              onRescan={this.handleScan}
+            />
+          </div>
+        )
+      } catch (e) {
+        throw new Error(`Unable to partition data: ${e.message}\n${args.join(', ')}`)
+      }
     }
 
     return (

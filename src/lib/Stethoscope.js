@@ -1,5 +1,7 @@
 /* global fetch */
 import { HOST, PASS, FAIL } from '../constants'
+const { remote } = window.require('electron')
+const log = remote.getGlobal('log')
 
 const handleValidate = (result, partitions, device, practices, platform) => {
   const { status, ...rest } = result
@@ -16,14 +18,21 @@ const handleValidate = (result, partitions, device, practices, platform) => {
       }
     }
 
-    const item = {
-      title: key,
-      name: key,
-      status: itemStatus,
-      actions: '',
-      link: '',
-      ...practices[key],
-      directions: practices[key].directions[platform]
+    let item = {}
+
+    try {
+      item = {
+        title: key,
+        name: key,
+        status: itemStatus,
+        actions: '',
+        link: '',
+        ...practices[key],
+        directions: practices[key].directions[platform]
+      }
+    } catch (e) {
+      log.error(`Stethoscope:handleValidate - ${e.message}`)
+      return acc
     }
 
     if (Array.isArray(rest[key])) {
