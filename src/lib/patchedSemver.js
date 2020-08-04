@@ -10,7 +10,7 @@
 
 import semver from 'semver'
 
-const LeadingZeroRE = new RegExp(/0+(\d+)/, 'g')
+const LeadingZeroRE = new RegExp(/^0+(\d+)/, 'g')
 
 function removeLeadingZeros (numeric) {
   return numeric.replace(LeadingZeroRE, '$1')
