@@ -1,7 +1,7 @@
 osVersion:
   darwin:
     # Latest Mojave or Catalina
-    ok: "<10.15 >=10.14.6 || >=10.15.1"
+    ok: ">=10.15.1"
     # Sierra
     nudge: ">=10.12.6"
   win32:
