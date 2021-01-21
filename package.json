@@ -84,7 +84,7 @@
     "semver": "^5.4.1",
     "serialize-error": "^2.1.0",
     "showdown": "^1.8.6",
-    "socket.io": "^2.0.4",
+    "socket.io": "^2.4.0",
     "winston": "3.1.0",
     "winston-daily-rotate-file": "^3.3.0"
   },
