@@ -1,4 +1,12 @@
 #!/usr/bin/env kmd
+exec gsettings list-recursively org.gnome.desktop.session
+trim
+save output
+
+extract idle-delay uint\d+ (\d+)
+save screen.idleDelay
+remove output
+
 exec gsettings list-recursively org.gnome.desktop.screensaver
 trim
 save output

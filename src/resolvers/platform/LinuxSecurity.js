@@ -34,19 +34,29 @@ export default {
 
   async screenLock (root, args, context) {
     const settings = await kmd('screen', context)
-    return settings.screen.lockEnabled === 'true'
+    // screen will lock if the session is set to go 
+    // idle with an idle-delay > 0 and the lock is enabled.
+    const idleEnabled = parseInt(settings.screen.idleDelay, 10) > 0
+    const lockEnabled = settings.screen.lockEnabled === 'true'
+    return idleEnabled && lockEnabled
   },
 
   async screenIdle (root, args, context) {
     const settings = await kmd('screen', context)
+
     const { screenIdle } = args
-    const { lockDelay, idleActivationEnabled } = settings.screen
-    const delayOk = semver.satisfies(semver.coerce(lockDelay), screenIdle)
-    const idleOk = idleActivationEnabled === 'true'
+    const { lockDelay, idleDelay } = settings.screen
+    // lock-delay is time since the session becomes idle
+    // and the screensaver comes on.
+    const totalDelay = parseInt(idleDelay, 10) + parseInt(lockDelay, 10)
+    const delayOk = semver.satisfies(semver.coerce(totalDelay), screenIdle)
+
+    const idleOk = this.screenLock(root, args, context)
+
     return delayOk && idleOk
   },
 
-async applications (root, appsToValidate, context) {
+  async applications (root, appsToValidate, context) {
 
     const foundApps = (await kmd('apps', context)).apps
 
