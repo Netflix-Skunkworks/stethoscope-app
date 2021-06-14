@@ -1,23 +1,23 @@
 osVersion:
   darwin:
     # Big Sur
-    ok: ">=11.0"
+    ok: ">=11.4"
     # Catalina
     nudge: ">=10.15.7"
   win32:
-    # Version 20H2
-    ok: ">=10.0.19042"
+    # Version 21H2
+    ok: ">=10.0.19043"
     # Version 2004
     nudge: ">=10.0.19041"
   awsWorkspace:
     ok: ">=10.0.14393"
     nudge: ">=10.0.10240"
   ubuntu:
-    ok: ">=18.4.0"
-    nudge: ">=18.0.2"
+    ok: ">=20.04.2"
+    nudge: ">=18.04.5"
   linux:
-    ok: ">=18.4.0"
-    nudge: ">=18.0.2"
+    ok: ">=20.04.2"
+    nudge: ">=18.04.5"
 firewall: ALWAYS
 diskEncryption: ALWAYS
 automaticUpdates: SUGGESTED
