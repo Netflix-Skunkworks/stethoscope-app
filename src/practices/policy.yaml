@@ -1,7 +1,7 @@
 osVersion:
   darwin:
     # Big Sur
-    ok: ">=11.4"
+    ok: ">=11.5.1"
     # Catalina
     nudge: ">=10.15.7"
   win32:
