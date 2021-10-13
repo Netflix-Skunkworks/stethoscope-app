@@ -126,7 +126,7 @@ input DevicePolicy {
   osVersion: PlatformBracketRequirement
   # whether or not software firewall is required
   firewall: RequirementOption
-  # whether or not disk encryption is required (this is not a comprehensive check as users are free to employ encyption that isn't baked into the OS)
+  # whether or not disk encryption is required (this is not a comprehensive check as users are free to employ encryption that isn't baked into the OS)
   diskEncryption: RequirementOption
   # whether or not automatic updates need to be enabled
   automaticUpdates: RequirementOption
@@ -196,7 +196,7 @@ type Security {
   remoteLogin(requirement: RequirementOption!): Boolean!
   applications(requirement: RequirementOption!): [Boolean!]!
   stethoscopeVersion(requirement: Semver!): Boolean!
-  automaticUpdates(requirment: RequirementOption!): Boolean!
+  automaticUpdates(requirement: RequirementOption!): Boolean!
   automaticOsUpdates(requirement: RequirementOption!): Boolean!
   automaticSecurityUpdates(requirement: RequirementOption!): Boolean!
   automaticAppUpdates(requirement: RequirementOption!): Boolean!
