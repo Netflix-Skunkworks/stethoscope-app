@@ -19,12 +19,19 @@ policy.stethoscopeVersion = `>=${pkg.version}`
 
 const paths = {
   darwin: `dist/mac/${pkg.name}.app/Contents/MacOS/${pkg.name}`,
+  darwin_arm64: `dist/mac-arm64/${pkg.name}.app/Contents/MacOS/${pkg.name}`,
   win32: `dist/win-unpacked/${pkg.name}.exe`,
   linux: `dist/linux-unpacked/${pkg.name.toLowerCase()}`
 }
 
+// The builder appears to put M1 Macs into a folder called "mac-arm64" instead of "mac", so I added this hacky workaround
+// to differentiate between the two darwin platforms.
+let platformName = process.platform
+if (platformName === 'darwin' && process.arch === 'arm64') {
+  platformName = 'darwin_arm64'
+}
 const app = new Application({
-  path: paths[process.platform],
+  path: paths[platformName],
   args: [path.join(__dirname, '..'), 'testMode']
 })
 
