@@ -16,8 +16,10 @@ try {
 // DEV log file names are prefixed with dev-
 const envPrefix = IS_DEV ? 'dev-' : ''
 const maxFiles = IS_DEV ? '1d' : '3d'
-const logLevels = ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
-const logColors = ['red', 'yellow', 'cyan', 'magenta']
+
+// Be careful here: The number of logColors need to correspond to the number of logLevels.
+const logLevels = ['error', 'warn',   'info', 'verbose', 'debug', 'silly']
+const logColors = ['red',   'yellow', 'cyan', 'magenta', 'white', 'gray']
 // logs that will continue to output in prod
 // change if you want more than 'error' and 'warn'
 const productionLogs = logLevels.slice(0, 2)
@@ -55,7 +57,12 @@ if (!global.log) {
         const index = logLevels.indexOf(level)
         if (index > -1) {
           color = logColors[index]
-          transform = s => chalk[color](s)
+          if (!color){
+            color = 'white'
+          }
+          transform = (s) => {
+            return chalk[color](s)
+          }
         }
       }
       if (typeof o === 'string') return transform(o)
