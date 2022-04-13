@@ -64,7 +64,9 @@ const windowPrefs = {
     nodeIntegration: true,
     webSecurity: false,
     contextIsolation: false,
-    sandbox: false
+    sandbox: false,
+    // Due to: https://stackoverflow.com/a/37893140
+    enableRemoteModule: true
   }
 }
 
