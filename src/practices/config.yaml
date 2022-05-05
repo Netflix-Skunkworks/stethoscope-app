@@ -7,3 +7,9 @@ policyServer:
 testHosts:
   # - url: "http://foo.bar.com"
   #   label: Display Value
+deprecationNotice:
+  heading: >
+    The Stethocsope Desktop application is deprecated and no longer supported.
+  subHeading:
+  linkUrl:
+  linkText:
