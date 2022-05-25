@@ -373,7 +373,7 @@ class App extends Component {
       <div className={classNames('App', { loading })}>
         <DeprecationNotice
           config={this.state.config || {}}
-          handleOpenExternal={this.handleOpenExternal}
+          onHandleOpenExternal={this.handleOpenExternal}
         />
         {content}
       </div>

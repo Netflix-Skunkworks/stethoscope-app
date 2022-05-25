@@ -1,8 +1,8 @@
 import React from 'react'
 import './DeprecationNotice.css'
 
-export default function Footer(props) {
-  const { config, handleOpenExternal } = props
+export default function Footer (props) {
+  const { config, onHandleOpenExternal } = props
   const { heading, subHeading, linkUrl, linkText } =
     config.deprecationNotice || {}
 
@@ -11,7 +11,7 @@ export default function Footer(props) {
       <p>{heading}</p>
       <p>{subHeading}</p>
       <p>
-        <a onClick={handleOpenExternal} href={linkUrl}>
+        <a onClick={onHandleOpenExternal} href={linkUrl}>
           {linkText}
         </a>
       </p>
