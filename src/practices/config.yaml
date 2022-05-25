@@ -9,7 +9,7 @@ testHosts:
   #   label: Display Value
 deprecationNotice:
   heading: >
-    The Stethocsope Desktop application is deprecated and no longer supported.
+    The Stethoscope Desktop application is deprecated and no longer supported.
   subHeading:
   linkUrl:
   linkText:
