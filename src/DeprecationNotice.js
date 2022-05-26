@@ -7,14 +7,18 @@ export default function Footer (props) {
     config.deprecationNotice || {}
 
   return (
-    <div className='deprecation-notice'>
-      <p>{heading}</p>
-      <p>{subHeading}</p>
-      <p>
-        <a onClick={onHandleOpenExternal} href={linkUrl}>
-          {linkText}
-        </a>
-      </p>
+    <div>
+      {config.deprecationNotice && (
+        <div className='deprecation-notice'>
+          <p>{heading}</p>
+          <p>{subHeading}</p>
+          <p>
+            <a onClick={onHandleOpenExternal} href={linkUrl}>
+              {linkText}
+            </a>
+          </p>
+        </div>
+      )}
     </div>
   )
 }
