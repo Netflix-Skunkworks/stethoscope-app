@@ -1,6 +1,14 @@
-# Stethoscope app
+# DEPRECATED
 
-[![Join the chat at https://gitter.im/Netflix-Stethoscope/Lobby](https://badges.gitter.im/Netflix-Stethoscope/Lobby.svg)](https://gitter.im/Netflix-Stethoscope/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Build status](https://img.shields.io/github/workflow/status/Netflix-Skunkworks/stethoscope-app/CI) [![Apache 2.0](https://img.shields.io/github/license/Netflix/stethoscope.svg)](http://www.apache.org/licenses/LICENSE-2.0) [![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix-Skunkworks/stethoscope-app.svg)]() [![Snyk](https://img.shields.io/snyk/vulnerabilities/github/Netflix-Skunkworks/stethoscope-app)]() [![Dependencies](https://img.shields.io/david/Netflix-Skunkworks/stethoscope-app)]() [![Current Version](https://img.shields.io/github/package-json/v/Netflix-Skunkworks/stethoscope-app)]() [![Current Release](https://img.shields.io/github/v/release/Netflix-Skunkworks/stethoscope-app)]()
+Thank you for your interest in Stethoscope! This iteration of Stethoscope has been deprecated and is being left up for posterity. Netflix's Information Security team still believes and is invested in the user-focused security approach embodied in this project.
+
+Internally, we pivoted away from this project in 2019 and developed a browser extension (typescript) and native helper application (golang) that improve the overall usability and effectiveness of endpoint security and device discovery. We are working to open source these new tools.
+
+Thank you to all our internal and external contributors, we appreciate you!
+
+-----
+
+![Build status](https://img.shields.io/github/workflow/status/Netflix-Skunkworks/stethoscope-app/CI) [![Apache 2.0](https://img.shields.io/github/license/Netflix/stethoscope.svg)](http://www.apache.org/licenses/LICENSE-2.0) [![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix-Skunkworks/stethoscope-app.svg)]() [![Snyk](https://img.shields.io/snyk/vulnerabilities/github/Netflix-Skunkworks/stethoscope-app)]() [![Dependencies](https://img.shields.io/david/Netflix-Skunkworks/stethoscope-app)]() [![Current Version](https://img.shields.io/github/package-json/v/Netflix-Skunkworks/stethoscope-app)]() [![Current Release](https://img.shields.io/github/v/release/Netflix-Skunkworks/stethoscope-app)]()
 
 The Stethoscope app is a desktop application created by Netflix that checks security-related settings and makes recommendations for improving the configuration of your computer, without requiring central device management or automated reporting.
 

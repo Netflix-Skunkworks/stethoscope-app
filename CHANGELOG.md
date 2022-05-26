@@ -1,6 +1,12 @@
 # Stethoscope Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0.6](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/5.0.1)
+
+### Changed
+
+Deprecated.
+
 ## [5.0.1](https://github.com/Netflix-Skunkworks/stethoscope-app/tree/5.0.1)
 
 ### Fixed
