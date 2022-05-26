@@ -2,6 +2,7 @@
 import React, { Component } from 'react'
 import Stethoscope from './lib/Stethoscope'
 import Device from './Device'
+import DeprecationNotice from './DeprecationNotice'
 import Loader from './Loader'
 import Footer from './Footer'
 import DownloadProgress from './DownloadProgress'
@@ -370,6 +371,10 @@ class App extends Component {
 
     return (
       <div className={classNames('App', { loading })}>
+        <DeprecationNotice
+          config={this.state.config || {}}
+          onHandleOpenExternal={this.handleOpenExternal}
+        />
         {content}
       </div>
     )
