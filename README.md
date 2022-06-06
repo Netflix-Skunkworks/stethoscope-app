@@ -1,10 +1,8 @@
 # DEPRECATED
 
-Thank you for your interest in Stethoscope! This iteration of Stethoscope has been deprecated and is being left up for posterity. Netflix's Information Security team still believes and is invested in the user-focused security approach embodied in this project.
+Thank you for your interest in Stethoscope! This iteration of Stethoscope has been deprecated and is being left up for posterity. We pivoted away from this project in 2019 and developed a browser extension and native helper application that improve the overall usability and effectiveness of endpoint security and device discovery.
 
-Internally, we pivoted away from this project in 2019 and developed a browser extension (typescript) and native helper application (golang) that improve the overall usability and effectiveness of endpoint security and device discovery. We are working to open source these new tools.
-
-Thank you to all our internal and external contributors, we appreciate you!
+Thank you to all our internal and external contributors, we appreciate your work toward making security more usable!
 
 -----
 

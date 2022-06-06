@@ -143,7 +143,9 @@ async function main () {
     process.exit(0)
   } catch (e) {
     console.error(chalk.red('X'), 'Test failed', e.message)
-    await app.stop()
+    if (app.isRunning()) {
+      await app.stop()
+    }
     process.exit(1)
   }
 }
