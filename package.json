@@ -75,7 +75,7 @@
     "helmet": "^3.9.0",
     "js-yaml": "^3.10.0",
     "kmd-script": "^0.0.11",
-    "moment": "^2.19.3",
+    "moment": "^2.29.4",
     "nocache": "^2.1.0",
     "node-fetch": "^2.6.1",
     "node-powershell": "^3.3.1",
