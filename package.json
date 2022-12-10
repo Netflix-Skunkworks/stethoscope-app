@@ -63,7 +63,7 @@
     "electron-notarize": "^0.2.1",
     "electron-settings": "^3.2.x",
     "electron-updater": "4.0.6",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "extend": "^3.0.2",
     "fast-glob": "^2.2.6",
     "generic-pool": "^3.4.2",
