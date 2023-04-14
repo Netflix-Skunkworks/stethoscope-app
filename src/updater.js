@@ -110,7 +110,7 @@ export default function updater (env, mainWindow, log = console, server, focusOr
   }
 
   return {
-    forceUpdate() {
+    forceUpdate () {
       forceUpdate = true
       autoUpdater.checkForUpdates().catch(err => {
         log.error(`Error updating: ${err.message}`, err)
